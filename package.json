@@ -1,0 +1,15 @@
+{
+    "name": "PredScript",
+    "version": "1.0.0",
+    "description": "Predicates as Types. Compiles to JS.",
+    "main": "main.js",
+    "scripts": {
+        "test": "node --test"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "immutable": "^5.0.0-beta.4"
+    }
+}
