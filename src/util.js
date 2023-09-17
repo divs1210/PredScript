@@ -1,17 +1,16 @@
-const Null = {};
+const NotFound = {};
 
 function isNull(x) {
     return x === null
-        || x === undefined
-        || x === Null;
+        || x === undefined;
 }
 
-function notNull(x) {
-    return !isNull(x);
+function val(obj) {
+    return obj.get('val');
 }
 
 module.exports = {
-    Null,
+    NotFound,
     isNull,
-    notNull
+    val
 };

@@ -1,4 +1,4 @@
-const {Null, isNull, notNull} = require('./util.js');
+const {NotFound, isNull} = require('./util.js');
 const {List, Map, Set, is, getIn, setIn} = require('immutable');
 
 // type hierarchy
@@ -10,7 +10,7 @@ let hierarchy = Map({
 });
 
 function parentOf(child) {
-    return getIn(hierarchy, ['parents', child], Null);
+    return getIn(hierarchy, ['parents', child], NotFound);
 }
 
 function ancestorsOf(child) {
@@ -28,7 +28,7 @@ function isA(ancestor, descendent) {
 
 function derive(parent, child) {
     // update parent
-    if(isNull(parentOf(child))) {
+    if(is(NotFound, parentOf(child))) {
         hierarchy = setIn(hierarchy, ['parents', child], parent);
     } else {
         throw new Error(`Tried to set new parent for ${child}: ${parent}!`);
@@ -79,15 +79,18 @@ class MultiMethod extends Function {
     }
 
     implementation(dispatchVal) {
+        // TODO: work with hierarchies better
+        // find the implementation for
+        // lowest common ancestors
         let dispatchOn = dispatchVal;
         let impl = this.vTable.get(dispatchOn);
 
-        while(isNull(impl) && !is(dispatchOn, Null)) {
+        while(isNull(impl) && !is(NotFound, dispatchOn)) {
             dispatchOn = parentOf(dispatchVal);
             impl = this.vTable.get(dispatchOn);
         }
 
-        return notNull(impl)?
+        return !isNull(impl)?
             impl :
             this.defaultImplementation;
     }
@@ -96,16 +99,12 @@ class MultiMethod extends Function {
         let dispatchVal = this.dispatchFn(...args);
         let impl = this.implementation(dispatchVal);
 
-        if(notNull(impl))
+        if(!isNull(impl))
             return impl(...args);
 
         throw new Error(`No implementation of ${this.mName} found for dispatch: ${dispatchVal}!`);
     }
 }
-
-const multiFn = (name, dispatchFn) =>
-      new MultiMethod(name, dispatchFn);
-
 
 module.exports = {
     parentOf,
@@ -113,5 +112,5 @@ module.exports = {
     descendentsOf,
     derive,
     isA,
-    multiFn
+    MultiMethod
 };

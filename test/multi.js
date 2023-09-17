@@ -1,9 +1,9 @@
 const assert = require('node:assert/strict');
-const {multiFn, derive, isA} = require("../src/multi.js");
+const {MultiMethod, derive, isA} = require("../src/multi.js");
 const {List, is} = require("immutable");
 
 
-let mtest = multiFn("mtest", (x) => typeof x);
+let mtest = new MultiMethod("mtest", (x) => typeof x);
 
 mtest.implement('number', (x) => List(['number', x]));
 mtest.setDefault((x) => List(['some', x]));
