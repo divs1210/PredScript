@@ -4,8 +4,8 @@ const {
     isPred, type, 
     isReal, Real, 
     MultiFn, Implement, apply, 
-    add,
-    isBool, Bool, sub, times, isLessThanEq,
+    add, sub, times, 
+    isBool, Bool, isLessThanEq,
     isList, List
 } = require('../src/builtins.js');
 const { val } = require('../src/util.js');
