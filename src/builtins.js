@@ -85,7 +85,7 @@ function Implement(multi, argTypes, retType, f) {
 
 // TODO: make polymorphic
 function apply(f, args) {
-    let jsF = f.get('val');
+    let jsF = val(f);
     return jsF(...args);
 }
 
