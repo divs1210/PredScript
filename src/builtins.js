@@ -1,4 +1,4 @@
-const {Map, is, getIn, List} = require('immutable');
+const {Map, is, getIn, List: _List} = require('immutable');
 const BigNumber = require('bignumber.js');
 const {MultiMethod} = require('./multi.js');
 const { val } = require('./util.js');
@@ -51,12 +51,30 @@ function Real(n) {
 }
 
 
+// List
+// ====
+const _isList = new MultiMethod("_isList", (x) => type(x));
+const isList = Obj(_isList, Map({type: isPred}));
+
+_isList.implement(isList, (_) => true);
+_isList.setDefault((_) => false);
+
+function List(jsArray) {
+    return Obj(
+        _List(jsArray),
+        Map({
+            type: isList
+        })
+    );
+}
+
+
 // Polymorphic Top Level Fns
 // =========================
 const _isFn = new MultiMethod("_isFn", (x) => type(x));
 const isFn = Obj(_isFn, Map({type: isPred}));
 const dispatch = (...args) =>
-    List(args).map((x) => type(x));
+    _List(args).map((x) => type(x));
 
 function MultiFn(name) {
     return Obj(
@@ -66,7 +84,8 @@ function MultiFn(name) {
 }
 
 function Implement(multi, argTypes, retType, f) {
-    let jsMulti = multi.get('val');
+    let jsMulti = val(multi);
+    let jsArgTypes = val(argTypes);
 
     let checkedF = (...args) => {
         let res = f(...args);
@@ -80,13 +99,14 @@ function Implement(multi, argTypes, retType, f) {
             + `${retType}, but actually returned ${actualRetType}.`);
     };
     
-    jsMulti.implement(argTypes, checkedF);
+    jsMulti.implement(jsArgTypes, checkedF);
 }
 
 // TODO: make polymorphic
 function apply(f, args) {
     let jsF = val(f);
-    return jsF(...args);
+    let jsArgs = val(args);
+    return jsF(...jsArgs);
 }
 
 
@@ -169,5 +189,7 @@ module.exports = {
     Bool,
     TRUE,
     FALSE,
-    isLessThanEq
+    isLessThanEq,
+    isList,
+    List
 };
