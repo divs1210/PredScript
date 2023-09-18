@@ -1,8 +1,9 @@
 const assert = require('node:assert/strict');
-const {List, is} = require('immutable');
+const {is} = require('immutable');
 const {isNull} = require('../src/util.js');
 const {
     Real, isReal,
+    List,
     MultiFn, Implement, apply,
     isLessThanEq, TRUE,
     times, sub

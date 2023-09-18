@@ -1,12 +1,14 @@
 const assert = require('node:assert/strict');
-const {is, List} = require('immutable');
+const {is} = require('immutable');
 const {
     isPred, type, 
     isReal, Real, 
     MultiFn, Implement, apply, 
-    add,
-    isBool, Bool, sub, times, isLessThanEq
+    add, sub, times, 
+    isBool, Bool, isLessThanEq,
+    isList, List
 } = require('../src/builtins.js');
+const { val } = require('../src/util.js');
 
 
 // Predicates
@@ -21,6 +23,23 @@ assert(is(isPred, type(isPred)));
 let _isReal = isReal.get('val');
 assert(_isPred(isReal));
 assert(is(isReal, type(Real(1))))
+
+
+// List
+// ====
+assert(_isPred(isList));
+assert(is(isList, type(List([1]))));
+
+
+// apply
+// =====
+assert(is(
+    Real(3),
+    apply(add, List([
+        Real(1),
+        Real(2)
+    ]))
+));
 
 
 // MultFn
