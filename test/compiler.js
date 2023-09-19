@@ -76,13 +76,22 @@ assert(is(
 // if / else
 // =========
 assert(is(
-    '((is(TRUE, isLessThan(a, b)))? (a) : null)',
+    '(is(TRUE, (apply(isLessThan, List([a, b]))))? (a): (null))',
     compile('if (a < b) a')
 ));
 
 assert(is(
-    '((is(TRUE, isLessThan(a, b)))? (a) : (b))',
-    compile('if (a < b) a else b')
+    '(is(TRUE, (apply(isLessThan, List([a, b]))))? (a): (b))',
+    compile('if (a < b) { a } else { b }')
+));
+
+assert(is(
+    '(is(TRUE, (apply(isLessThan, List([a, b]))))? (a): ((is(TRUE, (apply(isLessThan, List([b, c]))))? (b): (c))))',
+    compile(`
+        if (a < b) a 
+        else if (b < c) b 
+        else c
+    `)
 ));
 
 

@@ -22,7 +22,11 @@ function compileBinaryExpression(expr) {
         '/': 'div',
         '+': 'add',
         '-': 'sub',
-        '<=': 'isLessThanEq'
+        '<' : 'isLessThan',
+        '<=': 'isLessThanEq',
+        '=' : 'is', // TODO: this will require builtin `is`
+        '>' : 'isGreaterThan',
+        '>=': 'isGreaterThanEq'
     };
 
     let { operator, left, right } = expr;
@@ -36,6 +40,12 @@ function compileBinaryExpression(expr) {
         console.error(`Unhandled binary expression: ${JSON.stringify(expr, null, 2)}`);
         return '????';
     }
+}
+
+function compileIfExpression(expr) {
+    let { test, consequent, alternate } = expr;
+    let [cond, then, alt] = [test, consequent, alternate].map(compileAST);
+    return `(is(TRUE, (${cond}))? (${then}): (${alt}))`;
 }
 
 function compileCallExpression(expr) {
@@ -57,6 +67,9 @@ function compileBlockExpression(expr) {
 }
 
 function compileAST(ast) {
+    if(isNull(ast))
+        return 'null';
+
     switch (ast.type) {
         case 'Literal':
             return compileLiteral(ast);
@@ -64,6 +77,8 @@ function compileAST(ast) {
             return ast.name;
         case 'BinaryExpression':
             return compileBinaryExpression(ast);
+        case 'IfStatement':
+            return compileIfExpression(ast);
         case 'CallExpression':
             return compileCallExpression(ast);
         case 'ExpressionStatement':
