@@ -1,6 +1,6 @@
 const { is } = require("immutable");
 const { parse } = require("./parser");
-const { isNull } = require("./util");
+const { isNull, prettify } = require("./util");
 
 function compileLiteral(expr) {
     let val = expr.value;
@@ -10,7 +10,7 @@ function compileLiteral(expr) {
         case 'boolean':
             return `Bool(${val})`;
         default: {
-            console.error(`Unhandled literal: ${val}`);
+            console.error(`Unhandled literal: ${prettify(val)}`);
             return '????';
         }
     }
@@ -37,7 +37,7 @@ function compileBinaryExpression(expr) {
         let compiledRight = compileAST(right);    
         return `apply(${fn}, List([${compiledLeft}, ${compiledRight}]))`;   
     } else {
-        console.error(`Unhandled binary expression: ${JSON.stringify(expr, null, 2)}`);
+        console.error(`Unhandled binary expression: ${prettify(expr)}`);
         return '????';
     }
 }
@@ -81,12 +81,12 @@ function compileAST(ast) {
             return compileIfExpression(ast);
         case 'CallExpression':
             return compileCallExpression(ast);
-        case 'ExpressionStatement':
-            return compileAST(ast.expression);
         case 'BlockStatement':
             return compileBlockExpression(ast);
+        case 'ExpressionStatement':
+            return compileAST(ast.expression);
         default: {
-            console.error(`Unhandled AST:\n ${JSON.stringify(ast, null, 2)}`);
+            console.error(`Unhandled AST:\n ${prettify(ast)}`);
             return '????';
         }
     }
@@ -96,7 +96,7 @@ function compile(codeString) {
     console.log(`Input:\n${codeString}\n`);
 
     let ast = parse(codeString);
-    console.log(`AST:\n${JSON.stringify(ast, null, 2)}\n`);
+    console.log(`AST:\n${prettify(ast)}\n`);
 
     let jsCodeString = compileAST(ast);
     console.log(`Compiled:\n${jsCodeString}\n`);
