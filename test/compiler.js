@@ -10,20 +10,20 @@ assert(is(
 ));
 
 assert(is(
-    'Real(1.0)',
-    compile('1.0')
+    'Real(1.5)',
+    compile('1.5')
 ));
 
 
 // booleans
 // ========
 assert(is(
-    'TRUE',
+    'Bool(true)',
     compile('true')
 ));
 
 assert(is(
-    'FALSE',
+    'Bool(false)',
     compile('false')
 ));
 
@@ -36,15 +36,25 @@ assert(is(
 ));
 
 assert(is(
+    'add(a, times(b, c))',
+    compile('a + b * c')
+));
+
+assert(is(
     'isLessThanEq(a, b)',
     compile('a <= b')
 ));
 
 
-// complex expressions
-// ===================
+// function calls
+// ==============
 assert(is(
-    'times(n, fact(sub(n, Real(1))))',
+    '_',
+    compile('fact(n)')
+));
+
+assert(is(
+    'times(n, _)',
     compile('n * fact(n - 1)')
 ));
 
