@@ -1,7 +1,14 @@
 const assert = require('node:assert/strict');
 const { parse } = require("../src/parser");
+const { is } = require('immutable');
+const { prettify } = require('../src/util');
 
-let ast = parse(`
-let n: isReal = 42;
-`);
-// console.log(JSON.stringify(ast, null, 2));
+assert(is(
+    1.5,
+    parse('1.5')?.expression?.value
+));
+
+assert(is(
+    'ArrowFunctionExpression',
+    parse('() => null')?.expression?.type
+));
