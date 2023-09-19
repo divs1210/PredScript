@@ -31,17 +31,17 @@ assert(is(
 // Infix ops
 // =========
 assert(is(
-    'times(a, b)',
+    'apply(times, List([a, b]))',
     compile('a * b')
 ));
 
 assert(is(
-    'add(a, times(b, c))',
+    'apply(add, List([a, apply(times, List([b, c]))]))',
     compile('a + b * c')
 ));
 
 assert(is(
-    'isLessThanEq(a, b)',
+    'apply(isLessThanEq, List([a, b]))',
     compile('a <= b')
 ));
 
@@ -49,12 +49,15 @@ assert(is(
 // function calls
 // ==============
 assert(is(
-    '_',
-    compile('fact(n)')
+    'apply(add, List([a, b]))',
+    compile('add(a, b)')
 ));
 
+
+// Complex expressions
+// ===================
 assert(is(
-    'times(n, _)',
+    'apply(times, List([n, apply(fact, List([apply(sub, List([n, Real(1)]))]))]))',
     compile('n * fact(n - 1)')
 ));
 
