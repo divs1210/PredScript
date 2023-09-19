@@ -62,6 +62,17 @@ assert(is(
 ));
 
 
+// Block expressions
+// =================
+assert(is(
+    '((() => { apply(a, List([])); return apply(b, List([])); })())',
+    compile(`{
+        a();
+        b();
+    }`)
+));
+
+
 // if / else
 // =========
 assert(is(

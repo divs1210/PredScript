@@ -1,3 +1,4 @@
+const { is } = require("immutable");
 const { parse } = require("./parser");
 const { isNull } = require("./util");
 
@@ -42,6 +43,19 @@ function compileCallExpression(expr) {
     return `apply(${expr.callee.name}, List([${args}]))`;
 }
 
+function compileBlockExpression(expr) {
+    let countExprs = expr.body.length;
+    if (is(0, countExprs))
+        return 'null';
+    else if (is(1, countExprs))
+        return compileAST(expr.body[0]);
+    else {
+        let compiledExprs = expr.body.map(compileAST);
+        let lastExpr = compiledExprs.pop();
+        return `((() => { ${compiledExprs.join('; ')}; return ${lastExpr}; })())`;
+    }
+}
+
 function compileAST(ast) {
     switch (ast.type) {
         case 'Literal':
@@ -54,6 +68,8 @@ function compileAST(ast) {
             return compileCallExpression(ast);
         case 'ExpressionStatement':
             return compileAST(ast.expression);
+        case 'BlockStatement':
+            return compileBlockExpression(ast);
         default: {
             console.error(`Unhandled AST:\n ${JSON.stringify(ast, null, 2)}`);
             return '????';
