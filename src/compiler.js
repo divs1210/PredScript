@@ -89,22 +89,15 @@ function compileMultiFn(expr) {
     let argTypes = args.map((arg) => arg.type).join(', ');
 
     return `
-if(isNull(this.${fName})) {
-    this.${fName} = MultiFn("${fName}");
-}
-
+var ${fName} = ${fName} || MultiFn("${fName}");
 Implement(
     ${fName},
     List([${argTypes}]),
     ${fReturnType},
     (${argNames}) => ${fBody}
 );
-    `;
+    `.trim();
 }
-
-// function compileReturnStatement(stmt) {
-//     return compileAST(stmt.argument);
-// }
 
 function compileAST(ast) {
     if(isNull(ast))
@@ -129,8 +122,6 @@ function compileAST(ast) {
             return compileMultiFn(ast);
         case 'Program':
             return compileProgram(ast);
-        // case 'ReturnStatement':
-        //     return compileAST(ast.argument);
         default: {
             console.error(`Unhandled AST:\n ${prettify(ast)}`);
             return '????';

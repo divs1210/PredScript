@@ -99,10 +99,7 @@ assert(is(
 // ========
 assert(is(
     `
-if(isNull(this.inc)) {
-    this.inc = MultiFn("inc");
-}
-
+var inc = inc || MultiFn("inc");
 Implement(
     inc,
     List([isReal]),
@@ -114,5 +111,5 @@ Implement(
 function inc(x: isReal): isReal {
     x + 1;
 }
-    `).trim()
+    `)
 ));
