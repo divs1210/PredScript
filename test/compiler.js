@@ -76,17 +76,17 @@ assert(is(
 // if / else
 // =========
 assert(is(
-    '(_apply(is, List([TRUE, (_apply(apply, List([isLessThan, List([a, b])])))]))? (a): (null))',
+    '(_is(TRUE, (_apply(apply, List([isLessThan, List([a, b])]))))? (a): (null))',
     compileExpr('if (a < b) a')
 ));
 
 assert(is(
-    '(_apply(is, List([TRUE, (_apply(apply, List([isLessThan, List([a, b])])))]))? (a): (b))',
+    '(_is(TRUE, (_apply(apply, List([isLessThan, List([a, b])]))))? (a): (b))',
     compileExpr('if (a < b) { a } else { b }')
 ));
 
 assert(is(
-    '(_apply(is, List([TRUE, (_apply(apply, List([isLessThan, List([a, b])])))]))? (a): ((_apply(is, List([TRUE, (_apply(apply, List([isLessThan, List([b, c])])))]))? (b): (c))))',
+    '(_is(TRUE, (_apply(apply, List([isLessThan, List([a, b])]))))? (a): ((_is(TRUE, (_apply(apply, List([isLessThan, List([b, c])]))))? (b): (c))))',
     compileExpr(`
         if (a < b) a 
         else if (b < c) b 
