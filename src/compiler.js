@@ -146,8 +146,14 @@ function compile(codeString) {
 }
 
 function compileExpr(codeString) {
+    // console.log(`Input:\n${codeString}\n`);
+
     let ast = parseExpr(codeString);
+    // console.log(`AST:\n${prettify(ast)}\n`);
+
     let jsCodeString = compileAST(ast);
+    // console.log(`Compiled:\n${jsCodeString}\n`);
+    
     return jsCodeString;
 }
 
