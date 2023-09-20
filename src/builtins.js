@@ -76,6 +76,10 @@ const isFn = Obj(_isFn, Map({type: isPred}));
 const dispatch = (...args) =>
     _List(args).map((x) => type(x));
 
+function Fn(f) {
+    return Obj(f, Map({type: isFn}));
+}
+
 function MultiFn(name) {
     return Obj(
         new MultiMethod(name, dispatch),
@@ -185,6 +189,33 @@ Implement(
 );
 
 
+// Strings
+// =======
+const _isString = new MultiMethod("_isString", (x) => type(x));
+const isString = Obj(_isString, Map({type: isPred}));
+
+_isString.implement(isString, (_) => true);
+_isString.setDefault((_) => false);
+
+function String(s) {
+    return Obj(s, Map({type: isString}));
+}
+
+// toString
+const str = MultiFn('str');
+ImplementDefault(str, (x) => String('' + val(x)));
+
+
+// IO
+// ==
+function _println(...xs)  {
+    let strs = xs.map((x) => val(_apply(str, List([x]))));
+    console.log(strs.join(' '));
+}
+
+const println = Fn(_println);
+
+
 // exports
 // =======
 module.exports = {
@@ -192,6 +223,8 @@ module.exports = {
     isPred,
     Real,
     isReal,
+    isFn,
+    Fn,
     MultiFn,
     Implement,
     _apply,
@@ -206,5 +239,9 @@ module.exports = {
     is,
     isLessThanEq,
     isList,
-    List
+    List,
+    isString,
+    String,
+    str,
+    println
 };
