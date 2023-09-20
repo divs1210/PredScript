@@ -99,20 +99,20 @@ assert(is(
 // ========
 assert(is(
     `
-if(isNull(globalThis.inc)) {
-    globalThis.inc = MultiFn("inc");
+if(isNull(this.inc)) {
+    this.inc = MultiFn("inc");
 }
 
 Implement(
     inc,
     List([isReal]),
     isReal,
-    (x) => { add(x, 1) }
+    (x) => apply(add, List([x, Real(1)]))
 );
     `.trim(),
     compile(`
 function inc(x: isReal): isReal {
-    return x + 1;
+    x + 1;
 }
-    `)
+    `).trim()
 ));

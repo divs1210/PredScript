@@ -76,6 +76,36 @@ function compileProgram(expr) {
         return expr.body.map(compileAST).join("; ") + ";";
 }
 
+function compileMultiFn(expr) {
+    let fName = expr.id.name;
+    let fReturnType = expr?.returnType?.typeAnnotation?.typeName?.name ?? 'isAny';
+    let fBody = compileAST(expr.body);
+    let args = expr.params.map((arg)=> {
+        let argName = arg.name;
+        let argType = arg?.typeAnnotation?.typeAnnotation?.typeName?.name ?? 'isAny';
+        return {name: argName, type: argType};
+    });
+    let argNames = args.map((arg) => arg.name).join(', ');
+    let argTypes = args.map((arg) => arg.type).join(', ');
+
+    return `
+if(isNull(this.${fName})) {
+    this.${fName} = MultiFn("${fName}");
+}
+
+Implement(
+    ${fName},
+    List([${argTypes}]),
+    ${fReturnType},
+    (${argNames}) => ${fBody}
+);
+    `;
+}
+
+// function compileReturnStatement(stmt) {
+//     return compileAST(stmt.argument);
+// }
+
 function compileAST(ast) {
     if(isNull(ast))
         return 'null';
@@ -95,8 +125,12 @@ function compileAST(ast) {
             return compileBlockExpression(ast);
         case 'ExpressionStatement':
             return compileAST(ast.expression);
+        case 'FunctionDeclaration':
+            return compileMultiFn(ast);
         case 'Program':
             return compileProgram(ast);
+        // case 'ReturnStatement':
+        //     return compileAST(ast.argument);
         default: {
             console.error(`Unhandled AST:\n ${prettify(ast)}`);
             return '????';
@@ -105,13 +139,13 @@ function compileAST(ast) {
 }
 
 function compile(codeString) {
-    console.log(`Input:\n${codeString}\n`);
+    // console.log(`Input:\n${codeString}\n`);
 
     let ast = parse(codeString);
-    console.log(`AST:\n${prettify(ast)}\n`);
+    // console.log(`AST:\n${prettify(ast)}\n`);
 
     let jsCodeString = compileAST(ast);
-    console.log(`Compiled:\n${jsCodeString}\n`);
+    // console.log(`Compiled:\n${jsCodeString}\n`);
 
     return jsCodeString;
 }
