@@ -2,7 +2,7 @@
     "name": "PredScript",
     "version": "1.0.0",
     "description": "Predicates as Types. Compiles to JS.",
-    "main": "main.js",
+    "main": "index.js",
     "scripts": {
         "test": "node --test"
     },

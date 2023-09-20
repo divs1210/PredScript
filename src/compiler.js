@@ -46,7 +46,7 @@ function compileBinaryExpression(expr) {
 function compileIfExpression(expr) {
     let { test, consequent, alternate } = expr;
     let [cond, then, alt] = [test, consequent, alternate].map(compileAST);
-    return `(is(TRUE, (${cond}))? (${then}): (${alt}))`;
+    return `(_apply(is, List([TRUE, (${cond})]))? (${then}): (${alt}))`;
 }
 
 function compileCallExpression(expr) {
@@ -140,7 +140,7 @@ function compile(codeString) {
     // console.log(`AST:\n${prettify(ast)}\n`);
 
     let jsCodeString = compileAST(ast);
-    console.log(`Compiled:\n${jsCodeString}\n`);
+    // console.log(`Compiled:\n${jsCodeString}\n`);
 
     return jsCodeString;
 }
