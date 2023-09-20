@@ -236,6 +236,7 @@ module.exports = {
     Bool,
     TRUE,
     FALSE,
+    _is,
     is,
     isLessThanEq,
     isList,

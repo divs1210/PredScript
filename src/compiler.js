@@ -25,7 +25,7 @@ function compileBinaryExpression(expr) {
         '-': 'sub',
         '<' : 'isLessThan',
         '<=': 'isLessThanEq',
-        '=' : 'is',
+        '==': 'is',
         '>' : 'isGreaterThan',
         '>=': 'isGreaterThanEq'
     };
@@ -46,7 +46,7 @@ function compileBinaryExpression(expr) {
 function compileIfExpression(expr) {
     let { test, consequent, alternate } = expr;
     let [cond, then, alt] = [test, consequent, alternate].map(compileAST);
-    return `(_apply(is, List([TRUE, (${cond})]))? (${then}): (${alt}))`;
+    return `(_is(TRUE, (${cond}))? (${then}): (${alt}))`;
 }
 
 function compileCallExpression(expr) {
