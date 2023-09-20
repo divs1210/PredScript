@@ -31,17 +31,17 @@ assert(is(
 // Infix ops
 // =========
 assert(is(
-    'apply(times, List([a, b]))',
+    '_apply(apply, List([times, List([a, b])]))',
     compile('a * b')
 ));
 
 assert(is(
-    'apply(add, List([a, apply(times, List([b, c]))]))',
+    '_apply(apply, List([add, List([a, _apply(apply, List([times, List([b, c])]))])]))',
     compile('a + b * c')
 ));
 
 assert(is(
-    'apply(isLessThanEq, List([a, b]))',
+    '_apply(apply, List([isLessThanEq, List([a, b])]))',
     compile('a <= b')
 ));
 
@@ -49,7 +49,7 @@ assert(is(
 // function calls
 // ==============
 assert(is(
-    'apply(add, List([a, b]))',
+    '_apply(apply, List([add, List([a, b])]))',
     compile('add(a, b)')
 ));
 
@@ -57,7 +57,7 @@ assert(is(
 // Complex expressions
 // ===================
 assert(is(
-    'apply(times, List([n, apply(fact, List([apply(sub, List([n, Real(1)]))]))]))',
+    '_apply(apply, List([times, List([n, _apply(apply, List([fact, List([_apply(apply, List([sub, List([n, Real(1)])]))])]))])]))',
     compile('n * fact(n - 1)')
 ));
 
@@ -65,7 +65,7 @@ assert(is(
 // Block expressions
 // =================
 assert(is(
-    '((() => { apply(a, List([])); return apply(b, List([])); })())',
+    '((() => { _apply(apply, List([a, List([])])); return _apply(apply, List([b, List([])])); })())',
     compile(`{
         a();
         b();
@@ -76,17 +76,17 @@ assert(is(
 // if / else
 // =========
 assert(is(
-    '(is(TRUE, (apply(isLessThan, List([a, b]))))? (a): (null))',
+    '(is(TRUE, (_apply(apply, List([isLessThan, List([a, b])]))))? (a): (null))',
     compile('if (a < b) a')
 ));
 
 assert(is(
-    '(is(TRUE, (apply(isLessThan, List([a, b]))))? (a): (b))',
+    '(is(TRUE, (_apply(apply, List([isLessThan, List([a, b])]))))? (a): (b))',
     compile('if (a < b) { a } else { b }')
 ));
 
 assert(is(
-    '(is(TRUE, (apply(isLessThan, List([a, b]))))? (a): ((is(TRUE, (apply(isLessThan, List([b, c]))))? (b): (c))))',
+    '(is(TRUE, (_apply(apply, List([isLessThan, List([a, b])]))))? (a): ((is(TRUE, (_apply(apply, List([isLessThan, List([b, c])]))))? (b): (c))))',
     compile(`
         if (a < b) a 
         else if (b < c) b 
@@ -104,7 +104,7 @@ Implement(
     inc,
     List([isReal]),
     isReal,
-    (x) => apply(add, List([x, Real(1)]))
+    (x) => _apply(apply, List([add, List([x, Real(1)])]))
 );
     `.trim(),
     compile(`

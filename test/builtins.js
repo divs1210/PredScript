@@ -52,9 +52,6 @@ Implement(
         return jsXs.get(jsIdx);
     }
 );
-
-// TODO: update compiler
-// f(x, y) => _apply(apply, [f, [x, y]])
 assert(_is(
     Real(12),
     _apply(

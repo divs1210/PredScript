@@ -1,6 +1,6 @@
-const {Map, is: _is, getIn, List: _List, setIn} = require('immutable');
+const {Map, is: _is, getIn, List: _List} = require('immutable');
 const BigNumber = require('bignumber.js');
-const {MultiMethod, isA} = require('./multi.js');
+const {MultiMethod} = require('./multi.js');
 const { val } = require('./util.js');
 
 // All objects are represented as this
@@ -108,13 +108,6 @@ function ImplementDefault(multi, f) {
 }
 
 
-// isAny type
-// ==========
-let isAny = MultiFn('isAny');
-isAny = setIn(isAny, ['meta', 'type'], isPred);
-ImplementDefault(isAny, (_) => true);
-
-
 // Apply
 // =====
 function _apply(f, args) {
@@ -207,7 +200,6 @@ module.exports = {
     sub,
     times,
     isBool,
-    isAny,
     Bool,
     TRUE,
     FALSE,
