@@ -97,22 +97,22 @@ assert(is(
 
 // MultiFns
 // ========
-// assert(is(
-//     `
-// if(isNull(globalThis.inc)) {
-//     globalThis.inc = MultiFn("inc");
-// }
+assert(is(
+    `
+if(isNull(globalThis.inc)) {
+    globalThis.inc = MultiFn("inc");
+}
 
-// Implement(
-//     inc,
-//     List([isReal]),
-//     isReal,
-//     (x) => { add(x, 1) }
-// );
-//     `.trim(),
-//     compile(`
-// function inc(x: isReal): isReal {
-//     return x + 1;
-// }
-//     `)
-// ));
+Implement(
+    inc,
+    List([isReal]),
+    isReal,
+    (x) => { add(x, 1) }
+);
+    `.trim(),
+    compile(`
+function inc(x: isReal): isReal {
+    return x + 1;
+}
+    `)
+));
