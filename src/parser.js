@@ -1,7 +1,7 @@
-const TSParser = require('@typescript-eslint/parser');
+const TSParser = require('@typescript-eslint/typescript-estree');
 
 const parse = (code) => 
-    TSParser.parseForESLint(code, {loc: true}).ast;
+    TSParser.parse(code, {loc: true, range: true});
 
 const parseExpr = (code) =>
     parse(code).body[0];

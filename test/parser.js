@@ -27,3 +27,12 @@ assert(is(
     'ArrowFunctionExpression',
     parseExpr('(x) => x')?.expression?.type
 ));
+
+assert(is(
+    'FunctionDeclaration',
+    parseExpr(`
+function inc(x: isReal): isReal {
+    return x + 1;
+}
+    `)?.type
+));
