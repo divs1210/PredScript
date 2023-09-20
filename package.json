@@ -10,7 +10,11 @@
     "author": "",
     "license": "MIT",
     "dependencies": {
+        "@typescript-eslint/parser": "^6.7.2",
+        "@typescript-eslint/typescript-estree": "^6.7.2",
+        "@typescript-eslint/utils": "^6.7.2",
         "bignumber.js": "^4.0.4",
-        "immutable": "^5.0.0-beta.4"
+        "immutable": "^5.0.0-beta.4",
+        "typescript-parser": "^2.6.1"
     }
 }
