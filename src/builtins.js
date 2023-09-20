@@ -1,4 +1,4 @@
-const {Map, is, getIn, List: _List} = require('immutable');
+const {Map, is: _is, getIn, List: _List} = require('immutable');
 const BigNumber = require('bignumber.js');
 const {MultiMethod} = require('./multi.js');
 const { val } = require('./util.js');
@@ -28,7 +28,7 @@ _isPred.setDefault((_) => false);
 
 // `type` is special-cased for isPred
 // ==================================
-type = (x) => is(isPred, x)?
+type = (x) => _is(isPred, x)?
     isPred:
     getIn(x, ['meta', 'type'], null);
 
@@ -91,7 +91,7 @@ function Implement(multi, argTypes, retType, f) {
         let res = f(...args);
         let actualRetType = type(res);
 
-        if(is(retType, actualRetType))
+        if(_is(retType, actualRetType))
             return res;
 
         throw new Error(
@@ -102,12 +102,22 @@ function Implement(multi, argTypes, retType, f) {
     jsMulti.implement(jsArgTypes, checkedF);
 }
 
-// TODO: make polymorphic
-function apply(f, args) {
+function ImplementDefault(multi, f) {
+    let jsMulti = val(multi);
+    jsMulti.setDefault(f);
+}
+
+
+// Apply
+// =====
+function _apply(f, args) {
     let jsF = val(f);
     let jsArgs = val(args);
     return jsF(...jsArgs);
 }
+
+const apply = MultiFn('apply');
+ImplementDefault(apply, _apply);
 
 
 // Arithmetic
@@ -152,9 +162,9 @@ function _Bool(b) {
 const TRUE = _Bool(true);
 const FALSE = _Bool(false);
 function Bool(b) {
-    if (is(true, b))
+    if (_is(true, b))
         return TRUE;
-    else if(is(false, b))
+    else if(_is(false, b))
         return FALSE;
     else
         throw Error(`${b} is not a boolean!`);
@@ -163,6 +173,9 @@ function Bool(b) {
 
 // Logic operators
 // ================
+const is = MultiFn('is');
+ImplementDefault(is, (x, y) => Bool(_is(x, y)));
+
 const isLessThanEq = MultiFn('isLessThanEq');
 Implement(
     isLessThanEq, 
@@ -181,6 +194,7 @@ module.exports = {
     isReal,
     MultiFn,
     Implement,
+    _apply,
     apply,
     add,
     sub,
@@ -189,6 +203,7 @@ module.exports = {
     Bool,
     TRUE,
     FALSE,
+    is,
     isLessThanEq,
     isList,
     List

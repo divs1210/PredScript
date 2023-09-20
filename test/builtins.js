@@ -1,12 +1,12 @@
 const assert = require('node:assert/strict');
-const {is} = require('immutable');
+const {is: _is} = require('immutable');
 const {
     isPred, type, 
     isReal, Real, 
-    MultiFn, Implement, apply, 
+    MultiFn, Implement, _apply, apply,
     add, sub, times, 
-    isBool, Bool, isLessThanEq,
-    isList, List
+    is, isBool, Bool, isLessThanEq,
+    isList, List, TRUE, FALSE, isAny 
 } = require('../src/builtins.js');
 const { val } = require('../src/util.js');
 
@@ -15,30 +15,56 @@ const { val } = require('../src/util.js');
 // ==========
 let _isPred = isPred.get('val');
 assert(_isPred(isPred));
-assert(is(isPred, type(isPred)));
+assert(_is(isPred, type(isPred)));
 
 
 // Real Numbers
 // ============
 let _isReal = isReal.get('val');
 assert(_isPred(isReal));
-assert(is(isReal, type(Real(1))))
+assert(_is(isReal, type(Real(1))))
 
 
 // List
 // ====
 assert(_isPred(isList));
-assert(is(isList, type(List([1]))));
+assert(_is(isList, type(List([1]))));
 
 
 // apply
 // =====
-assert(is(
+assert(_is(
     Real(3),
-    apply(add, List([
+    _apply(add, List([
         Real(1),
         Real(2)
     ]))
+));
+
+Implement(
+    apply,
+    List([isList, isReal]),
+    isReal,
+    (xs, idx) => {
+        let jsXs  = val(xs);
+        let bigNumberIdx = val(idx);
+        let jsIdx = bigNumberIdx.toNumber();
+        return jsXs.get(jsIdx);
+    }
+);
+assert(_is(
+    Real(12),
+    _apply(
+        apply, 
+        List([
+            List([
+                Real(10),
+                Real(11),
+                Real(12)
+            ]),
+            Real(2)
+        ])
+    )
 ));
 
 
@@ -49,32 +75,32 @@ Implement(
     inc,
     List([isReal]),
     isReal,
-    (x) => apply(
+    (x) => _apply(
         add,
         List([x, Real(1)])
     )
 );
-assert(is(
+assert(_is(
     Real(2),
-    apply(inc, List([Real(1)]))
+    _apply(inc, List([Real(1)]))
 ));
 
 
 // Arithmetic
 // ==========
-assert(is(
+assert(_is(
     Real(3),
-    apply(add, List([Real(1), Real(2)]))
+    _apply(add, List([Real(1), Real(2)]))
 ));
 
-assert(is(
+assert(_is(
     Real(-1),
-    apply(sub, List([Real(1), Real(2)]))
+    _apply(sub, List([Real(1), Real(2)]))
 ));
 
-assert(is(
+assert(_is(
     Real(6),
-    apply(times, List([Real(2), Real(3)]))
+    _apply(times, List([Real(2), Real(3)]))
 ));
 
 
@@ -82,25 +108,35 @@ assert(is(
 // =======
 let _isBool = isBool.get('val');
 assert(isPred, isBool);
-assert(is(
+assert(_is(
     isBool,
-    type(Bool(true))
+    type(TRUE)
 ));
 
 
 // Logic
 // =====
-assert(is(
-    Bool(true),
-    apply(isLessThanEq, List([Real(1), Real(2)]))
+assert(_is(
+    TRUE,
+    _apply(is, List([Real(1), Real(1)]))
 ));
 
-assert(is(
-    Bool(true),
-    apply(isLessThanEq, List([Real(1), Real(1)]))
+assert(_is(
+    FALSE,
+    _apply(is, List([Real(1), Real(2)]))
 ));
 
-assert(is(
-    Bool(false),
-    apply(isLessThanEq, List([Real(2), Real(1)]))
+assert(_is(
+    TRUE,
+    _apply(isLessThanEq, List([Real(1), Real(2)]))
+));
+
+assert(_is(
+    TRUE,
+    _apply(isLessThanEq, List([Real(1), Real(1)]))
+));
+
+assert(_is(
+    FALSE,
+    _apply(isLessThanEq, List([Real(2), Real(1)]))
 ));

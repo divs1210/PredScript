@@ -24,7 +24,7 @@ function compileBinaryExpression(expr) {
         '-': 'sub',
         '<' : 'isLessThan',
         '<=': 'isLessThanEq',
-        '=' : 'is', // TODO: this will require builtin `is`
+        '=' : 'is',
         '>' : 'isGreaterThan',
         '>=': 'isGreaterThanEq'
     };
@@ -35,7 +35,7 @@ function compileBinaryExpression(expr) {
     if (!isNull(fn)) {
         let compiledLeft  = compileAST(left);
         let compiledRight = compileAST(right);    
-        return `apply(${fn}, List([${compiledLeft}, ${compiledRight}]))`;   
+        return `_apply(apply, List([${fn}, List([${compiledLeft}, ${compiledRight}])]))`;   
     } else {
         console.error(`Unhandled binary expression: ${prettify(expr)}`);
         return '????';
@@ -50,7 +50,7 @@ function compileIfExpression(expr) {
 
 function compileCallExpression(expr) {
     let args = expr.arguments.map(compileAST).join(', ');
-    return `apply(${expr.callee.name}, List([${args}]))`;
+    return `_apply(apply, List([${expr.callee.name}, List([${args}])]))`;
 }
 
 function compileBlockExpression(expr) {
@@ -136,7 +136,7 @@ function compile(codeString) {
     // console.log(`AST:\n${prettify(ast)}\n`);
 
     let jsCodeString = compileAST(ast);
-    // console.log(`Compiled:\n${jsCodeString}\n`);
+    console.log(`Compiled:\n${jsCodeString}\n`);
 
     return jsCodeString;
 }
