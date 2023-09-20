@@ -1,6 +1,6 @@
-const {Map, is: _is, getIn, List: _List} = require('immutable');
+const {Map, is: _is, getIn, List: _List, setIn} = require('immutable');
 const BigNumber = require('bignumber.js');
-const {MultiMethod} = require('./multi.js');
+const {MultiMethod, isA} = require('./multi.js');
 const { val } = require('./util.js');
 
 // All objects are represented as this
@@ -107,12 +107,24 @@ function ImplementDefault(multi, f) {
     jsMulti.setDefault(f);
 }
 
-// TODO: make polymorphic
-function apply(f, args) {
+
+// isAny type
+// ==========
+let isAny = MultiFn('isAny');
+isAny = setIn(isAny, ['meta', 'type'], isPred);
+ImplementDefault(isAny, (_) => true);
+
+
+// Apply
+// =====
+function _apply(f, args) {
     let jsF = val(f);
     let jsArgs = val(args);
     return jsF(...jsArgs);
 }
+
+const apply = MultiFn('apply');
+ImplementDefault(apply, _apply);
 
 
 // Arithmetic
@@ -189,11 +201,13 @@ module.exports = {
     isReal,
     MultiFn,
     Implement,
+    _apply,
     apply,
     add,
     sub,
     times,
     isBool,
+    isAny,
     Bool,
     TRUE,
     FALSE,
