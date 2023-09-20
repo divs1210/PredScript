@@ -1,6 +1,7 @@
 const { is } = require("immutable");
-const { parse } = require("./parser");
+const { parse, parseExpr } = require("./parser");
 const { isNull, prettify } = require("./util");
+const builtins = require('./builtins');
 
 function compileLiteral(expr) {
     let val = expr.value;
@@ -67,13 +68,16 @@ function compileBlockExpression(expr) {
 }
 
 function compileProgram(expr) {
+    let allBuiltins = Object.keys(builtins).join(', ');
+    let requireBuiltins = `const {${ allBuiltins }} = require('./src/builtins');\n\n`;
+
     let countExprs = expr.body.length;
     if (is(0, countExprs))
         return 'null';
     else if (is(1, countExprs))
-        return compileAST(expr.body[0]);
+        return requireBuiltins + compileAST(expr.body[0]);
     else
-        return expr.body.map(compileAST).join("; ") + ";";
+        return requireBuiltins + expr.body.map(compileAST).join("; ") + ";";
 }
 
 function compileMultiFn(expr) {
@@ -141,6 +145,13 @@ function compile(codeString) {
     return jsCodeString;
 }
 
+function compileExpr(codeString) {
+    let ast = parseExpr(codeString);
+    let jsCodeString = compileAST(ast);
+    return jsCodeString;
+}
+
 module.exports = {
-    compile
+    compile,
+    compileExpr
 };
