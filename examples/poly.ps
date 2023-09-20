@@ -1,0 +1,9 @@
+function not(x: isBool): isBool {
+    if (x) { false } else { true }
+}
+
+function not(x: isReal): isReal {
+    0 - x
+}
+
+println(not(false), not(5))
