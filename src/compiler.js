@@ -1,5 +1,5 @@
 const { is } = require("immutable");
-const { parse } = require("./parser");
+const { parse, parseExpr } = require("./parser");
 const { isNull, prettify } = require("./util");
 const builtins = require('./builtins');
 
@@ -145,6 +145,13 @@ function compile(codeString) {
     return jsCodeString;
 }
 
+function compileExpr(codeString) {
+    let ast = parseExpr(codeString);
+    let jsCodeString = compileAST(ast);
+    return jsCodeString;
+}
+
 module.exports = {
-    compile
+    compile,
+    compileExpr
 };

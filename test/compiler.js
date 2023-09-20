@@ -1,17 +1,17 @@
 const assert = require('assert/strict');
-const { compile } = require('../src/compiler.js');
+const { compileExpr } = require('../src/compiler.js');
 const { is } = require('immutable');
 
 // numbers
 // =======
 assert(is(
     'Real(1)',
-    compile('1')
+    compileExpr('1')
 ));
 
 assert(is(
     'Real(1.5)',
-    compile('1.5')
+    compileExpr('1.5')
 ));
 
 
@@ -19,12 +19,12 @@ assert(is(
 // ========
 assert(is(
     'Bool(true)',
-    compile('true')
+    compileExpr('true')
 ));
 
 assert(is(
     'Bool(false)',
-    compile('false')
+    compileExpr('false')
 ));
 
 
@@ -32,17 +32,17 @@ assert(is(
 // =========
 assert(is(
     '_apply(apply, List([times, List([a, b])]))',
-    compile('a * b')
+    compileExpr('a * b')
 ));
 
 assert(is(
     '_apply(apply, List([add, List([a, _apply(apply, List([times, List([b, c])]))])]))',
-    compile('a + b * c')
+    compileExpr('a + b * c')
 ));
 
 assert(is(
     '_apply(apply, List([isLessThanEq, List([a, b])]))',
-    compile('a <= b')
+    compileExpr('a <= b')
 ));
 
 
@@ -50,7 +50,7 @@ assert(is(
 // ==============
 assert(is(
     '_apply(apply, List([add, List([a, b])]))',
-    compile('add(a, b)')
+    compileExpr('add(a, b)')
 ));
 
 
@@ -58,7 +58,7 @@ assert(is(
 // ===================
 assert(is(
     '_apply(apply, List([times, List([n, _apply(apply, List([fact, List([_apply(apply, List([sub, List([n, Real(1)])]))])]))])]))',
-    compile('n * fact(n - 1)')
+    compileExpr('n * fact(n - 1)')
 ));
 
 
@@ -66,7 +66,7 @@ assert(is(
 // =================
 assert(is(
     '((() => { _apply(apply, List([a, List([])])); return _apply(apply, List([b, List([])])); })())',
-    compile(`{
+    compileExpr(`{
         a();
         b();
     }`)
@@ -77,17 +77,17 @@ assert(is(
 // =========
 assert(is(
     '(is(TRUE, (_apply(apply, List([isLessThan, List([a, b])]))))? (a): (null))',
-    compile('if (a < b) a')
+    compileExpr('if (a < b) a')
 ));
 
 assert(is(
     '(is(TRUE, (_apply(apply, List([isLessThan, List([a, b])]))))? (a): (b))',
-    compile('if (a < b) { a } else { b }')
+    compileExpr('if (a < b) { a } else { b }')
 ));
 
 assert(is(
     '(is(TRUE, (_apply(apply, List([isLessThan, List([a, b])]))))? (a): ((is(TRUE, (_apply(apply, List([isLessThan, List([b, c])]))))? (b): (c))))',
-    compile(`
+    compileExpr(`
         if (a < b) a 
         else if (b < c) b 
         else c
@@ -107,7 +107,7 @@ Implement(
     (x) => _apply(apply, List([add, List([x, Real(1)])]))
 );
     `.trim(),
-    compile(`
+    compileExpr(`
 function inc(x: isReal): isReal {
     x + 1;
 }
