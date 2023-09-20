@@ -66,6 +66,16 @@ function compileBlockExpression(expr) {
     }
 }
 
+function compileProgram(expr) {
+    let countExprs = expr.body.length;
+    if (is(0, countExprs))
+        return 'null';
+    else if (is(1, countExprs))
+        return compileAST(expr.body[0]);
+    else
+        return expr.body.map(compileAST).join("; ") + ";";
+}
+
 function compileAST(ast) {
     if(isNull(ast))
         return 'null';
@@ -85,6 +95,8 @@ function compileAST(ast) {
             return compileBlockExpression(ast);
         case 'ExpressionStatement':
             return compileAST(ast.expression);
+        case 'Program':
+            return compileProgram(ast);
         default: {
             console.error(`Unhandled AST:\n ${prettify(ast)}`);
             return '????';

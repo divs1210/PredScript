@@ -1,14 +1,29 @@
 const assert = require('node:assert/strict');
-const { parse } = require("../src/parser");
+const { parseExpr } = require("../src/parser");
 const { is } = require('immutable');
-const { prettify } = require('../src/util');
+const { pprint } = require('../src/util');
 
 assert(is(
     1.5,
-    parse('1.5')?.expression?.value
+    parseExpr('1.5')?.expression?.value
 ));
 
 assert(is(
     'ArrowFunctionExpression',
-    parse('() => null')?.expression?.type
+    parseExpr('() => null')?.expression?.type
+));
+
+assert(is(
+    'ArrowFunctionExpression',
+    parseExpr('(x) => null')?.expression?.type
+));
+
+assert(is(
+    'ArrowFunctionExpression',
+    parseExpr('() => x')?.expression?.type
+));
+
+assert(is(
+    'ArrowFunctionExpression',
+    parseExpr('(x) => x')?.expression?.type
 ));
