@@ -106,9 +106,32 @@ class Scanner {
             case '\r':
             case '\t': break;
             case '\n': line++; break;
+            // strings
+            case '"': this.string(); break;
             // unknown
             default: parseError(line, `Unexpected character: ${ch}`);
         }
+    }
+
+    string() {
+        while (this.peek() != '"' && !this.isAtEnd()) {
+            if (this.peek() == '\n')
+                line++;
+
+            advance();
+        }
+
+        if (this.isAtEnd()) {
+            parseError(line, "Unterminated string.");
+            return;
+        }
+
+        // The closing ".
+        advance();
+        
+        // Trim the surrounding quotes.
+        let value = this.source.substring(this.start + 1, this.current - 1);
+        this.addToken("STRING", value);
     }
     
     peek() {
@@ -124,9 +147,9 @@ class Scanner {
     
     match(expectedChar) {
         if (this.isAtEnd())
-        return false;
+            return false;
         if (this.source[current] != expectedChar) 
-        return false;
+            return false;
         
         current++;
         return true;
