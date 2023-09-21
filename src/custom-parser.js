@@ -1,5 +1,5 @@
 const combinators = require("parjs/combinators");
-const { floatParser, symbolParser, booleanParser, stringParser } = require("./parsers");
+const { floatParser, symbolParser, booleanParser, stringParser, blockExprParser } = require("./parsers");
 
 const exprParser =
     // numbers
@@ -9,7 +9,9 @@ const exprParser =
     // symbols
     .pipe(combinators.or(symbolParser))
     // strings
-    .pipe(combinators.or(stringParser));
+    .pipe(combinators.or(stringParser))
+    // block expressions
+    .pipe(combinators.or(blockExprParser));
 
 module.exports = {
     parseExpr: (code) => exprParser.parse(code)

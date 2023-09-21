@@ -95,7 +95,7 @@ const _blockExprParser =
     .pipe(combinators.map(res => {
         return {
             type: 'block',
-            value: res.flat(1)
+            value: res.flat(1).filter((node) => node.type !== 'semicolon')
         }
     }));
 
@@ -109,7 +109,7 @@ const blockExprParser =
     .pipe(combinators.map(res => {
         return {
             type: 'block',
-            value: res.flat(1)
+            value: res.flat(1).filter((node) => node.type !== 'semicolon')
         }
     }));
 

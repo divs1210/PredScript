@@ -1,6 +1,6 @@
 const assert = require('assert/strict');
 const { parseExpr, parseSymbol } = require('../src/custom-parser');
-const { is } = require('immutable');
+const { is, fromJS } = require('immutable');
 const { parse } = require('path');
 
 // numbers
@@ -37,10 +37,13 @@ assert(is(
 
 // Block Expresssion
 // =================
-console.log(parseExpr('{}'));
 assert(is(
-    '{}',
-    parse('{}').value.value
-))
+    fromJS([
+        { type: 'number',    value: 1     },
+        { type: 'symbol',    value: 'abc' },
+        { type: 'boolean',   value: false }
+      ]),
+    fromJS(parseExpr('{ 1; abc; false;  }').value.value)
+));
 
 // let code = 'f( if (a < b) { 1; 2 } else "b" )';
