@@ -20,11 +20,24 @@ const TokenType = Set([
     "AND", "OR",
     "IF", "ELSE", 
     "TRUE", "FALSE",
-    "MULTIFUN", "FN", 
+    "MULTIFN", 
     "NULL",
     "LET", "LOOP", "RECUR",
     "EOF"
 ]);
+
+const Keywords = {
+    else:     'ELSE',
+    false:    'FALSE',
+    for:      'FOR',
+    function: 'MULTIFN',
+    if:       'IF',
+    null:     'NULL',
+    true:     'TRUE',
+    let:      'LET',
+    loop:     'LOOP',
+    recur:    'RECUR'
+};
 
 class Token {
     constructor(type, lexeme, literal, line) {
@@ -163,8 +176,10 @@ class Scanner {
     symbol() {
         while (this.isAlphaNumeric(this.peek()))
             this.advance();
-        
-        this.addToken('SYMBOl');
+    
+        let text = this.source.substring(this.start, this.current);
+        let type = Keywords[text] || 'SYMBOL';
+        this.addToken(type);
     }
 
     isAlpha(ch) {
@@ -206,14 +221,14 @@ class Scanner {
         if (this.source[current] != expectedChar) 
             return false;
         
-        current++;
+        this.current++;
         return true;
     }
     
     addToken(type, literal) {
         literal = literal || null;
-        text = source.substring(start, current);
-        tokens.add(new Token(type, text, literal, line));
+        text = source.substring(this.start, this.current);
+        this.tokens.add(new Token(type, text, literal, line));
     }
     
     isAtEnd() {
