@@ -14,4 +14,9 @@ assert(is(
     parseExpr('a1b').value.value
 ));
 
+assert(is(
+    false,
+    parseExpr('false').value.value
+));
+
 // let code = 'f( if (a < b) { 1 } else "b" )';

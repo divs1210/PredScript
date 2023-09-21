@@ -1,9 +1,11 @@
 const combinators = require("parjs/combinators");
-const { floatParser, symbolParser } = require("./parsers");
+const { floatParser, symbolParser, booleanParser } = require("./parsers");
 
 const exprParser =
     // numbers
     floatParser
+    // booleans
+    .pipe(combinators.or(booleanParser))
     // symbols
     .pipe(combinators.or(symbolParser));
 

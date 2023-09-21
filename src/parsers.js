@@ -2,9 +2,8 @@ const { Set } = require("immutable");
 const parsers = require("parjs");
 const combinators = require("parjs/combinators");
 
-// wrappers
-// ========
 // numbers
+// =======
 const floatParser = 
     parsers.float()
     .pipe(combinators.map(res => {
@@ -14,7 +13,9 @@ const floatParser =
         };
     }));
 
+
 // symbols
+// =======
 const whiteSpaceChars = Set([' ', '\n', '\t', 'r']);
 
 const firstCharOfSymbolParser =
@@ -36,8 +37,18 @@ const symbolParser =
         };
     }));
 
+const booleanParser =
+    parsers.string('true')
+    .pipe(combinators.or(parsers.string('false')))
+    .pipe(combinators.map(res => {
+        return {
+            type: 'boolean',
+            value: res == 'true' ? true : false
+        }
+    }));
 
 module.exports = {
     floatParser,
-    symbolParser
+    symbolParser,
+    booleanParser
 };
