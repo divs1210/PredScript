@@ -47,8 +47,24 @@ const booleanParser =
         }
     }));
 
+
+// strings
+// =======
+const stringParser =
+    parsers.noCharOf('"')
+    .pipe(combinators.many())
+    .pipe(combinators.between('"', '"'))
+    .pipe(combinators.map(res => {
+        return {
+            type: 'string',
+            value: res.join('')
+        }
+    }));
+
+
 module.exports = {
     floatParser,
     symbolParser,
-    booleanParser
+    booleanParser,
+    stringParser
 };
