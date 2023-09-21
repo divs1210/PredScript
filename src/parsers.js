@@ -92,49 +92,19 @@ const binaryOpParser =
         };
     }));
 
-const spacedBinaryOpParser =
-    binaryOpParser
-    .pipe(combinators.between(parsers.whitespace()));
-
-const spacedBinaryOpAndLiteralPairsParser =
-    spacedBinaryOpParser
-    .pipe(combinators.then(spacedLiteralParser))
-    .pipe(combinators.many())
-    .pipe(combinators.map(res => res.flat(1)));
-
-const literalBinaryExprParser =
+// fully parenthesized exprs only
+const binaryExprParser =
     spacedLiteralParser
-    .pipe(combinators.then(spacedBinaryOpAndLiteralPairsParser))
-    .pipe(combinators.map(res => res.flat(1)));
-
-const literalBinaryExprOrLiteralParser =
-    literalBinaryExprParser
-    .pipe(combinators.or(spacedLiteralParser));
-
-const bracketedBinaryExprParser = 
-    literalBinaryExprOrLiteralParser
+    .pipe(combinators.then(binaryOpParser))
+    .pipe(combinators.then(spacedLiteralParser))
     .pipe(combinators.between('(', ')'))
     .pipe(combinators.map(res => {
-        res.unshift({type: 'open-paren',  value: '('});
-        res.push   ({type: 'close-paren', value: ')'});
-        return res;
+        let [left, op, right] = res.flat(1);
+        return {
+            type:  'binary-expr',
+            value: { left, op, right }
+        };
     }));
-
-const bracketedBinaryExprOrLiteralBinaryExprOrLiteralParser = 
-    bracketedBinaryExprParser
-    .pipe(combinators.or(literalBinaryExprOrLiteralParser));
-
-const binaryOpAndBinaryExpPairsParser =
-    spacedBinaryOpParser
-    .pipe(combinators.then(bracketedBinaryExprOrLiteralBinaryExprOrLiteralParser))
-    .pipe(combinators.many());
-
-const binaryExprParser =
-    bracketedBinaryExprParser
-    .pipe(combinators.or(spacedLiteralParser))
-    .pipe(combinators.then(binaryOpAndBinaryExpPairsParser));
-
-pprint(binaryExprParser.parse('(1)+(2/(3-5))-3'));
 
 
 // block expression
@@ -182,6 +152,6 @@ module.exports = {
     symbolParser,
     booleanParser,
     stringParser,
-//    binaryExprParser,
+    binaryExprParser,
     blockExprParser
 };

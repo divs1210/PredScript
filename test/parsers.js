@@ -1,7 +1,7 @@
 const assert = require('assert/strict');
 const { is, fromJS } = require("immutable");
 const { pprint } = require('../src/util');
-const { floatParser, symbolParser, booleanParser, stringParser, blockExprParser } = require("../src/parsers");
+const { floatParser, symbolParser, booleanParser, stringParser, blockExprParser, binaryExprParser } = require("../src/parsers");
 
 // numbers
 // =======
@@ -42,28 +42,26 @@ assert(is(
 
 // binary expressions
 // ==================
-// pprint(binaryExprParser.parse('a * b + c'));
-
-// assert(is(
-//     fromJS({
-//       "type": "binary-exp",
-//       "value": {
-//         "left": {
-//           "type": "symbol",
-//           "value": "a"
-//         },
-//         "op": {
-//           "type": "binary-op",
-//           "value": "+"
-//         },
-//         "right": {
-//           "type": "symbol",
-//           "value": "b"
-//         }
-//       }
-//     }),
-//     fromJS(binaryExprParser.parse('a - b + c').value)
-// ));
+assert(is(
+    fromJS({
+      "type": "binary-expr",
+      "value": {
+        "left": {
+          "type": "symbol",
+          "value": "a"
+        },
+        "op": {
+          "type": "binary-op",
+          "value": "+"
+        },
+        "right": {
+          "type": "symbol",
+          "value": "b"
+        }
+      }
+    }),
+    fromJS(binaryExprParser.parse('(a + b)').value)
+));
 
 // Block Expression
 // ================
