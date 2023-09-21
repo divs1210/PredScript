@@ -110,10 +110,12 @@ class Scanner {
             case '"': this.string(); break;
             // unknown
             default: 
-            if (this.isDigit(ch))
-                this.number();
-            else
-                parseError(line, `Unexpected character: ${ch}`);
+                if (this.isDigit(ch))
+                    this.number();
+                else if (this.isAlpha(ch))
+                    this.symbol();
+                else
+                    parseError(line, `Unexpected character: ${ch}`);
         }
     }
 
@@ -156,6 +158,24 @@ class Scanner {
             Number.parseFloat(
                 this.source.substring(
                     this.start, this.current)));
+    }
+
+    symbol() {
+        while (this.isAlphaNumeric(this.peek()))
+            this.advance();
+        
+        this.addToken('SYMBOl');
+    }
+
+    isAlpha(ch) {
+        return (ch >= 'a' && ch <= 'z')
+            || (ch >= 'A' && ch <= 'Z')
+            ||  ch == '_';
+    }
+    
+    isAlphaNumeric(ch) {
+        return this.isAlpha(ch) 
+            || this.isDigit(ch);
     }
 
     isDigit(ch) {
