@@ -1,6 +1,7 @@
 const assert = require('assert/strict');
-const { is } = require("immutable");
-const { floatParser, symbolParser, booleanParser, stringParser } = require("../src/parsers");
+const { is, fromJS } = require("immutable");
+const { pprint } = require('../src/util');
+const { floatParser, symbolParser, booleanParser, stringParser, blockExprParser } = require("../src/parsers");
 
 // numbers
 // =======
@@ -33,9 +34,46 @@ assert(is(
 
 // strings
 // =======
-console.log(stringParser.parse('"hello"'));
-
 assert(is(
     'hello',
     stringParser.parse('"hello"').value.value
 ));
+
+
+// Block Expression
+// ================
+assert(is(
+    fromJS([
+          {
+            "type": "boolean",
+            "value": true
+          },
+          {
+            "type": "semicolon",
+            "value": ";"
+          }
+        ,
+        {
+          "type": "block",
+          "value": [
+              {
+                "type": "symbol",
+                "value": "a"
+              },
+              {
+                "type": "semicolon",
+                "value": ";"
+              }
+            ]
+        },
+          {
+            "type": "number",
+            "value": 5
+          },
+          {
+            "type": "semicolon",
+            "value": ";"
+          }
+        ]),
+    fromJS(blockExprParser.parse('{ true; { a; } 5; }').value.value)
+))

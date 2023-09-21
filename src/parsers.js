@@ -37,6 +37,9 @@ const symbolParser =
         };
     }));
 
+
+// booleans
+// ========
 const booleanParser =
     parsers.string('true')
     .pipe(combinators.or(parsers.string('false')))
@@ -62,9 +65,59 @@ const stringParser =
     }));
 
 
+// literal expression
+// ==================
+const literalExprParser =
+    floatParser
+    .pipe(combinators.or(booleanParser))
+    .pipe(combinators.or(symbolParser))
+    .pipe(combinators.or(stringParser));
+
+
+// block expression
+// ================
+const spacedSemicolon =
+    parsers.string(';')
+    .pipe(combinators.between(parsers.whitespace()))
+    .pipe(combinators.map(res => {
+        return {
+            type: 'semicolon',
+            value: res
+        }
+    }));
+
+const _blockExprParser =
+    literalExprParser
+    .pipe(combinators.then(spacedSemicolon))
+    .pipe(combinators.between(parsers.whitespace()))
+    .pipe(combinators.many())
+    .pipe(combinators.between('{', '}'))
+    .pipe(combinators.map(res => {
+        return {
+            type: 'block',
+            value: res.flat(1)
+        }
+    }));
+
+const blockExprParser =
+    literalExprParser
+    .pipe(combinators.then(spacedSemicolon))
+    .pipe(combinators.or(_blockExprParser))
+    .pipe(combinators.between(parsers.whitespace()))
+    .pipe(combinators.many())
+    .pipe(combinators.between('{', '}'))
+    .pipe(combinators.map(res => {
+        return {
+            type: 'block',
+            value: res.flat(1)
+        }
+    }));
+
+
 module.exports = {
     floatParser,
     symbolParser,
     booleanParser,
-    stringParser
+    stringParser,
+    blockExprParser
 };
