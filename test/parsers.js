@@ -39,7 +39,32 @@ assert(is(
   stringParser.parse('"hello"').value.value
 ));
   
-          
+
+// binary expressions
+// ==================
+// pprint(binaryExprParser.parse('a * b + c'));
+
+// assert(is(
+//     fromJS({
+//       "type": "binary-exp",
+//       "value": {
+//         "left": {
+//           "type": "symbol",
+//           "value": "a"
+//         },
+//         "op": {
+//           "type": "binary-op",
+//           "value": "+"
+//         },
+//         "right": {
+//           "type": "symbol",
+//           "value": "b"
+//         }
+//       }
+//     }),
+//     fromJS(binaryExprParser.parse('a - b + c').value)
+// ));
+
 // Block Expression
 // ================
 assert(is(

@@ -1,6 +1,7 @@
 const { Set } = require("immutable");
 const parsers = require("parjs");
 const combinators = require("parjs/combinators");
+const { pprint } = require("./util");
 
 // numbers
 // =======
@@ -16,8 +17,6 @@ const floatParser =
 
 // symbols
 // =======
-const whiteSpaceChars = Set([' ', '\n', '\t', 'r']);
-
 const firstCharOfSymbolParser =
     parsers.letter()
     .pipe(combinators.or(parsers.anyCharOf('$_')));
@@ -73,6 +72,70 @@ const literalExprParser =
     .pipe(combinators.or(symbolParser))
     .pipe(combinators.or(stringParser));
 
+const spacedLiteralParser =
+    literalExprParser
+    .pipe(combinators.between(parsers.whitespace()));
+
+
+// binary expression
+// =================
+const binaryOpParser =
+    parsers.anyStringOf(
+        "+", "-", "*", "/",
+        '<', '>',
+        '==', '<=', '>=',
+        "&&", "||"
+    ).pipe(combinators.map(res => {
+        return {
+            type: 'binary-op',
+            value: res
+        };
+    }));
+
+const spacedBinaryOpParser =
+    binaryOpParser
+    .pipe(combinators.between(parsers.whitespace()));
+
+const spacedBinaryOpAndLiteralPairsParser =
+    spacedBinaryOpParser
+    .pipe(combinators.then(spacedLiteralParser))
+    .pipe(combinators.many())
+    .pipe(combinators.map(res => res.flat(1)));
+
+const literalBinaryExprParser =
+    spacedLiteralParser
+    .pipe(combinators.then(spacedBinaryOpAndLiteralPairsParser))
+    .pipe(combinators.map(res => res.flat(1)));
+
+const literalBinaryExprOrLiteralParser =
+    literalBinaryExprParser
+    .pipe(combinators.or(spacedLiteralParser));
+
+const bracketedBinaryExprParser = 
+    literalBinaryExprOrLiteralParser
+    .pipe(combinators.between('(', ')'))
+    .pipe(combinators.map(res => {
+        res.unshift({type: 'open-paren',  value: '('});
+        res.push   ({type: 'close-paren', value: ')'});
+        return res;
+    }));
+
+const bracketedBinaryExprOrLiteralBinaryExprOrLiteralParser = 
+    bracketedBinaryExprParser
+    .pipe(combinators.or(literalBinaryExprOrLiteralParser));
+
+const binaryOpAndBinaryExpPairsParser =
+    spacedBinaryOpParser
+    .pipe(combinators.then(bracketedBinaryExprOrLiteralBinaryExprOrLiteralParser))
+    .pipe(combinators.many());
+
+const binaryExprParser =
+    bracketedBinaryExprParser
+    .pipe(combinators.or(spacedLiteralParser))
+    .pipe(combinators.then(binaryOpAndBinaryExpPairsParser));
+
+pprint(binaryExprParser.parse('(1)+(2/(3-5))-3'));
+
 
 // block expression
 // ================
@@ -119,5 +182,6 @@ module.exports = {
     symbolParser,
     booleanParser,
     stringParser,
+//    binaryExprParser,
     blockExprParser
 };
