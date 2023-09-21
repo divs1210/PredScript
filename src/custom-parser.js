@@ -109,7 +109,11 @@ class Scanner {
             // strings
             case '"': this.string(); break;
             // unknown
-            default: parseError(line, `Unexpected character: ${ch}`);
+            default: 
+            if (this.isDigit(ch))
+                this.number();
+            else
+                parseError(line, `Unexpected character: ${ch}`);
         }
     }
 
@@ -133,12 +137,43 @@ class Scanner {
         let value = this.source.substring(this.start + 1, this.current - 1);
         this.addToken("STRING", value);
     }
+
+    number() {
+        while (this.isDigit(this.peek()))
+            this.advance();
+        
+        // Look for a fractional part.
+        if (this.peek() === '.' && this.isDigit(this.peekNext())) {
+            // Consume the "."
+            advance();
+            
+            while (this.isDigit(this.peek()))
+                this.advance();
+        }
+
+        this.addToken(
+            'NUMBER', 
+            Number.parseFloat(
+                this.source.substring(
+                    this.start, this.current)));
+    }
+
+    isDigit(ch) {
+        return ch >= '0' && ch <= '9';
+    }
     
     peek() {
         if (this.isAtEnd()) 
         return '\0';
         
         return this.source[current];
+    }
+
+    peekNext() {
+        if (this.current + 1 >= this.source.length) 
+            return '\0';
+        
+        return this.source[this.current + 1];
     }
     
     advance() {
