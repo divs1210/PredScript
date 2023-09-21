@@ -121,6 +121,7 @@ const spacedSemicolon =
 
 const _blockExprParser =
     literalExprParser
+    .pipe(combinators.or(binaryExprParser))
     .pipe(combinators.then(spacedSemicolon))
     .pipe(combinators.between(parsers.whitespace()))
     .pipe(combinators.many())
@@ -134,6 +135,7 @@ const _blockExprParser =
 
 const blockExprParser =
     literalExprParser
+    .pipe(combinators.or(binaryExprParser))
     .pipe(combinators.then(spacedSemicolon))
     .pipe(combinators.or(_blockExprParser))
     .pipe(combinators.between(parsers.whitespace()))
@@ -145,7 +147,6 @@ const blockExprParser =
             value: res.flat(1).filter((node) => node.type !== 'semicolon')
         }
     }));
-
 
 module.exports = {
     floatParser,
