@@ -39,17 +39,13 @@ const Keywords = {
     recur:    'RECUR'
 };
 
-class Token {
-    constructor(type, lexeme, literal, line) {
-        this.type    = type;
-        this.lexeme  = lexeme;
-        this.literal = literal;
-        this.line    = line;
-    }
-    
-    toString() {
-        return type + " " + lexeme + " " + literal;
-    }
+function Token (type, lexeme, literal, line) {
+    return {
+        type:     type,
+        lexeme:   lexeme,
+        literal: literal,
+        line:    line,
+    };
 }
 
 // STATIC
@@ -82,7 +78,7 @@ class Scanner {
             this.scanToken();
         }
         
-        this.tokens.add(new Token("EOF", "", null, line));
+        this.tokens.push(Token("EOF", "", null, this.line));
         
         return this.tokens;
     }
@@ -101,10 +97,10 @@ class Scanner {
             case '-': this.addToken('MINUS');       break;
             case '+': this.addToken('PLUS');        break;
             case '*': this.addToken('STAR');        break;
-            case '!': this.addToken(match('=') ? 'BANG_EQUAL'  : 'BANG');      break;
-            case '=': this.addToken(match('=') ? 'EQUAL_EQUAL' : 'EQUAL');     break;
-            case '<': this.addToken(match('=') ? 'LESS_EQUAL'  : 'LESS');      break;
-            case '>': this.addToken(match('=') ? 'GREATER_EQUAL' : 'GREATER'); break;
+            case '!': this.addToken(this.match('=') ? 'BANG_EQUAL'  : 'BANG');      break;
+            case '=': this.addToken(this.match('=') ? 'EQUAL_EQUAL' : 'EQUAL');     break;
+            case '<': this.addToken(this.match('=') ? 'LESS_EQUAL'  : 'LESS');      break;
+            case '>': this.addToken(this.match('=') ? 'GREATER_EQUAL' : 'GREATER'); break;
             case '/':
                 if (this.match('/')) {
                     // comment
@@ -118,7 +114,7 @@ class Scanner {
             case ' ' :
             case '\r':
             case '\t': break;
-            case '\n': line++; break;
+            case '\n': this.line++; break;
             // strings
             case '"': this.string(); break;
             // unknown
@@ -128,25 +124,25 @@ class Scanner {
                 else if (this.isAlpha(ch))
                     this.symbol();
                 else
-                    parseError(line, `Unexpected character: ${ch}`);
+                    parseError(this.line, `Unexpected character: ${ch}`);
         }
     }
 
     string() {
         while (this.peek() != '"' && !this.isAtEnd()) {
             if (this.peek() == '\n')
-                line++;
+                this.line++;
 
-            advance();
+            this.advance();
         }
 
         if (this.isAtEnd()) {
-            parseError(line, "Unterminated string.");
+            parseError(this.line, "Unterminated string.");
             return;
         }
 
         // The closing ".
-        advance();
+        this.advance();
         
         // Trim the surrounding quotes.
         let value = this.source.substring(this.start + 1, this.current - 1);
@@ -201,7 +197,7 @@ class Scanner {
         if (this.isAtEnd()) 
         return '\0';
         
-        return this.source[current];
+        return this.source[this.current];
     }
 
     peekNext() {
@@ -218,7 +214,7 @@ class Scanner {
     match(expectedChar) {
         if (this.isAtEnd())
             return false;
-        if (this.source[current] != expectedChar) 
+        if (this.source[this.current] != expectedChar) 
             return false;
         
         this.current++;
@@ -227,11 +223,15 @@ class Scanner {
     
     addToken(type, literal) {
         literal = literal || null;
-        text = source.substring(this.start, this.current);
-        this.tokens.add(new Token(type, text, literal, line));
+        let text = this.source.substring(this.start, this.current);
+        this.tokens.push(new Token(type, text, literal, this.line));
     }
     
     isAtEnd() {
         return this.current >= this.source.length;
     }
 }
+
+module.exports = {
+    Scanner
+};
