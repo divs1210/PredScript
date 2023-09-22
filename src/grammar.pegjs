@@ -110,6 +110,10 @@
         };
     }
 
+    function groupingNode(expr) {
+        return expr;
+    }
+
     function exprStatementNode(expr) {
         return {
             type: 'expr-stmt',
@@ -123,9 +127,16 @@
             value: stmt
         };
     }
+
+    function programNode(p) {
+        return {
+            type: 'program',
+            value: p.map(s => s[1])
+        };
+    }
 }
 
-program   = (_ statement _)*
+program   = p:((_ statement _)*)                                                               { return programNode(p);                        }
 
 statement        = s:(letStatement / multiFnStatement / exprStatement)                         { return statementNode(s);                      }
 exprStatement    = e:expression (_ ';')?                                                       { return exprStatementNode(e);                  }
@@ -148,8 +159,8 @@ ifExpr     = 'if' _ '(' _ cond:expression _ ')' _ then:expression _else:((_ 'els
                                                                                      { return ifNode(cond, then, _else); }
 fnCall     = f:primary _ '(' _ args:((expression (_ ',' _ expression)*)?) _ ')'      { return fnCallNode(f, args);       }
 
-primary    = p:(NUMBER / STRING / BOOL / NULL / SYMBOL / block / grouping)
-grouping   = '(' _ e:expression _ ')'                                                { return e;                         }
+primary    = NUMBER / STRING / BOOL / NULL / SYMBOL / block / grouping
+grouping   = '(' _ e:expression _ ')'                                                { return groupingNode(e);           }
 block      = '{' _ b:((_ exprStatement / letStatement _)*) _ '}'                     { return blockNode(b);              }
 
 NUMBER      = n:([0-9]+ ('.' [0-9]+)?)                         { return numberNode(n); }
