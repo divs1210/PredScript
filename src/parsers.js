@@ -77,6 +77,28 @@ const spacedLiteralParser =
     .pipe(combinators.between(parsers.whitespace()));
 
 
+// function calls
+// ==============
+const fnCallParser =
+    spacedLiteralParser
+    .pipe(combinators.then(
+        spacedLiteralParser
+        .pipe(combinators.manySepBy(','))
+        .pipe(combinators.between(parsers.whitespace()))
+        .pipe(combinators.between('(', ')'))
+        .pipe(combinators.between(parsers.whitespace()))
+    ))
+    .pipe(combinators.map(res => {
+        return {
+            type:  'fn-call',
+            value: {
+                f:    res[0],
+                args: res[1]
+            }
+        }
+    }));
+
+
 // binary expression
 // =================
 const binaryOpParser =
@@ -201,5 +223,6 @@ module.exports = {
     stringParser,
     binaryExprParser,
     blockExprParser,
-    ifElseParser
+    ifElseParser,
+    fnCallParser
 };
