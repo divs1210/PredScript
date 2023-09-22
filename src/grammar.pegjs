@@ -81,21 +81,21 @@
     }
 
     function multiFnArgNode(obj) {
-        obj.type = 'multiFnArg';
+        obj.type = 'multifn-arg';
         return obj;
     }
 
     // intermediate node
     function multiFnArgsNode(obj) {
         return {
-            type: 'multiFnArgsNode',
+            type: 'multifn-args',
             args: [obj.x].concat(obj.xs.map(arr => arr[3]))
         };
     }
 
     function multiFnNode(obj) {
         return {
-            type: 'multiFnNode',
+            type: 'multifn',
             args: obj.args[2].args,
             body: obj.body
         }
