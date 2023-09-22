@@ -34,17 +34,17 @@ inc(4) // => 5: isInt
 
 // this can be overridden for our new predicates!
 function inc(x: isEven): isOdd {
-    // `as!` forces type conversion without checking
-    let incX: isInt = as!(asInt, x) + 1
-    as!(isOdd, incX);
+    x
+    .as!(asInt, this) // forced type cast
+    .inc(this)
+    .as!(isOdd, this) // forced type cast
 }
 
-// we can also call inc: (isInt) -> isInt
-// instead of doing + 1
-// to avoid repetition
 function inc(x: isOdd): isEven {
-    let incX: isInt = inc(as!(isInt, x));
-    as!(isEven, incX);
+    x
+    .as!(asInt, this)
+    .inc(this)
+    .as!(isEven, this)
 }
 
 // `as` does a checked conversion at runtime
@@ -66,15 +66,17 @@ let isUser: isPred =
 
 // this is type checked at compile time
 async function fetchUserById(id: isInt): isUser {
-    let url: isURL = fetchUserByIdURLTemplate(id);
-    let resp: isHTTPResp = await fetch(url);
-    
-    // this is validated and cast at runtime
-    as(isUser, parseJSON(resp.body));
+    id
+    .fetchUserByIdURLTemplate(this)
+    .fetch(this)
+    .await(this)
+    .get(this, "body")
+    .parseJSON(this)
+    .as(isUser, this) // validate and cast at runtime 
 }
 
 // no validation library required!
-await fetchUserById(5) 
+fetchUserById(5).await(this);
 // => { 
 //  id: 5,
 //  name: "Bob",
