@@ -39,11 +39,18 @@
         };
     }
 
-    function fnCallNode(parsed) {
-        console.log('parsed call: '+JSON.stringify(parsed, null, 2));
-        let ret = parsed;
-        console.log('ret: '+ret);
-        return {type: 'call', value: ret};
+    function fnCallNode(f, _args) {
+        let args;
+        if (_args?.length > 0)
+            args = [_args[0]].concat(_args[1].map(arg => arg[3]))
+        else
+            args = [];
+
+        return {
+            type: 'call', 
+            f:    f,
+            args: args
+        };
     }
 
     function ifNode(cond, then, _else) {
@@ -83,6 +90,7 @@
         return obj;
     }
 
+    // intermediate node
     function multiFnArgsNode(obj) {
         return {
             type: 'multiFnArgsNode',
@@ -93,7 +101,7 @@
     function multiFnNode(obj) {
         return {
             type: 'multiFnNode',
-            args: obj.args[2],
+            args: obj.args[2].args,
             body: obj.body
         }
     }
