@@ -13,8 +13,13 @@ comparison = term _ ( ( '>' / '>=' / '<' / '<=' ) _ term)*
 term       = factor _ ( ( '-' / '+' ) _ factor)*
 factor     = unary _ ( ( '/' / '*' ) _ unary)*
 unary      = ( '!' / '-' ) _ unary
-             / primary _ '(' _ (expression (_ ',' _ expression)*)? _ ')'
+             / ifExpr
+             / fnCall
              / primary
+
+ifExpr     = 'if' _ '(' _ expression _ ')' _ expression (_ 'else' _ expression)?
+fnCall     = primary _ '(' _ (expression (_ ',' _ expression)*)? _ ')'
+
 primary    = NUMBER / STRING / SYMBOL / BOOL / NULL / block / grouping
 grouping   = '(' _ expression _ ')'
 block      = '{' _ (_ exprStatement / letStatement _)* _ '}'
