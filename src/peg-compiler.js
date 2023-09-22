@@ -1,15 +1,17 @@
 const { is } = require("immutable");
 const { parse, parseExpr } = require("./peg-parser");
-const { isNull, prettify, pprint } = require("./util");
+const { isNull, prettify } = require("./util");
 const builtins = require('./builtins');
 
 function compileLiteral(node) {
     let val = node.value;
-    switch(typeof val) {
+    switch(node.type) {
         case 'number': 
             return `Real(${val})`;
         case 'bool':
             return `Bool(${val})`;
+        case 'null':
+            return 'null';
         default: {
             console.error(`Unhandled literal: ${prettify(val)}`);
             return '????';
@@ -36,7 +38,7 @@ function compileBinaryExpression(node) {
     if (!isNull(fn)) {
         let compiledLeft  = compileAST(left);
         let compiledRight = compileAST(right);    
-        return `_apply(apply, List([${fn}, List([${compiledLeft}, ${compiledRight}])]))`;   
+        return `_apply(${fn}, List([${compiledLeft}, ${compiledRight}]))`;   
     } else {
         console.error(`Unhandled binary expression: ${prettify(node)}`);
         return '????';
@@ -50,8 +52,9 @@ function compileIfExpression(expr) {
 }
 
 function compileCallExpression(node) {
+    let f = compileAST(node.f);
     let args = node.args.map(compileAST).join(', ');
-    return `_apply(apply, List([${node.f}, List([${args}])]))`;
+    return `_apply(apply, List([${f}, List([${args}])]))`;
 }
 
 function compileBlockExpression(node) {
@@ -154,8 +157,6 @@ function compileExpr(codeString) {
     
     return jsCodeString;
 }
-
-pprint(compileExpr('1'));
 
 module.exports = {
     compile,
