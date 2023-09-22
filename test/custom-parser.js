@@ -2,6 +2,7 @@ const assert = require('assert/strict');
 const { parseExpr, parseSymbol } = require('../src/custom-parser');
 const { is, fromJS } = require('immutable');
 const { parse } = require('path');
+const { pprint } = require('../src/util');
 
 // numbers
 // =======
@@ -46,4 +47,40 @@ assert(is(
     fromJS(parseExpr('{ 1; abc; false;  }').value.value)
 ));
 
-// let code = 'f( if (a < b) { 1; 2 } else "b" )';
+
+// if / else expressions
+// =====================
+assert(is(
+    fromJS({
+        "type": "if",
+        "cond": {
+          "type": "binary-expr",
+          "value": {
+            "left": {
+              "type": "symbol",
+              "value": "a"
+            },
+            "op": {
+              "type": "binary-op",
+              "value": "<"
+            },
+            "right": {
+              "type": "symbol",
+              "value": "b"
+            }
+          }
+        },
+        "then": {
+          "type": "symbol",
+          "value": "a"
+        },
+        "else": {
+          "type": "symbol",
+          "value": "b"
+        }
+      }),
+    fromJS(parseExpr('if (a < b) a else b').value)
+));
+
+
+// let code = 'f( if (a < b) { 1; 2; } else "b" )';

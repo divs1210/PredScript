@@ -148,11 +148,58 @@ const blockExprParser =
         }
     }));
 
+
+// if / else
+// =========
+const ifParser =
+    parsers.string('if')
+    .pipe(combinators.between(parsers.whitespace()));
+
+const elseParser =
+    parsers.string('else')
+    .pipe(combinators.between(parsers.whitespace()));
+
+const condParser =
+    binaryExprParser
+    .pipe(combinators.or(
+        spacedLiteralParser
+        .pipe(combinators.between('(', ')'))
+        .pipe(combinators.between(parsers.whitespace()))
+    ));
+
+const thenParser =
+    blockExprParser
+    .pipe(combinators.or(binaryExprParser))
+    .pipe(combinators.or(spacedLiteralParser))
+    .pipe(combinators.between(parsers.whitespace()))
+
+// only if / else, no else if
+const ifElseParser =
+    ifParser
+    .pipe(combinators.then(condParser))
+    .pipe(combinators.then(thenParser))
+    .pipe(combinators.then(
+        elseParser
+        .pipe(combinators.then(thenParser))
+    ))
+    .pipe(combinators.map(res => {
+        let [cond, then, _else] = 
+            [res[0][0][1], res[0][1], res[1][1]];
+        return {
+            type: 'if',
+            cond: cond,
+            then: then,
+            else: _else
+        };
+    }));
+
+
 module.exports = {
     floatParser,
     symbolParser,
     booleanParser,
     stringParser,
     binaryExprParser,
-    blockExprParser
+    blockExprParser,
+    ifElseParser
 };
