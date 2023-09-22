@@ -1,13 +1,9 @@
 program   = (_ statement _)*
 
-statement = exprStatement / letStatement / multiFnStatement
-
+statement        = exprStatement / letStatement / multiFnStatement
 exprStatement    = expression _ ';'
-
 letStatement     = 'let' __ SYMBOL _ '=' _ expression _ ';'
-
-multiFnStatement = 'function' __ SYMBOL _ '(' _ multiFnArgs? _ ')' _ multiFnBody
-multiFnBody      = '{' _ (_ statement _)* _ '}'
+multiFnStatement = 'function' __ SYMBOL _ '(' _ multiFnArgs? _ ')' _ block
 multiFnArgs      = multiFnArg (_ ',' _ multiFnArg)*
 multiFnArg       = SYMBOL _ ':' _ SYMBOL
 
@@ -17,8 +13,11 @@ comparison = term _ ( ( '>' / '>=' / '<' / '<=' ) _ term)*
 term       = factor _ ( ( '-' / '+' ) _ factor)*
 factor     = unary _ ( ( '/' / '*' ) _ unary)*
 unary      = ( '!' / '-' ) _ unary
+             / primary _ '(' _ (expression (_ ',' _ expression)*)? _ ')'
              / primary
-primary    = NUMBER / STRING / SYMBOL / BOOL / NULL / '(' _ expression _ ')'
+primary    = NUMBER / STRING / SYMBOL / BOOL / NULL / block / grouping
+grouping   = '(' _ expression _ ')'
+block      = '{' _ (_ exprStatement / letStatement _)* _ '}'
 
 NUMBER      = [0-9]+ ('.' [0-9]+)?
 BOOL        = 'true' / 'false'

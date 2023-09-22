@@ -11,6 +11,8 @@ let c = 1;
 function add(a: int, b: real) {
     a + b * c;
 }
+
+add(1, add(w, 3+2));
 `));
 
 module.exports = {
