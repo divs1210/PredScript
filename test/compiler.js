@@ -31,17 +31,17 @@ assert(is(
 // Infix ops
 // =========
 assert(is(
-    '_apply(apply, List([times, List([a, b])]))',
+    '_apply(times, List([a, b]))',
     compileExpr('a * b')
 ));
 
 assert(is(
-    '_apply(apply, List([add, List([a, _apply(apply, List([times, List([b, c])]))])]))',
+    '_apply(add, List([a, _apply(times, List([b, c]))]))',
     compileExpr('a + b * c')
 ));
 
 assert(is(
-    '_apply(apply, List([isLessThanEq, List([a, b])]))',
+    '_apply(isLessThanEq, List([a, b]))',
     compileExpr('a <= b')
 ));
 
@@ -49,15 +49,15 @@ assert(is(
 // function calls
 // ==============
 assert(is(
-    '_apply(apply, List([add, List([a, b])]))',
-    compileExpr('add(a, b)')
+    '_apply(apply, List([f, List([a, b])]))',
+    compileExpr('f(a, b)')
 ));
 
 
 // Complex expressions
 // ===================
 assert(is(
-    '_apply(apply, List([times, List([n, _apply(apply, List([fact, List([_apply(apply, List([sub, List([n, Real(1)])]))])]))])]))',
+    '_apply(times, List([n, _apply(apply, List([fact, List([_apply(sub, List([n, Real(1)]))])]))]))',
     compileExpr('n * fact(n - 1)')
 ));
 
@@ -76,17 +76,17 @@ assert(is(
 // if / else
 // =========
 assert(is(
-    '(_is(TRUE, (_apply(apply, List([isLessThan, List([a, b])]))))? (a): (null))',
+    '(_is(TRUE, (_apply(isLessThan, List([a, b]))))? (a): (null))',
     compileExpr('if (a < b) a')
 ));
 
 assert(is(
-    '(_is(TRUE, (_apply(apply, List([isLessThan, List([a, b])]))))? (a): (b))',
+    '(_is(TRUE, (_apply(isLessThan, List([a, b]))))? (a): (b))',
     compileExpr('if (a < b) { a } else { b }')
 ));
 
 assert(is(
-    '(_is(TRUE, (_apply(apply, List([isLessThan, List([a, b])]))))? (a): ((_is(TRUE, (_apply(apply, List([isLessThan, List([b, c])]))))? (b): (c))))',
+    '(_is(TRUE, (_apply(isLessThan, List([a, b]))))? (a): ((_is(TRUE, (_apply(isLessThan, List([b, c]))))? (b): (c))))',
     compileExpr(`
         if (a < b) a 
         else if (b < c) b 
@@ -104,7 +104,7 @@ Implement(
     inc,
     List([isReal]),
     isReal,
-    (x) => _apply(apply, List([add, List([x, Real(1)])]))
+    (x) => _apply(add, List([x, Real(1)]))
 );
     `.trim(),
     compileExpr(`

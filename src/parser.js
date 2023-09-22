@@ -1,10 +1,9 @@
-const TSParser = require('@typescript-eslint/typescript-estree');
+const fs = require('fs');
+const peg = require("pegjs");
 
-const parse = (code) => 
-    TSParser.parse(code, {loc: true, range: true});
-
-const parseExpr = (code) =>
-    parse(code).body[0];
+const grammar = fs.readFileSync('src/grammar.pegjs', 'utf8');
+const parse = peg.generate(grammar).parse;
+let parseExpr = (code) => parse(code).value[0];
 
 module.exports = {
     parse,

@@ -3,13 +3,15 @@ const { parse, parseExpr } = require("./parser");
 const { isNull, prettify } = require("./util");
 const builtins = require('./builtins');
 
-function compileLiteral(expr) {
-    let val = expr.value;
-    switch(typeof val) {
+function compileLiteral(node) {
+    let val = node.value;
+    switch(node.type) {
         case 'number': 
             return `Real(${val})`;
-        case 'boolean':
+        case 'bool':
             return `Bool(${val})`;
+        case 'null':
+            return 'null';
         default: {
             console.error(`Unhandled literal: ${prettify(val)}`);
             return '????';
@@ -17,7 +19,7 @@ function compileLiteral(expr) {
     }
 }
 
-function compileBinaryExpression(expr) {
+function compileBinaryExpression(node) {
     let opToFn = {
         '*': 'times',
         '/': 'div',
@@ -30,67 +32,63 @@ function compileBinaryExpression(expr) {
         '>=': 'isGreaterThanEq'
     };
 
-    let { operator, left, right } = expr;
-    let fn = opToFn[operator];
+    let { op, left, right } = node;
+    let fn = opToFn[op];
 
     if (!isNull(fn)) {
         let compiledLeft  = compileAST(left);
         let compiledRight = compileAST(right);    
-        return `_apply(apply, List([${fn}, List([${compiledLeft}, ${compiledRight}])]))`;   
+        return `_apply(${fn}, List([${compiledLeft}, ${compiledRight}]))`;   
     } else {
-        console.error(`Unhandled binary expression: ${prettify(expr)}`);
+        console.error(`Unhandled binary expression: ${prettify(node)}`);
         return '????';
     }
 }
 
 function compileIfExpression(expr) {
-    let { test, consequent, alternate } = expr;
-    let [cond, then, alt] = [test, consequent, alternate].map(compileAST);
+    let { condExp, thenExp, elseExp } = expr;
+    let [cond, then, alt] = [condExp, thenExp, elseExp].map(compileAST);
     return `(_is(TRUE, (${cond}))? (${then}): (${alt}))`;
 }
 
-function compileCallExpression(expr) {
-    let args = expr.arguments.map(compileAST).join(', ');
-    return `_apply(apply, List([${expr.callee.name}, List([${args}])]))`;
+function compileCallExpression(node) {
+    let f = compileAST(node.f);
+    let args = node.args.map(compileAST).join(', ');
+    return `_apply(apply, List([${f}, List([${args}])]))`;
 }
 
-function compileBlockExpression(expr) {
-    let countExprs = expr.body.length;
+function compileBlockExpression(node) {
+    let countExprs = node.value.length;
     if (is(0, countExprs))
         return 'null';
     else if (is(1, countExprs))
-        return compileAST(expr.body[0]);
+        return compileAST(node.value[0]);
     else {
-        let compiledExprs = expr.body.map(compileAST);
+        let compiledExprs = node.value.map(compileAST);
         let lastExpr = compiledExprs.pop();
         return `((() => { ${compiledExprs.join('; ')}; return ${lastExpr}; })())`;
     }
 }
 
-function compileProgram(expr) {
+function compileProgram(node) {
     let allBuiltins = Object.keys(builtins).join(', ');
     let requireBuiltins = `const {${ allBuiltins }} = require('./src/builtins');\n\n`;
 
-    let countExprs = expr.body.length;
+    let countExprs = node.value.length;
     if (is(0, countExprs))
         return 'null';
     else if (is(1, countExprs))
-        return requireBuiltins + compileAST(expr.body[0]);
+        return requireBuiltins + compileAST(node.value[0]);
     else
-        return requireBuiltins + expr.body.map(compileAST).join("; ") + ";";
+        return requireBuiltins + node.value.map(compileAST).join("; ") + ";";
 }
 
-function compileMultiFn(expr) {
-    let fName = expr.id.name;
-    let fReturnType = expr?.returnType?.typeAnnotation?.typeName?.name ?? 'isAny';
-    let fBody = compileAST(expr.body);
-    let args = expr.params.map((arg)=> {
-        let argName = arg.name;
-        let argType = arg?.typeAnnotation?.typeAnnotation?.typeName?.name ?? 'isAny';
-        return {name: argName, type: argType};
-    });
-    let argNames = args.map((arg) => arg.name).join(', ');
-    let argTypes = args.map((arg) => arg.type).join(', ');
+function compileMultiFn(node) {
+    let fName = compileAST(node.name);
+    let fReturnType = compileAST(node.retType);
+    let fBody = compileAST(node.body);
+    let argNames = node.args.map((arg) => compileAST(arg.argName)).join(', ');
+    let argTypes = node.args.map((arg) => compileAST(arg.argType)).join(', ');
 
     return `
 var ${fName} = ${fName} || MultiFn("${fName}");
@@ -108,23 +106,26 @@ function compileAST(ast) {
         return 'null';
 
     switch (ast.type) {
-        case 'Literal':
+        case 'number':
+        case 'bool':
+        case 'string':
+        case 'null':
             return compileLiteral(ast);
-        case 'Identifier':
-            return ast.name;
-        case 'BinaryExpression':
+        case 'symbol':
+            return ast.value;
+        case 'binary-exp':
             return compileBinaryExpression(ast);
-        case 'IfStatement':
+        case 'if-exp':
             return compileIfExpression(ast);
-        case 'CallExpression':
+        case 'call-exp':
             return compileCallExpression(ast);
-        case 'BlockStatement':
+        case 'block-stmt':
             return compileBlockExpression(ast);
-        case 'ExpressionStatement':
-            return compileAST(ast.expression);
-        case 'FunctionDeclaration':
+        case 'expr-stmt':
+            return compileAST(ast.value);
+        case 'multifn-stmt':
             return compileMultiFn(ast);
-        case 'Program':
+        case 'program':
             return compileProgram(ast);
         default: {
             console.error(`Unhandled AST:\n ${prettify(ast)}`);
