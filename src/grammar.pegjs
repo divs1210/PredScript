@@ -1,8 +1,20 @@
 {
-    function stringNode(parsed) {
+    const nullNode = {type: 'null', value: 'null'};
+
+    function numberNode(parsed) {
         // console.log('parsed: '+JSON.stringify(parsed, null, 2));
-        let ret = parsed[1].map(x => x[1]).join('');
+        let ret = parseFloat(parsed.flat(2).join(''));
         // console.log('ret: '+ret);
+        return {type: 'string', value: ret};
+    }
+
+    function boolNode(parsed) {
+        let ret = parsed === 'true'? true : false;
+        return {type: 'string', value: ret};
+    }
+
+    function stringNode(parsed) {
+        let ret = parsed[1].map(x => x[1]).join('');
         return {type: 'string', value: ret};
     }
 
@@ -34,13 +46,13 @@ unary      = ( '!' / '-' ) _ unary
 ifExpr     = 'if' _ '(' _ expression _ ')' _ expression (_ 'else' _ expression)?
 fnCall     = primary _ '(' _ (expression (_ ',' _ expression)*)? _ ')'
 
-primary    = NUMBER / STRING / SYMBOL / BOOL / NULL / block / grouping
+primary    = NUMBER / STRING / BOOL / NULL / SYMBOL / block / grouping
 grouping   = '(' _ expression _ ')'
 block      = '{' _ (_ exprStatement / letStatement _)* _ '}'
 
-NUMBER      = [0-9]+ ('.' [0-9]+)?
-BOOL        = 'true' / 'false'
-NULL        = 'null'
+NUMBER      = n:([0-9]+ ('.' [0-9]+)?) { return numberNode(n); }
+BOOL        = b:('true' / 'false') { return boolNode(b); } 
+NULL        = 'null' { return nullNode; }
 STRING      = s:('"' (!'"' .)* '"') { return stringNode(s); }
 SYMBOL      = s:(SYMBOLSTART (SYMBOLSTART / [0-9])*) { return symbolNode(s); }
 SYMBOLSTART = [a-zA-Z] / '$' / '_'
