@@ -34,14 +34,14 @@
 
     function blockNode(parsed) {
         return {
-            type: 'block', 
+            type: 'block-stmt', 
             value: parsed.map(arr => arr[1][0])
         };
     }
 
     function fnCallNode(f, args) {
         return {
-            type: 'call', 
+            type: 'call-exp', 
             f:    f,
             args: (args?.length === 0) ? [] : [args[0]].concat(args[1].map(arg => arg[3]))
         };
@@ -95,9 +95,11 @@
 
     function multiFnNode(obj) {
         return {
-            type: 'multifn',
+            type: 'multifn-stmt',
+            name: obj.fname,
             args: obj.args[2].args,
-            body: obj.body
+            body: obj.body,
+            retType: obj.retType
         }
     }
 
@@ -136,14 +138,15 @@
     }
 }
 
-program   = p:((_ statement _)*)                                                               { return programNode(p);                        }
+program   = p:((_ statement _)*)                                                               { return programNode(p);                                 }
 
-statement        = s:(letStatement / multiFnStatement / exprStatement)                         { return statementNode(s);                      }
-exprStatement    = e:expression (_ ';')?                                                       { return exprStatementNode(e);                  }
-letStatement     = 'let' __ name:SYMBOL _ ':' _ type:SYMBOL _ '=' _ val:expression (_ ';')?    { return letNode({ name, type, val });          }                   
-multiFnStatement = 'function' __ fname:SYMBOL _ args:('(' _ multiFnArgs? _ ')') _ body:block   { return multiFnNode({ fname, args, body});     }
-multiFnArgs      = x:multiFnArg xs:((_ ',' _ multiFnArg)*)                                     { return multiFnArgsNode({ x, xs });            }
-multiFnArg       = argName:SYMBOL _ ':' _ argType:SYMBOL                                       { return multiFnArgNode({ argName, argType });  }
+statement        = s:(letStatement / multiFnStatement / exprStatement)                      // { return statementNode(s);                               }
+exprStatement    = e:expression (_ ';')?                                                       { return exprStatementNode(e);                           }
+letStatement     = 'let' __ name:SYMBOL _ ':' _ type:SYMBOL _ '=' _ val:expression (_ ';')?    { return letNode({ name, type, val });                   }                   
+multiFnStatement = 'function' __ fname:SYMBOL _ args:('(' _ multiFnArgs? _ ')') _ ':' _ retType:SYMBOL _ body:block
+                                                                                               { return multiFnNode({ fname, args, retType, body});     }
+multiFnArgs      = x:multiFnArg xs:((_ ',' _ multiFnArg)*)                                     { return multiFnArgsNode({ x, xs });                     }
+multiFnArg       = argName:SYMBOL _ ':' _ argType:SYMBOL                                       { return multiFnArgNode({ argName, argType });           }
 
 expression = equality
 equality   = x:comparison _ pairs:(( ( '!=' / '==' ) _ comparison)*)    { return binaryNode(x, pairs);  }
