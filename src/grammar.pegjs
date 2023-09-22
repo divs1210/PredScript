@@ -58,16 +58,28 @@
         let [op, _, expr] = pairs[0];
         return {type: 'binary-op', left: x, op: op, right: expr};
     }
+
+    function multiFnArgNode(obj) {
+        obj.type = 'multiFnArg';
+        return obj;
+    }
+
+    function multiFnArgsNode(obj) {
+        return {
+            type: 'multiFnArgsNode',
+            args: [obj.x].concat(obj.xs.map(arr => arr[3]))
+        };
+    }
 }
 
 program   = (_ statement _)*
 
 statement        = letStatement / multiFnStatement / exprStatement
 exprStatement    = expression (_ ';')?
-letStatement     = 'let' __ SYMBOL _ '=' _ expression (_ ';')?
-multiFnStatement = 'function' __ SYMBOL _ '(' _ multiFnArgs? _ ')' _ block
-multiFnArgs      = multiFnArg (_ ',' _ multiFnArg)*
-multiFnArg       = SYMBOL _ ':' _ SYMBOL
+letStatement     = 'let' __ SYMBOL _ '=' _ expression (_ ';')?                       
+multiFnStatement = 'function' __ SYMBOL _ '(' _ multiFnArgs? _ ')' _ block           
+multiFnArgs      = x:multiFnArg xs:((_ ',' _ multiFnArg)*)                           { return multiFnArgsNode({ x, xs });           }
+multiFnArg       = argName:SYMBOL _ ':' _ argType:SYMBOL                             { return multiFnArgNode({ argName, argType }); }
 
 expression = equality
 equality   = x:comparison _ pairs:(( ( '!=' / '==' ) _ comparison)*)    { return binaryNode(x, pairs);  }
