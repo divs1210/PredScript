@@ -1,7 +1,7 @@
 {
     const nullNode = {
         type: 'null', 
-        value: 'null'
+        value: null
     };
 
     function numberNode(parsed) {
@@ -39,27 +39,20 @@
         };
     }
 
-    function fnCallNode(f, _args) {
-        let args;
-        if (_args?.length > 0)
-            args = [_args[0]].concat(_args[1].map(arg => arg[3]))
-        else
-            args = [];
-
+    function fnCallNode(f, args) {
         return {
             type: 'call', 
             f:    f,
-            args: args
+            args: (args?.length === 0) ? [] : [args[0]].concat(args[1].map(arg => arg[3]))
         };
     }
 
     function ifNode(cond, then, _else) {
-        let elseNode = _else? _else[3]: null;
         return {
             type: 'if',
             cond: cond,
             then: then,
-            else: elseNode
+            else: _else? _else[3]: null
         };
     }
 
