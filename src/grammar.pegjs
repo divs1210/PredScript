@@ -49,10 +49,10 @@
 
     function ifNode(cond, then, _else) {
         return {
-            type: 'if',
-            cond: cond,
-            then: then,
-            else: _else? _else[3]: null
+            type: 'if-exp',
+            condExp: cond,
+            thenExp: then,
+            elseExp: _else? _else[3]: null
         };
     }
 
