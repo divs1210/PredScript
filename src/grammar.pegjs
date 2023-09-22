@@ -44,19 +44,23 @@
     }
 
     function unaryNode(op, x) {
-        let ret = {op, x};
-        console.log('parsed un:'+JSON.stringify(ret, null, 2));
-        return {type: 'unary-op', value: ret};
+        return {type: 'unary-exp', value: {op, x}};
     }
 
     function binaryNode(x, pairs) {
-        let ret = {x, pairs};
-        
         if (pairs.length === 0)
             return x;
-
-        let [op, _, expr] = pairs[0];
-        return {type: 'binary-op', left: x, op: op, right: expr};
+        
+        let [op, _, p0] = pairs[0];
+        return binaryNode(
+            {
+                type:  'binary-exp',
+                op:    op,
+                left:  x,
+                right: p0
+            },
+            pairs.slice(1)
+        );
     }
 
     function multiFnArgNode(obj) {
@@ -70,6 +74,14 @@
             args: [obj.x].concat(obj.xs.map(arr => arr[3]))
         };
     }
+
+    function multiFnNode(obj) {
+        return {
+            type: 'multiFnNode',
+            args: obj.args[2],
+            body: obj.body
+        }
+    }
 }
 
 program   = (_ statement _)*
@@ -77,9 +89,9 @@ program   = (_ statement _)*
 statement        = letStatement / multiFnStatement / exprStatement
 exprStatement    = expression (_ ';')?
 letStatement     = 'let' __ SYMBOL _ '=' _ expression (_ ';')?                       
-multiFnStatement = 'function' __ SYMBOL _ '(' _ multiFnArgs? _ ')' _ block           
-multiFnArgs      = x:multiFnArg xs:((_ ',' _ multiFnArg)*)                           { return multiFnArgsNode({ x, xs });           }
-multiFnArg       = argName:SYMBOL _ ':' _ argType:SYMBOL                             { return multiFnArgNode({ argName, argType }); }
+multiFnStatement = 'function' __ fname:SYMBOL _ args:('(' _ multiFnArgs? _ ')') _ body:block   { return multiFnNode({ fname, args, body});     }
+multiFnArgs      = x:multiFnArg xs:((_ ',' _ multiFnArg)*)                                     { return multiFnArgsNode({ x, xs });            }
+multiFnArg       = argName:SYMBOL _ ':' _ argType:SYMBOL                                       { return multiFnArgNode({ argName, argType });  }
 
 expression = equality
 equality   = x:comparison _ pairs:(( ( '!=' / '==' ) _ comparison)*)    { return binaryNode(x, pairs);  }
