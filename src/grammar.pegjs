@@ -109,12 +109,26 @@
             varVal:  obj.val
         };
     }
+
+    function exprStatementNode(expr) {
+        return {
+            type: 'expr-stmt',
+            value: expr
+        };
+    }
+
+    function statementNode(stmt) {
+        return {
+            type: 'stmt',
+            value: stmt
+        };
+    }
 }
 
 program   = (_ statement _)*
 
-statement        = letStatement / multiFnStatement / exprStatement
-exprStatement    = expression (_ ';')?
+statement        = s:(letStatement / multiFnStatement / exprStatement)                         { return statementNode(s);                      }
+exprStatement    = e:expression (_ ';')?                                                       { return exprStatementNode(e);                  }
 letStatement     = 'let' __ name:SYMBOL _ ':' _ type:SYMBOL _ '=' _ val:expression (_ ';')?    { return letNode({ name, type, val });          }                   
 multiFnStatement = 'function' __ fname:SYMBOL _ args:('(' _ multiFnArgs? _ ')') _ body:block   { return multiFnNode({ fname, args, body});     }
 multiFnArgs      = x:multiFnArg xs:((_ ',' _ multiFnArg)*)                                     { return multiFnArgsNode({ x, xs });            }
