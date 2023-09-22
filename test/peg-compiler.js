@@ -76,17 +76,17 @@ assert(is(
 // if / else
 // =========
 assert(is(
-    '(_is(TRUE, (_apply(apply, List([isLessThan, List([a, b])]))))? (a): (null))',
+    '(_is(TRUE, (_apply(isLessThan, List([a, b]))))? (a): (null))',
     compileExpr('if (a < b) a')
 ));
 
 assert(is(
-    '(_is(TRUE, (_apply(apply, List([isLessThan, List([a, b])]))))? (a): (b))',
+    '(_is(TRUE, (_apply(isLessThan, List([a, b]))))? (a): (b))',
     compileExpr('if (a < b) { a } else { b }')
 ));
 
 assert(is(
-    '(_is(TRUE, (_apply(apply, List([isLessThan, List([a, b])]))))? (a): ((_is(TRUE, (_apply(apply, List([isLessThan, List([b, c])]))))? (b): (c))))',
+    '(_is(TRUE, (_apply(isLessThan, List([a, b]))))? (a): ((_is(TRUE, (_apply(isLessThan, List([b, c]))))? (b): (c))))',
     compileExpr(`
         if (a < b) a 
         else if (b < c) b 
@@ -104,7 +104,7 @@ Implement(
     inc,
     List([isReal]),
     isReal,
-    (x) => _apply(apply, List([add, List([x, Real(1)])]))
+    (x) => _apply(add, List([x, Real(1)]))
 );
     `.trim(),
     compileExpr(`

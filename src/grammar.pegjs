@@ -35,7 +35,7 @@
     function blockNode(parsed) {
         return {
             type: 'block-stmt', 
-            value: parsed.map(arr => arr[1][0])
+            value: parsed.map(arr => arr[1])
         };
     }
 
@@ -43,7 +43,7 @@
         return {
             type: 'call-exp', 
             f:    f,
-            args: (args?.length === 0) ? [] : [args[0]].concat(args[1].map(arg => arg[3]))
+            args: (args == null || args.length === 0) ? [] : [args[0]].concat(args[1].map(arg => arg[3]))
         };
     }
 

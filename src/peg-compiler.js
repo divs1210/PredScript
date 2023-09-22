@@ -84,11 +84,11 @@ function compileProgram(node) {
 }
 
 function compileMultiFn(node) {
-    let fName = node.fname;
-    let fReturnType = node.retType;
+    let fName = compileAST(node.name);
+    let fReturnType = compileAST(node.retType);
     let fBody = compileAST(node.body);
-    let argNames = node.args.map((arg) => arg.argName).join(', ');
-    let argTypes = node.args.map((arg) => arg.argType).join(', ');
+    let argNames = node.args.map((arg) => compileAST(arg.argName)).join(', ');
+    let argTypes = node.args.map((arg) => compileAST(arg.argType)).join(', ');
 
     return `
 var ${fName} = ${fName} || MultiFn("${fName}");
@@ -147,13 +147,13 @@ function compile(codeString) {
 }
 
 function compileExpr(codeString) {
-    console.log(`Input:\n${codeString}\n`);
+    // console.log(`Input:\n${codeString}\n`);
 
     let ast = parseExpr(codeString);
-    console.log(`AST:\n${prettify(ast)}\n`);
+    // console.log(`AST:\n${prettify(ast)}\n`);
 
     let jsCodeString = compileAST(ast);
-    console.log(`Compiled:\n${jsCodeString}\n`);
+    // console.log(`Compiled:\n${jsCodeString}\n`);
     
     return jsCodeString;
 }
