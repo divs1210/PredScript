@@ -1,31 +1,42 @@
 {
-    const nullNode = {type: 'null', value: 'null'};
+    const nullNode = {
+        type: 'null', 
+        value: 'null'
+    };
 
     function numberNode(parsed) {
-        let ret = parseFloat(parsed.flat(2).join(''));
-        return {type: 'number', value: ret};
+        return {
+            type: 'number', 
+            value: parseFloat(parsed.flat(2).join(''))
+        };
     }
 
     function boolNode(parsed) {
-        let ret = parsed === 'true'? true : false;
-        return {type: 'bool', value: ret};
+        return {
+            type: 'bool', 
+            value: parsed === 'true'? true : false
+        };
     }
 
     function stringNode(parsed) {
-        let ret = parsed[1].map(x => x[1]).join('');
-        return {type: 'string', value: ret};
+        return {
+            type: 'string', 
+            value: parsed[1].map(x => x[1]).join('')
+        };
     }
 
     function symbolNode(parsed) {
-        let ret = parsed.flat(1).join('');
-        return {type: 'symbol', value: ret};
+        return {
+            type: 'symbol', 
+            value: parsed.flat(1).join('')
+        };
     }
 
     function blockNode(parsed) {
-        console.log('parsed block: '+JSON.stringify(parsed, null, 2));
-        let ret = parsed;
-        console.log('ret: '+ret);
-        return {type: 'block', value: ret};
+        return {
+            type: 'block', 
+            value: parsed.map(arr => arr[1][0])
+        };
     }
 
     function fnCallNode(parsed) {
@@ -44,7 +55,11 @@
     }
 
     function unaryNode(op, x) {
-        return {type: 'unary-exp', value: {op, x}};
+        return {
+            type:  'unary-exp', 
+            op:    op,
+            value: x
+        };
     }
 
     function binaryNode(x, pairs) {

@@ -5,7 +5,7 @@ const { pprint } = require('./util');
 const grammar = fs.readFileSync('src/grammar.pegjs', 'utf8');
 const parse = peg.generate(grammar).parse;
 
-pprint(parse(`-c`));
+pprint(parse(`{a+b;b;c}`));
 
 let parseExpr = null;
 
