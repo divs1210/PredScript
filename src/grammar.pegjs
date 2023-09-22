@@ -2,15 +2,13 @@
     const nullNode = {type: 'null', value: 'null'};
 
     function numberNode(parsed) {
-        // console.log('parsed: '+JSON.stringify(parsed, null, 2));
         let ret = parseFloat(parsed.flat(2).join(''));
-        // console.log('ret: '+ret);
-        return {type: 'string', value: ret};
+        return {type: 'number', value: ret};
     }
 
     function boolNode(parsed) {
         let ret = parsed === 'true'? true : false;
-        return {type: 'string', value: ret};
+        return {type: 'bool', value: ret};
     }
 
     function stringNode(parsed) {
@@ -21,6 +19,20 @@
     function symbolNode(parsed) {
         let ret = parsed.flat(1).join('');
         return {type: 'symbol', value: ret};
+    }
+
+    function blockNode(parsed) {
+        console.log('parsed: '+JSON.stringify(parsed, null, 2));
+        let ret = parsed;
+        console.log('ret: '+ret);
+        return {type: 'block', value: ret};
+    }
+
+    function fnCallNode(parsed) {
+        console.log('parsed: '+JSON.stringify(parsed, null, 2));
+        let ret = parsed;
+        console.log('ret: '+ret);
+        return {type: 'call', value: ret};
     }
 }
 
@@ -44,17 +56,17 @@ unary      = ( '!' / '-' ) _ unary
              / primary
 
 ifExpr     = 'if' _ '(' _ expression _ ')' _ expression (_ 'else' _ expression)?
-fnCall     = primary _ '(' _ (expression (_ ',' _ expression)*)? _ ')'
+fnCall     = c:(primary _ '(' _ (expression (_ ',' _ expression)*)? _ ')')           { return fnCallNode(c); }
 
 primary    = NUMBER / STRING / BOOL / NULL / SYMBOL / block / grouping
-grouping   = '(' _ expression _ ')'
-block      = '{' _ (_ exprStatement / letStatement _)* _ '}'
+grouping   = '(' _ e:expression _ ')'                                                { return e; }
+block      = b:('{' _ (_ exprStatement / letStatement _)* _ '}')                     { return blockNode(b); }
 
-NUMBER      = n:([0-9]+ ('.' [0-9]+)?) { return numberNode(n); }
-BOOL        = b:('true' / 'false') { return boolNode(b); } 
-NULL        = 'null' { return nullNode; }
-STRING      = s:('"' (!'"' .)* '"') { return stringNode(s); }
-SYMBOL      = s:(SYMBOLSTART (SYMBOLSTART / [0-9])*) { return symbolNode(s); }
+NUMBER      = n:([0-9]+ ('.' [0-9]+)?)                         { return numberNode(n); }
+BOOL        = b:('true' / 'false')                             { return boolNode(b);   } 
+NULL        = 'null'                                           { return nullNode;      }
+STRING      = s:('"' (!'"' .)* '"')                            { return stringNode(s); }
+SYMBOL      = s:(SYMBOLSTART (SYMBOLSTART / [0-9])*)           { return symbolNode(s); }
 SYMBOLSTART = [a-zA-Z] / '$' / '_'
 
 _  = __*
