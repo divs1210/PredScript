@@ -1,6 +1,6 @@
 const path = require('node:path'); 
 const fs = require('fs');
-const { compile } = require('./src/compiler');
+const { compile } = require('./src/peg-compiler');
 
 let [_, __, fileName] = process.argv;
 let filePath = path.join(__dirname, fileName);
