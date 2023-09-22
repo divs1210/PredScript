@@ -142,7 +142,7 @@ const spacedSemicolon =
     }));
 
 const _blockExprParser =
-    literalExprParser
+    spacedLiteralParser
     .pipe(combinators.or(binaryExprParser))
     .pipe(combinators.then(spacedSemicolon))
     .pipe(combinators.between(parsers.whitespace()))
@@ -156,7 +156,7 @@ const _blockExprParser =
     }));
 
 const blockExprParser =
-    literalExprParser
+    spacedLiteralParser
     .pipe(combinators.or(binaryExprParser))
     .pipe(combinators.then(spacedSemicolon))
     .pipe(combinators.or(_blockExprParser))
