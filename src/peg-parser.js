@@ -5,7 +5,7 @@ const { pprint } = require('./util');
 const grammar = fs.readFileSync('src/grammar.pegjs', 'utf8');
 const parse = peg.generate(grammar).parse;
 
-// pprint(parse(`if (a < b) a else if (b < c) b else c`));
+pprint(parse(`let a: int = 1`));
 
 let parseExpr = null;
 

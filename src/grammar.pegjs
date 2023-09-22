@@ -100,13 +100,22 @@
             body: obj.body
         }
     }
+
+    function letNode(obj) {
+        return {
+            type:    'let',
+            varName: obj.name,
+            varType: obj.type,
+            varVal:  obj.val
+        };
+    }
 }
 
 program   = (_ statement _)*
 
 statement        = letStatement / multiFnStatement / exprStatement
 exprStatement    = expression (_ ';')?
-letStatement     = 'let' __ SYMBOL _ '=' _ expression (_ ';')?                       
+letStatement     = 'let' __ name:SYMBOL _ ':' _ type:SYMBOL _ '=' _ val:expression (_ ';')?    { return letNode({ name, type, val });          }                   
 multiFnStatement = 'function' __ fname:SYMBOL _ args:('(' _ multiFnArgs? _ ')') _ body:block   { return multiFnNode({ fname, args, body});     }
 multiFnArgs      = x:multiFnArg xs:((_ ',' _ multiFnArg)*)                                     { return multiFnArgsNode({ x, xs });            }
 multiFnArg       = argName:SYMBOL _ ':' _ argType:SYMBOL                                       { return multiFnArgNode({ argName, argType });  }
