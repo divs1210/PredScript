@@ -54,11 +54,13 @@
     }
 
     function ifNode(cond, then, _else) {
-        let _in = {cond, then, _else};
-        console.log('parsed if: '+JSON.stringify(_in, null, 2));
-        let ret = _in;
-        console.log('ret: '+ret);
-        return {type: 'if', value: ret};
+        let elseNode = _else? _else[3]: null;
+        return {
+            type: 'if',
+            cond: cond,
+            then: then,
+            else: elseNode
+        };
     }
 
     function unaryNode(op, x) {
