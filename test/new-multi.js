@@ -1,5 +1,5 @@
 const assert = require('assert/strict');
-const { derive, MultiMethod } = require('../src/new-builtins');
+const { derive, MultiMethod } = require('../src/new-multi');
 const { Map, List, is } = require('immutable');
 const { val } = require('../src/util');
 
@@ -36,7 +36,8 @@ let evenVar = Map({
 
 // multimethod
 // ===========
-let foo = new MultiMethod('foo');
+let _type = obj => obj.get('meta').type;
+let foo = new MultiMethod('foo', _type);
 
 assert.throws(() => {
     foo(intVar, evenVar)
