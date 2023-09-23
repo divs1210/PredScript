@@ -83,7 +83,7 @@ function derive(parent, child) {
 }
 
 function typeDistance(child, ancestor) {
-    if (is(child, ancestor))
+    if (_is(child, ancestor))
         return 0;
 
     let parent = parentOf(child, ancestor);
@@ -161,7 +161,7 @@ class MultiMethod extends Function {
             return this.defaultImpl;
         else if (isNull(nextBestFit))
             return bestFit;
-        else if (!is(
+        else if (!_is(
                     argTypesDistance(argTypes, bestFit.argTypes),
                     argTypesDistance(argTypes, nextBestFit.argTypes)
                 ))
@@ -402,14 +402,48 @@ const str = MultiFn('str');
 ImplementDefault(str, isString, (x) => String('' + val(x)));
 
 
-// // IO
-// // ==
-// function _println(...xs)  {
-//     let strs = xs.map((x) => val(_apply(str, List([x]))));
-//     console.log(strs.join(' '));
-// }
+// Fns
+// ===
+const isFn = MultiFn('isFn');
+setType(isFn, isPred);
 
-// const println = Fn(_println);
+ImplementDefault(isFn, isBool, _ => FALSE);
+Implement(
+    isFn,
+    List([isFn]),
+    isBool,
+    _ => TRUE
+);
+Implement(
+    isFn,
+    List([isMultiFn]),
+    isBool,
+    _ => TRUE
+);
+Implement(
+    isFn,
+    List([isPred]),
+    isBool,
+    _ => TRUE
+);
+
+function Fn(f) {
+    return Obj(f, isFn);
+}
+
+// IO
+// ==
+function _println(...xs)  {
+    let strs = xs.map((x) => val(_apply(str, List([x]))));
+    console.log(strs.join(' '));
+}
+
+const println = Fn(_println);
+
+
+// more types
+// ==========
+const type = Fn(_type);
 
 
 // TODO:
@@ -454,5 +488,10 @@ module.exports = {
     isLessThanEq,
     isGreaterThanEq,
     String,
-    isString
+    isString,
+    str,
+    isFn,
+    Fn,
+    println,
+    type
 };
