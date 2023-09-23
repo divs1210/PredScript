@@ -1,7 +1,7 @@
 const assert = require('assert/strict');
 const { derive, MultiMethod } = require('../src/new-multi');
 const { Map, List, is, fromJS } = require('immutable');
-const { pprint } = require('../src/util');
+const { pprint, val } = require('../src/util');
 
 // types
 // =====
@@ -18,12 +18,17 @@ derive(isInt, isEven);
 
 // vars
 // ====
-let x = Map({
+let realVar = Map({
+    val: 3,
+    meta: Map({type: isReal})
+});
+
+let intVar = Map({
     val: 1,
     meta: Map({type: isInt})
 });
 
-let y = Map({
+let evenVar = Map({
     val: 2,
     meta: Map({type: isEven})
 });
@@ -34,7 +39,7 @@ let y = Map({
 let foo = new MultiMethod('foo');
 
 assert.throws(() => {
-    foo(x, y)
+    foo(intVar, evenVar)
 }, "call default impl when no impls");
 
 
@@ -42,26 +47,32 @@ assert.throws(() => {
 // ==========================
 foo.implementFor(List([isReal, isReal]), (x, y) => {
     return new Map({
-        val: x.get('val') + y.get('val'),
-        meta: Map({type: isReal})
+        val: val(x) + val(y),
+        meta: Map({
+            type: isReal, 
+            impl: 'real, real'
+        })
     });
 });
 
 assert(is(
     Map({
         val: 3,
-        meta: Map({type: isReal})
+        meta: Map({
+            type: isReal, 
+            impl: 'real, real'
+        })
     }),
-    foo(x, y)
-), "(int, even) -> real");
+    foo(intVar, evenVar)
+));
 
 assert.throws(() => {
-    let z = Map({
+    let boolVar = Map({
         val: true,
         meta: Map({type: isBool})
     });
 
-    foo(x, z);
+    foo(intVar, boolVar);
 }, "default called when no matching impl");
 
 
@@ -69,8 +80,11 @@ assert.throws(() => {
 // ========================
 foo.implementFor(List([isInt, isReal]), (x, y) => {
     return Map({
-        val: x.get('val') + y.get('val'),
-        meta: Map({ type: isReal, impl: 'int, real' })
+        val: val(x) + val(y),
+        meta: Map({ 
+            type: isReal, 
+            impl: 'int, real' 
+        })
     });
 });
 
@@ -82,6 +96,29 @@ assert(is(
             impl: 'int, real'
         })
     }),
-    foo(x, y)
+    foo(intVar, evenVar)
 ));
 
+
+// impl foo for (real, int)
+// ========================
+foo.implementFor(List([isReal, isInt]), (x, y) => {
+    return Map({
+        val: val(x) + val(y),
+        meta: Map({ 
+            type: isReal, 
+            impl: 'real, int' 
+        })
+    });
+});
+
+// assert(is(
+//     Map({
+//         val: 4,
+//         meta: Map({
+//             type: isReal,
+//             impl: 'real, int'
+//         })
+//     }),
+//     foo(realVar, intVar)
+// ));
