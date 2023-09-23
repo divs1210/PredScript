@@ -1,5 +1,6 @@
 const { isNull, prettify } = require('./util.js');
 const { Map, Set, is, getIn, setIn, List: _List } = require('immutable');
+const BigNumber = require('bignumber.js');
 
 // objects and types
 // =================
@@ -192,8 +193,8 @@ class MultiMethod extends Function {
 
 // Predicates
 // ==========
-let _isPred = new MultiMethod('isPred');
-let isPred = Obj(_isPred);
+const _isPred = new MultiMethod('isPred');
+const isPred = Obj(_isPred);
 setType(isPred, isPred);
 
 // Any
@@ -202,8 +203,8 @@ setType(isAny, isPred);
 
 // Booleans
 // ========
-let _isBool = Obj((obj) => obj === TRUE || obj === FALSE);
-let isBool = Obj(_isBool, isPred);
+const _isBool = Obj((obj) => obj === TRUE || obj === FALSE);
+const isBool = Obj(_isBool, isPred);
 setType(TRUE, isBool);
 setType(FALSE, isBool);
 
@@ -217,8 +218,28 @@ _isPred.setDefault(isBool, _ => FALSE);
 _isPred.implementFor(
     _List([isPred]),
     isBool,
-    (_) => TRUE
+    _ => TRUE
 );
+
+// List
+// ====
+const _isList = new MultiMethod("isList");
+const isList = Obj(_isList, isPred);
+
+_isList.setDefault(isBool, _ => FALSE);
+_isList.implementFor(
+    _List([isList]),
+    isBool, 
+    _ => true
+);
+
+function List(jsArray) {
+    return Obj(
+        _List(jsArray),
+        isList
+    );
+}
+
 
 // MultiFns
 // ========
@@ -258,32 +279,15 @@ setType(isReal, isPred);
 ImplementDefault(isReal, isBool, _ => FALSE);
 Implement(
     isReal,
-    _List([isReal]),
+    List([isReal]),
     isBool, 
-    (_) => TRUE
+    _ => TRUE
 );
 
 function Real(n) {
-    return Obj(new BigNumber(n), isReal);
-}
-
-// List
-// ====
-const isList = MultiFn("isList");
-setType(isList, isPred);
-
-ImplementDefault(isList, isBool, _ => FALSE);
-Implement(
-    isList,
-    _List([isList]),
-    isBool, 
-    (_) => TRUE
-);
-
-function List(jsArray) {
     return Obj(
-        _List(jsArray),
-        isList
+        new BigNumber(n), 
+        isReal
     );
 }
 
@@ -298,6 +302,55 @@ function _apply(f, args) {
 const apply = MultiFn('apply');
 ImplementDefault(apply, isAny, _apply);
 
+// Arithmetic
+// ==========
+const add = MultiFn('add');
+Implement(
+    add,
+    List([isReal, isReal]),
+    isReal,
+    (x, y) => Real(x.get('val').add(y.get('val')))
+);
+
+const sub = MultiFn('sub');
+Implement(
+    sub,
+    List([isReal, isReal]),
+    isReal,
+    (x, y) => Real(x.get('val').sub(y.get('val')))
+);
+
+const times = MultiFn('times');
+Implement(
+    times,
+    List([isReal, isReal]),
+    isReal,
+    (x, y) => Real(x.get('val').times(y.get('val')))
+);
+
+const divide = MultiFn('divide');
+Implement(
+    divide,
+    List([isReal, isReal]),
+    isReal,
+    (x, y) => Real(x.get('val').div(y.get('val')))
+);
+
+const mod = MultiFn('mod');
+Implement(
+    mod,
+    List([isReal, isReal]),
+    isReal,
+    (x, y) => Real(x.get('val').mod(y.get('val')))
+);
+
+const pow = MultiFn('pow');
+Implement(
+    pow,
+    List([isReal, isReal]),
+    isReal,
+    (x, y) => Real(x.get('val').pow(y.get('val')))
+);
 
 
 // TODO:
@@ -330,5 +383,11 @@ module.exports = {
     List,
     _List,
     apply,
-    _apply
+    _apply,
+    add,
+    sub,
+    times,
+    divide,
+    mod,
+    pow
 };
