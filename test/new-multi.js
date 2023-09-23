@@ -122,3 +122,10 @@ assert(is(
     }),
     foo(realVar, intVar)
 ));
+
+
+// ambiguity
+// =========
+assert.throws(() => {
+    foo(intVar, intVar)
+}, 'ambiguous: (int, real) or (real, int)');
