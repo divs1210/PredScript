@@ -287,6 +287,18 @@ function List(jsArray) {
     );
 }
 
+// Apply
+// =====
+function _apply(f, args) {
+    let jsF = val(f);
+    let jsArgs = val(args);
+    return jsF(...jsArgs);
+}
+
+const apply = MultiFn('apply');
+ImplementDefault(apply, isAny, _apply);
+
+
 
 // TODO:
 // =====
@@ -315,5 +327,8 @@ module.exports = {
     isReal,
     Real,
     isList,
-    List
+    List,
+    _List,
+    apply,
+    _apply
 };
