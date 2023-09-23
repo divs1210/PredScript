@@ -1,6 +1,28 @@
 const { isNull, prettify } = require('./util.js');
 const { Map, Set, is, getIn, setIn, List } = require('immutable');
-const { type } = require('./builtins');
+
+// objects and types
+// =================
+const Obj = (val, type) =>
+      Map({
+          val:  val,
+          meta: Map({
+            type: type || null
+          })
+      });
+
+function val(obj) {
+    return obj.get('val');
+}
+
+const TRUE  = Obj(true);
+const FALSE = Obj(false);
+let isAny   = Obj(_ => TRUE);
+
+function type(obj) {
+    return getIn(obj, ['meta', 'type'], isAny);
+}
+
 
 // type hierarchy
 // ==============
@@ -52,9 +74,6 @@ function derive(parent, child) {
     }
 }
 
-
-// MultiMethods
-// ============
 function typeDistance(child, ancestor) {
     if (is(child, ancestor))
         return 0;
@@ -73,14 +92,15 @@ function absTypeDistance(child, ancestor) {
     );
 }
 
-// `from` is lower in hierarchy than `to`
+
+// MultiMethods
+// ============
 function argTypesDistance(fromArgTypes, toArgTypes) {
     return fromArgTypes
     .zip(toArgTypes)
     .map(([x, y]) => absTypeDistance(x, y))
     .reduce((x, y) => x + y, 0);
 }
-
 
 class MultiMethod extends Function {
     constructor(mName) {
@@ -159,6 +179,25 @@ class MultiMethod extends Function {
         return res;
     }
 }
+
+
+// =====================================
+
+let _isPred = new MultiMethod('isPred');
+let isPred = Obj(_isPred);
+
+let _isBool = Obj((obj) => obj === TRUE || obj === FALSE);
+let isBool = Obj(_isBool, isPred);
+
+_isPred.setDefault((obj) => 
+    obj === isPred ? TRUE : FALSE
+);
+_isPred.implementFor(
+    List([isPred]),
+    isBool,
+    (_) => TRUE
+);
+
 
 
 // TODO:

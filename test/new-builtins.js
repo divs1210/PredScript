@@ -1,5 +1,5 @@
 const assert = require('assert/strict');
-const { derive, MultiMethod } = require('../src/new-multi');
+const { derive, MultiMethod } = require('../src/new-builtins');
 const { Map, List, is } = require('immutable');
 const { val } = require('../src/util');
 
