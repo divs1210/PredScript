@@ -107,8 +107,8 @@ class MultiMethod extends Function {
         this.defaultImpl = { f };
     }
 
-    implementFor(argTypes, f) {
-        this.impls = this.impls.push({argTypes, f});
+    implementFor(argTypes, retType, f) {
+        this.impls = this.impls.push({argTypes, retType, f});
     }
 
     matchingImpls(argTypes) {

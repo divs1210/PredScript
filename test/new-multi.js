@@ -45,7 +45,10 @@ assert.throws(() => {
 
 // implement for (real, real)
 // ==========================
-foo.implementFor(List([isReal, isReal]), (x, y) => {
+foo.implementFor(List(
+    [isReal, isReal]),
+    isReal,
+    (x, y) => {
     return new Map({
         val: val(x) + val(y),
         meta: Map({
@@ -78,7 +81,10 @@ assert.throws(() => {
 
 // impl foo for (int, real)
 // ========================
-foo.implementFor(List([isInt, isReal]), (x, y) => {
+foo.implementFor(List(
+    [isInt, isReal]), 
+    isReal,
+    (x, y) => {
     return Map({
         val: val(x) + val(y),
         meta: Map({ 
@@ -102,7 +108,10 @@ assert(is(
 
 // impl foo for (real, int)
 // ========================
-foo.implementFor(List([isReal, isInt]), (x, y) => {
+foo.implementFor(List(
+    [isReal, isInt]), 
+    isReal,
+    (x, y) => {
     return Map({
         val: val(x) + val(y),
         meta: Map({ 
