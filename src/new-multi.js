@@ -95,8 +95,8 @@ class MultiMethod extends Function {
         let mostSpecificImpl;
         while(mostSpecificTypes.every(t => !isNull(t))) {
             for(let i = 0; i < mostSpecificTypes.size; i++) {
-                let t = mostSpecificTypes[i];
-                mostSpecificImpl = matchingImpls.find(impl => is(t, impl.argTypes[i]));
+                let t = mostSpecificTypes.get(i);
+                mostSpecificImpl = matchingImpls.find(impl => is(t, impl.argTypes.get(i)));
 
                 if(!isNull(mostSpecificImpl))
                     return mostSpecificImpl;
@@ -118,43 +118,6 @@ class MultiMethod extends Function {
     }
 }
 
-// test
-// let isReal = {name: 'real'};
-// let isInt  = {name: 'int'};
-// let isEven = {name: 'even'};
-
-// derive(isReal, isInt);
-// derive(isInt, isEven);
-
-// let x = Map({
-//     val: 1,
-//     meta: Map({type: isInt})
-// });
-
-// let y = Map({
-//     val: 2,
-//     meta: Map({type: isEven})
-// });
-
-
-// // multimethod
-// let foo = new MultiMethod('foo');
-
-// // check default impl
-// // pprint('default:');
-// // foo(x, y);
-
-// // implement
-// foo.implementFor(List([isReal, isReal]), (x, y) => {
-//     return new Map({
-//         val: x.get('val') + y.get('val'),
-//         meta: Map({type: isReal})
-//     });
-// });
-
-// // check dispatch
-// pprint('For int, even:');
-// pprint(foo(x, y));
 
 module.exports = {
     parentOf,
