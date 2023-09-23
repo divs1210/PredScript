@@ -128,8 +128,8 @@ class MultiMethod extends Function {
         return self;
     }
 
-    setDefault(f) {
-        this.defaultImpl = { f };
+    setDefault(retType, f) {
+        this.defaultImpl = { retType, f };
     }
 
     implementFor(argTypes, retType, f) {
@@ -213,6 +213,7 @@ function Bool(b) {
 
 // Predicates continued
 // ====================
+_isPred.setDefault(isBool, _ => FALSE);
 _isPred.implementFor(
     List([isPred]),
     isBool,
@@ -224,7 +225,7 @@ _isPred.implementFor(
 const _isReal = new MultiMethod("isReal");
 const isReal = Obj(_isReal, isPred);
 
-_isReal.setDefault((_) => FALSE);
+_isReal.setDefault(isBool, _ => FALSE);
 _isReal.implementFor(
     List([isReal]),
     isBool, 

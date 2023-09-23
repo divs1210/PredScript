@@ -20,17 +20,17 @@ derive(isInt, isEven);
 // ====
 let realVar = Map({
     val: 3,
-    meta: Map({type: isReal})
+    meta: {type: isReal}
 });
 
 let intVar = Map({
     val: 1,
-    meta: Map({type: isInt})
+    meta: {type: isInt}
 });
 
 let evenVar = Map({
     val: 2,
-    meta: Map({type: isEven})
+    meta: {type: isEven}
 });
 
 
@@ -51,28 +51,22 @@ foo.implementFor(List(
     (x, y) => {
     return new Map({
         val: val(x) + val(y),
-        meta: Map({
+        meta: {
             type: isReal, 
             impl: 'real, real'
-        })
+        }
     });
 });
 
 assert(is(
-    Map({
-        val: 3,
-        meta: Map({
-            type: isReal, 
-            impl: 'real, real'
-        })
-    }),
-    foo(intVar, evenVar)
+    'real, real',
+    foo(intVar, evenVar).get('meta').impl
 ));
 
 assert.throws(() => {
     let boolVar = Map({
         val: true,
-        meta: Map({type: isBool})
+        meta: { type: isBool }
     });
 
     foo(intVar, boolVar);
@@ -87,22 +81,16 @@ foo.implementFor(List(
     (x, y) => {
     return Map({
         val: val(x) + val(y),
-        meta: Map({ 
+        meta: { 
             type: isReal, 
             impl: 'int, real' 
-        })
+        }
     });
 });
 
 assert(is(
-    Map({
-        val: 3,
-        meta: Map({
-            type: isReal,
-            impl: 'int, real'
-        })
-    }),
-    foo(intVar, evenVar)
+    'int, real',
+    foo(intVar, evenVar).get('meta').impl
 ));
 
 
@@ -114,22 +102,16 @@ foo.implementFor(List(
     (x, y) => {
     return Map({
         val: val(x) + val(y),
-        meta: Map({ 
+        meta: { 
             type: isReal, 
             impl: 'real, int' 
-        })
+        }
     });
 });
 
 assert(is(
-    Map({
-        val: 4,
-        meta: Map({
-            type: isReal,
-            impl: 'real, int'
-        })
-    }),
-    foo(realVar, intVar)
+    'real, int',
+    foo(realVar, intVar).get('meta').impl
 ));
 
 
