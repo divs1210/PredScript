@@ -70,7 +70,7 @@ function typeDistance(child, ancestor) {
     return 1 + typeDistance(parent, ancestor);
 }
 
-// from is lower in hierarchy that to
+// `from` is lower in hierarchy than `to`
 function argTypesDistance(fromArgTypes, toArgTypes) {
     return fromArgTypes
     .zip(toArgTypes)
@@ -122,14 +122,29 @@ class MultiMethod extends Function {
     }
 
     implementationFor(argTypes) {
-        let pq = new PriorityQueue((x, y) => 
+        let pq = new PriorityQueue((x, y) =>
             compareArgTypes(argTypes, x.argTypes, y.argTypes)
         );
+
+        // 
 
         for (let impl of this.matchingImpls(argTypes))
             pq.enqueue(impl);
         
-        return pq.dequeue() || this.defaultImpl;
+        let bestFit = pq.dequeue();
+        let nextBestFit = pq.dequeue();
+
+        if(isNull(bestFit))
+            return this.defaultImpl;
+        else if (isNull(nextBestFit))
+            return bestFit;
+        else if (!is(
+                    argTypesDistance(argTypes, bestFit.argTypes),
+                    argTypesDistance(argTypes, nextBestFit.argTypes)
+                ))
+            return bestFit;
+        else
+            throw new Error(`Ambiguous call to MultiMethod ${this.mName} with args types: ${prettify(argTypes)}`);
     }
 
     __call__(...args) {
