@@ -1,5 +1,6 @@
 const { isNull, prettify } = require('./util.js');
 const { Map, Set, is, getIn, setIn, List } = require('immutable');
+const { type } = require('./builtins');
 
 // type hierarchy
 // ==============
@@ -54,10 +55,6 @@ function derive(parent, child) {
 
 // MultiMethods
 // ============
-function type(obj) {
-    return getIn(obj, ['meta', 'type']);
-}
-
 function typeDistance(child, ancestor) {
     if (is(child, ancestor))
         return 0;
@@ -146,15 +143,23 @@ class MultiMethod extends Function {
 
     __call__(...args) {
         let impl = this.implementationFor(List(args).map(type));
-        return impl.f(...args);
+        let retType = impl.retType;
+        let res = impl.f(...args);
+        let resType = type(res);
+
+        if (!isA(retType, resType))
+            throw new Error(
+                `MultiMethod ${this.mName} returned a result of the wrong type!`
+                + `\nexpected: ${prettify(retType)}`
+                + `\n  actual: ${prettify(resType)}`);
+
+        return res;
     }
 }
 
 
 // TODO:
 // =====
-// * multimethods should accept a return type
-// * multimethods should check the return type before returning
 // * switch builtins to use new-multi
 // * memoize implementationFor
 
