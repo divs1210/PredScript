@@ -360,7 +360,7 @@ Implement(
     is,
     List([isReal, isReal]),
     isBool,
-    (x, y) => x.eq(y)
+    (x, y) => Bool(x.get('val').eq(y.get('val')))
 );
 
 const isLessThanEq = MultiFn('isLessThanEq');
@@ -380,21 +380,26 @@ Implement(
 );
 
 
-// // Strings
-// // =======
-// const _isString = new MultiMethod("_isString", (x) => type(x));
-// const isString = Obj(_isString, Map({type: isPred}));
+// Strings
+// =======
+const isString = MultiFn("isString");
+setType(isString, isPred);
 
-// _isString.implement(isString, (_) => true);
-// _isString.setDefault((_) => false);
+ImplementDefault(isString, isBool, _ => FALSE);
+Implement(
+    isString,
+    List([isString]), 
+    isBool,
+    _ => TRUE
+);
 
-// function String(s) {
-//     return Obj(s, Map({type: isString}));
-// }
+function String(s) {
+    return Obj(s, isString);
+}
 
-// // toString
-// const str = MultiFn('str');
-// ImplementDefault(str, (x) => String('' + val(x)));
+// toString
+const str = MultiFn('str');
+ImplementDefault(str, isString, (x) => String('' + val(x)));
 
 
 // // IO
@@ -447,5 +452,7 @@ module.exports = {
     is,
     _is,
     isLessThanEq,
-    isGreaterThanEq
+    isGreaterThanEq,
+    String,
+    isString
 };
