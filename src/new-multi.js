@@ -1,5 +1,5 @@
-const {NotFound, isNull} = require('./util.js');
-const {List, Map, Set, is, getIn, setIn} = require('immutable');
+const { isNull, prettify } = require('./util.js');
+const { Map, Set, is, getIn, setIn, List } = require('immutable');
 
 // type hierarchy
 // ==============
@@ -10,7 +10,7 @@ let hierarchy = Map({
 });
 
 function parentOf(child) {
-    return getIn(hierarchy, ['parents', child], NotFound);
+    return getIn(hierarchy, ['parents', child], null);
 }
 
 function ancestorsOf(child) {
@@ -51,8 +51,13 @@ function derive(parent, child) {
     }
 }
 
+
 // MultiMethods
 // ============
+function type(obj) {
+    return getIn(obj, ['meta', 'type']);
+}
+
 class MultiMethod {
     constructor(name) {
         // hack to make objects callable:
@@ -62,25 +67,33 @@ class MultiMethod {
         this.__self__ = self;
 
         self.name = name;
-        self.impls = Map();
-        
-        return self;
-    }
+        self.impls = List();
+        self.defaultImplementation = (...args) => {
+            throw new Error(`MultiMethod ${name} not defined for args: ${prettify(args)}`);
+        }
 
-    implement(argTypes, impl) {
+        return self;
     }
 
     setDefault(impl) {
         this.defaultImplementation = impl;
     }
 
-    implementation(argTypes) {
-        let impl = null;
+    implementFor(argTypes, f) {
+        this.impls = this.impls.push({argTypes, f});
+    }
+
+    implementationFor(argTypes) {
+        
+        
         return !isNull(impl)?
             impl :
             this.defaultImplementation;
     }
+
     __call__(...args) {
+        let impl = this.implementationFor(args.map(type));
+        return impl.f(...args);
     }
 }
 
