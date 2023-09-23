@@ -27,8 +27,6 @@ Implement(
     }
 );
 
-console.log(_apply(fact, List([Real(5)])).get('val').toNumber());
-
 assert(is(
     120,
     _apply(fact, List([Real(5)])).get('val').toNumber()

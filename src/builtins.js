@@ -342,5 +342,6 @@ module.exports = {
     isFn,
     Fn,
     println,
-    type
+    type,
+    _type
 };

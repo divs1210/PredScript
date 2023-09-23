@@ -32,11 +32,11 @@ assert(_is(isList, _type(List([1]))));
 // apply
 // =====
 assert(_is(
-    Real(3),
+    3,
     _apply(add, List([
         Real(1),
         Real(2)
-    ]))
+    ])).get('val').toNumber()
 ));
 
 Implement(
@@ -51,7 +51,7 @@ Implement(
     }
 );
 assert(_is(
-    Real(12),
+    12,
     _apply(
         apply, 
         List([
@@ -62,7 +62,7 @@ assert(_is(
             ]),
             Real(2)
         ])
-    )
+    ).get('val').toNumber()
 ));
 
 
@@ -79,26 +79,26 @@ Implement(
     )
 );
 assert(_is(
-    Real(2),
-    _apply(inc, List([Real(1)]))
+    2,
+    _apply(inc, List([Real(1)])).get('val').toNumber()
 ));
 
 
 // Arithmetic
 // ==========
 assert(_is(
-    Real(3),
-    _apply(add, List([Real(1), Real(2)]))
+    3,
+    _apply(add, List([Real(1), Real(2)])).get('val').toNumber()
 ));
 
 assert(_is(
-    Real(-1),
-    _apply(sub, List([Real(1), Real(2)]))
+    -1,
+    _apply(sub, List([Real(1), Real(2)])).get('val').toNumber()
 ));
 
 assert(_is(
-    Real(6),
-    _apply(times, List([Real(2), Real(3)]))
+    6,
+    _apply(times, List([Real(2), Real(3)])).get('val').toNumber()
 ));
 
 
@@ -107,7 +107,7 @@ assert(_is(
 assert(isPred, isBool);
 assert(_is(
     isBool,
-    type(TRUE)
+    _type(TRUE)
 ));
 
 
