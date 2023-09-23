@@ -29,6 +29,7 @@ function setType(obj, type) {
     obj.get('meta').type = type;
 }
 
+// =============================================================
 
 // type hierarchy
 // ==============
@@ -98,6 +99,7 @@ function absTypeDistance(child, ancestor) {
     );
 }
 
+// =================================================================
 
 // MultiMethods
 // ============
@@ -186,6 +188,7 @@ class MultiMethod extends Function {
     }
 }
 
+// =====================================================
 
 // Predicates
 // ==========
@@ -229,10 +232,7 @@ _isReal.implementFor(
 );
 
 function Real(n) {
-    return Obj(
-        new BigNumber(n),
-        isReal
-    );
+    return Obj(new BigNumber(n), isReal);
 }
 
 
