@@ -1,7 +1,7 @@
 const assert = require('assert/strict');
-const { derive, MultiMethod, isA } = require('../src/new-multi');
-const { Map, List, is, fromJS } = require('immutable');
-const { pprint, val } = require('../src/util');
+const { derive, MultiMethod } = require('../src/new-multi');
+const { Map, List, is } = require('immutable');
+const { val } = require('../src/util');
 
 // types
 // =====
@@ -124,8 +124,8 @@ assert(is(
 ));
 
 
-// ambiguity
-// =========
+// throw on ambiguity
+// ==================
 assert.throws(() => {
     foo(intVar, intVar)
 }, 'ambiguous: (int, real) or (real, int)');

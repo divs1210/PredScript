@@ -1,6 +1,5 @@
-const { isNull, prettify, pprint } = require('./util.js');
+const { isNull, prettify } = require('./util.js');
 const { Map, Set, is, getIn, setIn, List } = require('immutable');
-const { PriorityQueue } = require('@datastructures-js/priority-queue');
 
 // type hierarchy
 // ==============
@@ -70,20 +69,21 @@ function typeDistance(child, ancestor) {
     return 1 + typeDistance(parent, ancestor);
 }
 
+function absTypeDistance(child, ancestor) {
+    return Math.min(
+        typeDistance(child, ancestor),
+        typeDistance(ancestor, child)
+    );
+}
+
 // `from` is lower in hierarchy than `to`
 function argTypesDistance(fromArgTypes, toArgTypes) {
     return fromArgTypes
     .zip(toArgTypes)
-    .map(([x, y]) => typeDistance(x, y))
+    .map(([x, y]) => absTypeDistance(x, y))
     .reduce((x, y) => x + y, 0);
 }
 
-function compareArgTypes(exactArgTypes, argTypes1, argTypes2) {
-    let d1 = argTypesDistance(exactArgTypes, argTypes1);
-    let d2 = argTypesDistance(exactArgTypes, argTypes2);
-
-    return (d1 < d2)? d1 : (d1 == d2 ? 0 : 1);
-}
 
 class MultiMethod extends Function {
     constructor(mName) {
@@ -122,17 +122,14 @@ class MultiMethod extends Function {
     }
 
     implementationFor(argTypes) {
-        let pq = new PriorityQueue((x, y) =>
-            compareArgTypes(argTypes, x.argTypes, y.argTypes)
-        );
+        let matchingImpls = this.matchingImpls(argTypes);
 
-        // 
+        if(matchingImpls.isEmpty())
+            return this.defaultImpl;
 
-        for (let impl of this.matchingImpls(argTypes))
-            pq.enqueue(impl);
-        
-        let bestFit = pq.dequeue();
-        let nextBestFit = pq.dequeue();
+        let sorted = matchingImpls.sortBy(impl => argTypesDistance(argTypes, impl.argTypes));
+        let bestFit = sorted.get(0);
+        let nextBestFit = sorted.get(1);
 
         if(isNull(bestFit))
             return this.defaultImpl;
