@@ -220,41 +220,6 @@ _isPred.implementFor(
     (_) => TRUE
 );
 
-// Numbers
-// =======
-const _isReal = new MultiMethod("isReal");
-const isReal = Obj(_isReal, isPred);
-
-_isReal.setDefault(isBool, _ => FALSE);
-_isReal.implementFor(
-    _List([isReal]),
-    isBool, 
-    (_) => TRUE
-);
-
-function Real(n) {
-    return Obj(new BigNumber(n), isReal);
-}
-
-// List
-// ====
-const _isList = new MultiMethod("isList");
-const isList = Obj(_isList, isPred);
-
-_isList.setDefault(isBool, _ => FALSE);
-_isList.implementFor(
-    _List([isList]),
-    isBool,
-    (_) => TRUE
-);
-
-function List(jsArray) {
-    return Obj(
-        _List(jsArray),
-        isList
-    );
-}
-
 // MultiFns
 // ========
 const _isMultiFn = new MultiMethod("isMultiFn");
@@ -285,6 +250,43 @@ function ImplementDefault(multi, retType, f) {
     jsMulti.setDefault(retType, f);
 }
 
+// Numbers
+// =======
+const isReal = MultiFn("isReal");
+setType(isReal, isPred);
+
+ImplementDefault(isReal, isBool, _ => FALSE);
+Implement(
+    isReal,
+    _List([isReal]),
+    isBool, 
+    (_) => TRUE
+);
+
+function Real(n) {
+    return Obj(new BigNumber(n), isReal);
+}
+
+// List
+// ====
+const isList = MultiFn("isList");
+setType(isList, isPred);
+
+ImplementDefault(isList, isBool, _ => FALSE);
+Implement(
+    isList,
+    _List([isList]),
+    isBool, 
+    (_) => TRUE
+);
+
+function List(jsArray) {
+    return Obj(
+        _List(jsArray),
+        isList
+    );
+}
+
 
 // TODO:
 // =====
@@ -299,6 +301,9 @@ module.exports = {
     derive,
     isA,
     MultiMethod,
+    MultiFn,
+    Implement,
+    ImplementDefault,
     Obj,
     val,
     isAny, 
