@@ -147,14 +147,6 @@ class MultiMethod extends Function {
         let impl = this.implementationFor(
             List(args).map(arg => this.getType(arg)));
 
-        // let retType = impl.retType;
-        // let resType = _type(res);
-        // if (!isA(retType, resType))
-        //     throw new Error(
-        //         `MultiMethod ${this.mName} returned a result of the wrong type!`
-        //         + `\nexpected: ${prettify(retType)}`
-        //         + `\n  actual: ${prettify(resType)}`);
-
         return impl.f(...args);
     }
 }
