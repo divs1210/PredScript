@@ -151,6 +151,13 @@ class MultiMethod extends Function {
 }
 
 
+// TODO:
+// =====
+// * multimethods should accept a return type
+// * multimethods should check the return type before returning
+// * switch builtins to use new-multi
+
+
 module.exports = {
     parentOf,
     ancestorsOf,
