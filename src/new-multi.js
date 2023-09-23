@@ -84,8 +84,28 @@ class MultiMethod {
     }
 
     implementationFor(argTypes) {
-        
-        
+        let matchingImpls = this.impls;
+        for (let i = 0; i < argTypes.length; i++) {
+            let t = argTypes.get(i);
+            matchingImpls = matchingImpls.filter(impl => isA(impl.argTypes[i], t));
+        }
+
+        // now filtered is a list of matching impls
+        // find impl with lowest types in the hierarchy
+        let mostSpecificTypes = argTypes;
+        let mostSpecificImpl;
+        while(mostSpecificTypes.every(arg => !isNull(arg))) {
+            for(let i = 0; i < mostSpecificTypes.length; i++) {
+                let t = mostSpecificTypes[i];
+                mostSpecificImpl = matchingImpls.find(impl => is(t, impl.argTypes[i]));
+
+                if(!isNull(mostSpecificImpl))
+                    return mostSpecificImpl;
+            }
+
+            mostSpecificTypes = mostSpecificTypes.map(parentOf);
+        }
+
         return !isNull(impl)?
             impl :
             this.defaultImplementation;
