@@ -1,5 +1,5 @@
 const { isNull, prettify } = require('./util.js');
-const { Map, Set, is, getIn, setIn, List } = require('immutable');
+const { Map, Set, is, getIn, setIn, List: _List } = require('immutable');
 
 // objects and types
 // =================
@@ -119,7 +119,7 @@ class MultiMethod extends Function {
         this.__self__ = self;
 
         self.mName = mName;
-        self.impls = List();
+        self.impls = _List();
         self.defaultImpl = {};
         self.defaultImpl.f = (...args) => {
             throw new Error(`MultiMethod ${mName} not defined for args: ${prettify(args)}`);
@@ -173,7 +173,7 @@ class MultiMethod extends Function {
     }
 
     __call__(...args) {
-        let impl = this.implementationFor(List(args).map(_type));
+        let impl = this.implementationFor(_List(args).map(_type));
         let retType = impl.retType;
         let res = impl.f(...args);
         let resType = _type(res);
@@ -215,7 +215,7 @@ function Bool(b) {
 // ====================
 _isPred.setDefault(isBool, _ => FALSE);
 _isPred.implementFor(
-    List([isPred]),
+    _List([isPred]),
     isBool,
     (_) => TRUE
 );
@@ -227,7 +227,7 @@ const isReal = Obj(_isReal, isPred);
 
 _isReal.setDefault(isBool, _ => FALSE);
 _isReal.implementFor(
-    List([isReal]),
+    _List([isReal]),
     isBool, 
     (_) => TRUE
 );
@@ -235,6 +235,27 @@ _isReal.implementFor(
 function Real(n) {
     return Obj(new BigNumber(n), isReal);
 }
+
+
+// List
+// ====
+const _isList = new MultiMethod("isList");
+const isList = Obj(_isList, isPred);
+
+_isList.setDefault(isBool, _ => FALSE);
+_isList.implementFor(
+    _List([isList]),
+    isBool,
+    (_) => TRUE
+);
+
+function List(jsArray) {
+    return Obj(
+        _List(jsArray),
+        isList
+    );
+}
+
 
 
 
@@ -260,5 +281,7 @@ module.exports = {
     FALSE,
     isPred,
     isReal,
-    Real
+    Real,
+    isList,
+    List
 };
