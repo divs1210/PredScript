@@ -1,5 +1,5 @@
 const { isNull, prettify } = require('./util.js');
-const { Map, Set, is, getIn, setIn, List: _List } = require('immutable');
+const { Map, Set, getIn, is: _is, setIn, List: _List } = require('immutable');
 const BigNumber = require('bignumber.js');
 
 // objects and types
@@ -53,7 +53,7 @@ function descendentsOf(ancestor) {
 }
 
 function isA(ancestor, descendent) {
-    return is(ancestor, descendent)
+    return _is(ancestor, descendent)
         || ancestorsOf(descendent).has(ancestor);
 }
 
@@ -351,6 +351,52 @@ Implement(
     isReal,
     (x, y) => Real(x.get('val').pow(y.get('val')))
 );
+
+// Logic operators
+// ================
+const is = MultiFn('is');
+ImplementDefault(is, isBool, (x, y) => Bool(_is(x, y)));
+Implement(
+    is,
+    List([isReal, isReal]),
+    isBool,
+    (x, y) => x.eq(y)
+);
+
+// const isLessThanEq = MultiFn('isLessThanEq');
+// Implement(
+//     isLessThanEq, 
+//     List([isReal, isReal]),
+//     isBool,
+//     (x, y) => Bool(val(x) <= val(y))
+// );
+
+
+// // Strings
+// // =======
+// const _isString = new MultiMethod("_isString", (x) => type(x));
+// const isString = Obj(_isString, Map({type: isPred}));
+
+// _isString.implement(isString, (_) => true);
+// _isString.setDefault((_) => false);
+
+// function String(s) {
+//     return Obj(s, Map({type: isString}));
+// }
+
+// // toString
+// const str = MultiFn('str');
+// ImplementDefault(str, (x) => String('' + val(x)));
+
+
+// // IO
+// // ==
+// function _println(...xs)  {
+//     let strs = xs.map((x) => val(_apply(str, List([x]))));
+//     console.log(strs.join(' '));
+// }
+
+// const println = Fn(_println);
 
 
 // TODO:
