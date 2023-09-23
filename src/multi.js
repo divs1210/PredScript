@@ -92,7 +92,8 @@ class MultiMethod extends Function {
         self.impls = List();
         self.defaultImpl = {};
         self.defaultImpl.f = (...args) => {
-            throw new Error(`MultiMethod ${mName} not defined for args: ${prettify(args)}`);
+            throw new Error(`MultiMethod ${mName} not defined for args:` 
+                + `${prettify(args.map(arg => arg.get('val')))}`);
         }
 
         return self;
@@ -138,7 +139,7 @@ class MultiMethod extends Function {
             return bestFit;
         else
             throw new Error(`Ambiguous call to MultiMethod ${this.mName}`
-                + `\nargs types: ${prettify(argTypes)}`
+                + `\nargs types: ${prettify(argTypes.get('val'))}`
                 + `\nmethod 1: ${prettify(bestFit.argTypes)}`
                 + `\nmethod 2: ${prettify(nextBestFit.argTypes)}`);
     }
