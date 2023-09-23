@@ -363,13 +363,21 @@ Implement(
     (x, y) => x.eq(y)
 );
 
-// const isLessThanEq = MultiFn('isLessThanEq');
-// Implement(
-//     isLessThanEq, 
-//     List([isReal, isReal]),
-//     isBool,
-//     (x, y) => Bool(val(x) <= val(y))
-// );
+const isLessThanEq = MultiFn('isLessThanEq');
+Implement(
+    isLessThanEq,
+    List([isReal, isReal]),
+    isBool,
+    (x, y) => Bool(x.get('val').lt(y.get('val')))
+);
+
+const isGreaterThanEq = MultiFn('isGreaterThanEq');
+Implement(
+    isGreaterThanEq,
+    List([isReal, isReal]),
+    isBool,
+    (x, y) => Bool(x.get('val').gt(y.get('val')))
+);
 
 
 // // Strings
@@ -435,5 +443,9 @@ module.exports = {
     times,
     divide,
     mod,
-    pow
+    pow,
+    is,
+    _is,
+    isLessThanEq,
+    isGreaterThanEq
 };
