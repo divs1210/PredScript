@@ -23,7 +23,7 @@ function descendentsOf(ancestor) {
 
 function isA(ancestor, descendent) {
     return is(ancestor, descendent)
-        || descendentsOf(ancestor).has(descendent);
+        || ancestorsOf(descendent).has(ancestor);
 }
 
 function derive(parent, child) {
