@@ -140,8 +140,8 @@ class MultiMethod extends Function {
         else
             throw new Error(`Ambiguous call to MultiMethod ${this.mName}`
                 + `\nargs types: ${prettify(argTypes)}`
-                + `\nmethod 1: ${prettify(argTypes)}`
-                + `\nmethod 2: ${prettify(argTypes)}`);
+                + `\nmethod 1: ${prettify(bestFit.argTypes)}`
+                + `\nmethod 2: ${prettify(nextBestFit.argTypes)}`);
     }
 
     __call__(...args) {
