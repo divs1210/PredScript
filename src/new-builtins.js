@@ -6,21 +6,27 @@ const { Map, Set, is, getIn, setIn, List } = require('immutable');
 const Obj = (val, type) =>
       Map({
           val:  val,
-          meta: Map({
+          meta: {
             type: type || null
-          })
+          }
       });
 
 function val(obj) {
     return obj.get('val');
 }
 
-const TRUE  = Obj(true);
-const FALSE = Obj(false);
-let isAny   = Obj(_ => TRUE);
+// primitives
+// ==========
+var TRUE  = Obj(true);
+var FALSE = Obj(false);
+let isAny = Obj(_ => TRUE);
 
-function type(obj) {
-    return getIn(obj, ['meta', 'type'], isAny);
+function _type(obj) {
+    return obj.get('meta').type || isAny;
+}
+
+function setType(obj, type) {
+    obj.get('meta').type = type;
 }
 
 
@@ -165,10 +171,10 @@ class MultiMethod extends Function {
     }
 
     __call__(...args) {
-        let impl = this.implementationFor(List(args).map(type));
+        let impl = this.implementationFor(List(args).map(_type));
         let retType = impl.retType;
         let res = impl.f(...args);
-        let resType = type(res);
+        let resType = _type(res);
 
         if (!isA(retType, resType))
             throw new Error(
@@ -181,22 +187,53 @@ class MultiMethod extends Function {
 }
 
 
-// =====================================
-
+// Predicates
+// ==========
 let _isPred = new MultiMethod('isPred');
 let isPred = Obj(_isPred);
+setType(isPred, isPred);
 
+// Any
+// ===
+setType(isAny, isPred);
+
+// Booleans
+// ========
 let _isBool = Obj((obj) => obj === TRUE || obj === FALSE);
 let isBool = Obj(_isBool, isPred);
+setType(TRUE, isBool);
+setType(FALSE, isBool);
 
-_isPred.setDefault((obj) => 
-    obj === isPred ? TRUE : FALSE
-);
+function Bool(b) {
+    return b === true? TRUE : FALSE;
+}
+
+// Predicates continued
+// ====================
 _isPred.implementFor(
     List([isPred]),
     isBool,
     (_) => TRUE
 );
+
+// Numbers
+// =======
+const _isReal = new MultiMethod("isReal");
+const isReal = Obj(_isReal, isPred);
+
+_isReal.setDefault((_) => FALSE);
+_isReal.implementFor(
+    List([isReal]),
+    isBool, 
+    (_) => TRUE
+);
+
+function Real(n) {
+    return Obj(
+        new BigNumber(n),
+        isReal
+    );
+}
 
 
 
@@ -212,5 +249,15 @@ module.exports = {
     descendentsOf,
     derive,
     isA,
-    MultiMethod
+    MultiMethod,
+    Obj,
+    val,
+    isAny, 
+    isBool,
+    Bool,
+    TRUE,
+    FALSE,
+    isPred,
+    isReal,
+    Real
 };
