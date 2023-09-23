@@ -236,7 +236,6 @@ function Real(n) {
     return Obj(new BigNumber(n), isReal);
 }
 
-
 // List
 // ====
 const _isList = new MultiMethod("isList");
@@ -256,7 +255,35 @@ function List(jsArray) {
     );
 }
 
+// MultiFns
+// ========
+const _isMultiFn = new MultiMethod("isMultiFn");
+const isMultiFn = Obj(_isMultiFn, isPred);
 
+_isMultiFn.setDefault(isBool, _ => FALSE);
+_isMultiFn.implementFor(
+    _List([isMultiFn]),
+    isBool,
+    (_) => TRUE
+);
+
+function MultiFn(name) {
+    return Obj(
+        new MultiMethod(name),
+        isMultiFn
+    );
+}
+
+function Implement(multi, argTypes, retType, f) {
+    let jsMulti = val(multi);
+    let jsArgTypes = val(argTypes);
+    jsMulti.implementFor(jsArgTypes, retType, f);
+}
+
+function ImplementDefault(multi, retType, f) {
+    let jsMulti = val(multi);
+    jsMulti.setDefault(retType, f);
+}
 
 
 // TODO:
