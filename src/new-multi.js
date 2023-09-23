@@ -1,5 +1,6 @@
 const { isNull, prettify, pprint } = require('./util.js');
 const { Map, Set, is, getIn, setIn, List } = require('immutable');
+const { PriorityQueue } = require('@datastructures-js/priority-queue');
 
 // type hierarchy
 // ==============
@@ -58,6 +59,32 @@ function type(obj) {
     return getIn(obj, ['meta', 'type']);
 }
 
+function typeDistance(child, ancestor) {
+    if (is(child, ancestor))
+        return 0;
+
+    let parent = parentOf(child, ancestor);
+    if (isNull(parent))
+        return 100;
+
+    return 1 + typeDistance(parent, ancestor);
+}
+
+// from is lower in hierarchy that to
+function argTypesDistance(fromArgTypes, toArgTypes) {
+    return fromArgTypes
+    .zip(toArgTypes)
+    .map(([x, y]) => typeDistance(x, y))
+    .reduce((x, y) => x + y, 0);
+}
+
+function compareArgTypes(exactArgTypes, argTypes1, argTypes2) {
+    let d1 = argTypesDistance(exactArgTypes, argTypes1);
+    let d2 = argTypesDistance(exactArgTypes, argTypes2);
+
+    return (d1 < d2)? d1 : (d1 == d2 ? 0 : 1);
+}
+
 class MultiMethod extends Function {
     constructor(mName) {
         // hack to make objects callable:
@@ -84,8 +111,25 @@ class MultiMethod extends Function {
         this.impls = this.impls.push({argTypes, f});
     }
 
+    matchingImpls(argTypes) {
+        let s = argTypes.size;
+        return this.impls.filter(impl => {
+            for (let i = 0; i < s; i++)
+                if (!isA(impl.argTypes.get(i), argTypes.get(i)))
+                    return false;
+            return true;
+        });
+    }
+
     implementationFor(argTypes) {
+        let pq = new PriorityQueue((x, y) => 
+            compareArgTypes(argTypes, x.argTypes, y.argTypes)
+        );
+
+        for (let impl of this.matchingImpls(argTypes))
+            pq.enqueue(impl);
         
+        return pq.dequeue() || this.defaultImpl;
     }
 
     __call__(...args) {
