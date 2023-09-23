@@ -108,7 +108,18 @@ function MultiFn(name) {
 function Implement(multi, argTypes, retType, f) {
     let jsMulti = val(multi);
     let jsArgTypes = val(argTypes);
-    jsMulti.implementFor(jsArgTypes, retType, f);
+
+    let checkedF = (...args) => {
+        let res = f(...args);
+        let actualRetType = _type(res);
+
+        if(_is(retType, actualRetType))
+            return res;
+
+        throw new Error(`${jsMulti.mName} returned a value of the wrong type!`);
+    };
+
+    jsMulti.implementFor(jsArgTypes, retType, checkedF);
 }
 
 function ImplementDefault(multi, retType, f) {
