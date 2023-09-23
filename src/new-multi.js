@@ -85,31 +85,7 @@ class MultiMethod extends Function {
     }
 
     implementationFor(argTypes) {
-        let matchingImpls = this.impls;
-        for (let i = 0; i < argTypes.size; i++) {
-            let t = argTypes.get(i);
-            matchingImpls = matchingImpls.filter(impl => isA(impl.argTypes.get(i), t));
-        }
-
-        let mostSpecificTypes = argTypes;
-        let mostSpecificImpl;
-        while(mostSpecificTypes.every(t => !isNull(t))) {
-            for(let i = 0; i < mostSpecificTypes.size; i++) {
-                let t = mostSpecificTypes.get(i);
-                mostSpecificImpl = matchingImpls.find(impl => is(t, impl.argTypes.get(i)));
-
-                if(!isNull(mostSpecificImpl))
-                    return mostSpecificImpl;
-            }
-
-            mostSpecificTypes = mostSpecificTypes.map(parentOf);
-        }
-
-        // mostSpecificImpl = mostSpecificImpl || matchingImpls.get(0);
-
-        return !isNull(mostSpecificImpl)?
-            mostSpecificImpl :
-            this.defaultImpl;
+        
     }
 
     __call__(...args) {

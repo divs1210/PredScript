@@ -112,13 +112,13 @@ foo.implementFor(List([isReal, isInt]), (x, y) => {
     });
 });
 
-// assert(is(
-//     Map({
-//         val: 4,
-//         meta: Map({
-//             type: isReal,
-//             impl: 'real, int'
-//         })
-//     }),
-//     foo(realVar, intVar)
-// ));
+assert(is(
+    Map({
+        val: 4,
+        meta: Map({
+            type: isReal,
+            impl: 'real, int'
+        })
+    }),
+    foo(realVar, intVar)
+));
