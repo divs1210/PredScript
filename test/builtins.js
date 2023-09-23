@@ -1,13 +1,12 @@
 const assert = require('node:assert/strict');
 const {is: _is} = require('immutable');
 const {
-    isPred, type, 
+    isPred, _type, 
     isReal, Real, 
     MultiFn, Implement, _apply, apply,
     add, sub, times, 
-    is, isBool, Bool, isLessThanEq,
-    isList, List, TRUE, FALSE, isAny 
-} = require('../src/builtins.js');
+    is, isBool, isLessThanEq,
+    isList, List, TRUE, FALSE} = require('../src/builtins.js');
 const { val } = require('../src/util.js');
 
 
@@ -15,20 +14,19 @@ const { val } = require('../src/util.js');
 // ==========
 let _isPred = isPred.get('val');
 assert(_isPred(isPred));
-assert(_is(isPred, type(isPred)));
+assert(_is(isPred, _type(isPred)));
 
 
 // Real Numbers
 // ============
-let _isReal = isReal.get('val');
 assert(_isPred(isReal));
-assert(_is(isReal, type(Real(1))))
+assert(_is(isReal, _type(Real(1))))
 
 
 // List
 // ====
 assert(_isPred(isList));
-assert(_is(isList, type(List([1]))));
+assert(_is(isList, _type(List([1]))));
 
 
 // apply
@@ -106,7 +104,6 @@ assert(_is(
 
 // Boolean
 // =======
-let _isBool = isBool.get('val');
 assert(isPred, isBool);
 assert(_is(
     isBool,

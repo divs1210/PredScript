@@ -1,5 +1,5 @@
-const {NotFound, isNull} = require('./util.js');
-const {List, Map, Set, is, getIn, setIn} = require('immutable');
+const { is, getIn, Set, setIn, Map, List } = require("immutable");
+const { isNull, prettify } = require("./util");
 
 // type hierarchy
 // ==============
@@ -10,7 +10,7 @@ let hierarchy = Map({
 });
 
 function parentOf(child) {
-    return getIn(hierarchy, ['parents', child], NotFound);
+    return getIn(hierarchy, ['parents', child], null);
 }
 
 function ancestorsOf(child) {
@@ -28,7 +28,7 @@ function isA(ancestor, descendent) {
 
 function derive(parent, child) {
     // update parent
-    if(is(NotFound, parentOf(child))) {
+    if(isNull(parentOf(child))) {
         hierarchy = setIn(hierarchy, ['parents', child], parent);
     } else {
         throw new Error(`Tried to set new parent for ${child}: ${parent}!`);
@@ -51,58 +51,111 @@ function derive(parent, child) {
     }
 }
 
+function typeDistance(child, ancestor) {
+    if (is(child, ancestor))
+        return 0;
 
-// multimethods
+    let parent = parentOf(child, ancestor);
+    if (isNull(parent))
+        return 100;
+
+    return 1 + typeDistance(parent, ancestor);
+}
+
+function absTypeDistance(child, ancestor) {
+    return Math.min(
+        typeDistance(child, ancestor),
+        typeDistance(ancestor, child)
+    );
+}
+
+
+// MultiMethods
 // ============
+function argTypesDistance(fromArgTypes, toArgTypes) {
+    return fromArgTypes
+    .zip(toArgTypes)
+    .map(([x, y]) => absTypeDistance(x, y))
+    .reduce((x, y) => x + y, 0);
+}
+
 class MultiMethod extends Function {
-    constructor(name, dispatchFn) {
+    constructor(mName, getType) {
         // hack to make objects callable:
         // https://stackoverflow.com/a/40878674/1163490
         super('...args', 'return this.__self__.__call__(...args)');
         var self = this.bind(this);
         this.__self__ = self;
 
-        self.mName = name;
-        self.vTable = Map();
-        self.dispatchFn = dispatchFn;
-        self.defaultImplementation = null;
+        self.mName = mName;
+        self.getType = getType;
+        self.impls = List();
+        self.defaultImpl = {};
+        self.defaultImpl.f = (...args) => {
+            throw new Error(`MultiMethod ${mName} not defined for args: ${prettify(args)}`);
+        }
 
         return self;
     }
 
-    implement(dispatchVal, f) {
-        this.vTable = this.vTable.set(dispatchVal, f);
+    setDefault(retType, f) {
+        this.defaultImpl = { retType, f };
     }
 
-    setDefault(implementation) {
-        this.defaultImplementation = implementation;
+    implementFor(argTypes, retType, f) {
+        this.impls = this.impls.push({argTypes, retType, f});
     }
 
-    implementation(dispatchVal) {
-        // TODO: work with hierarchies better
-        // find the implementation for
-        // lowest common ancestors
-        let dispatchOn = dispatchVal;
-        let impl = this.vTable.get(dispatchOn);
+    matchingImpls(argTypes) {
+        let s = argTypes.size;
+        return this.impls.filter(impl => {
+            for (let i = 0; i < s; i++)
+                if (!isA(impl.argTypes.get(i), argTypes.get(i)))
+                    return false;
+            return true;
+        });
+    }
 
-        while(isNull(impl) && !is(NotFound, dispatchOn)) {
-            dispatchOn = parentOf(dispatchVal);
-            impl = this.vTable.get(dispatchOn);
-        }
+    // TODO: memoize
+    implementationFor(argTypes) {
+        let matchingImpls = this.matchingImpls(argTypes);
 
-        return !isNull(impl)?
-            impl :
-            this.defaultImplementation;
+        if(matchingImpls.isEmpty())
+            return this.defaultImpl;
+
+        let sorted = matchingImpls.sortBy(impl => argTypesDistance(argTypes, impl.argTypes));
+        let bestFit = sorted.get(0);
+        let nextBestFit = sorted.get(1);
+
+        if(isNull(bestFit))
+            return this.defaultImpl;
+        else if (isNull(nextBestFit))
+            return bestFit;
+        else if (!is(
+                    argTypesDistance(argTypes, bestFit.argTypes),
+                    argTypesDistance(argTypes, nextBestFit.argTypes)
+                ))
+            return bestFit;
+        else
+            throw new Error(`Ambiguous call to MultiMethod ${this.mName}`
+                + `\nargs types: ${prettify(argTypes)}`
+                + `\nmethod 1: ${prettify(bestFit.argTypes)}`
+                + `\nmethod 2: ${prettify(nextBestFit.argTypes)}`);
     }
 
     __call__(...args) {
-        let dispatchVal = this.dispatchFn(...args);
-        let impl = this.implementation(dispatchVal);
+        let impl = this.implementationFor(
+            List(args).map(arg => this.getType(arg)));
 
-        if(!isNull(impl))
-            return impl(...args);
+        // let retType = impl.retType;
+        // let resType = _type(res);
+        // if (!isA(retType, resType))
+        //     throw new Error(
+        //         `MultiMethod ${this.mName} returned a result of the wrong type!`
+        //         + `\nexpected: ${prettify(retType)}`
+        //         + `\n  actual: ${prettify(resType)}`);
 
-        throw new Error(`No implementation of ${this.mName} found for dispatch: ${dispatchVal}!`);
+        return impl.f(...args);
     }
 }
 

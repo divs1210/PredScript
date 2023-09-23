@@ -1,6 +1,5 @@
 const assert = require('node:assert/strict');
 const {is} = require('immutable');
-const {isNull} = require('../src/util.js');
 const {
     Real, isReal,
     List,
@@ -10,14 +9,7 @@ const {
 } = require('../src/builtins.js');
 
 
-// (defn [isReal fact]
-//   [[isReal x]]
-//   (if (<= n 1)
-//     1
-//     (* n (fact (- n 1)))))
-// ==========================
-if(isNull(globalThis.fact))
-    globalThis.fact = MultiFn("fact");
+let fact = MultiFn("fact");
 
 Implement(
     fact,
@@ -34,9 +26,10 @@ Implement(
         }
     }
 );
-// ==========================
+
+console.log(_apply(fact, List([Real(5)])).get('val').toNumber());
 
 assert(is(
-    Real(120), 
-    _apply(fact, List([Real(5)]))
+    120,
+    _apply(fact, List([Real(5)])).get('val').toNumber()
 ));

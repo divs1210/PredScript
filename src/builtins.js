@@ -1,89 +1,107 @@
-const {Map, is: _is, getIn, List: _List} = require('immutable');
+const { Map, is: _is, List: _List } = require('immutable');
 const BigNumber = require('bignumber.js');
-const {MultiMethod} = require('./multi.js');
-const { val } = require('./util.js');
+const { MultiMethod } = require('./multi');
 
-// All objects are represented as this
-// ===================================
-const Obj = (val, meta) =>
+// objects and types
+// =================
+const Obj = (val, type) =>
       Map({
           val:  val,
-          meta: meta || Map()
+          meta: {
+            type: type || null
+          }
       });
 
-
-// Forward declarations
-// ====================
-let type;
-
-
-// isPred is the type of types
-// ===========================
-const _isPred = new MultiMethod("_isPred", (x) => type(x));
-const isPred = Obj(_isPred);
-
-_isPred.implement(isPred, (_) => true);
-_isPred.setDefault((_) => false);
-
-
-// `type` is special-cased for isPred
-// ==================================
-type = (x) => _is(isPred, x)?
-    isPred:
-    getIn(x, ['meta', 'type'], null);
-
-
-// Numbers
-// =======
-const _isReal = new MultiMethod("_isReal", (x) => type(x));
-const isReal = Obj(_isReal, Map({type: isPred}));
-
-_isReal.implement(isReal, (_) => true);
-_isReal.setDefault((_) => false);
-
-function Real(n) {
-    return Obj(
-        new BigNumber(n),
-        Map({
-            type: isReal
-        })
-    );
+function val(obj) {
+    return obj.get('val');
 }
+
+
+// primitives
+// ==========
+var TRUE  = Obj(true);
+var FALSE = Obj(false);
+let isAny = Obj(_ => TRUE);
+
+function _type(obj) {
+    return obj.get('meta').type || isAny;
+}
+
+function setType(obj, type) {
+    obj.get('meta').type = type;
+}
+
+
+// Predicates
+// ==========
+const _isPred = new MultiMethod('isPred', _type);
+const isPred = Obj(_isPred);
+setType(isPred, isPred);
+
+
+// Any
+// ===
+setType(isAny, isPred);
+
+
+// Booleans
+// ========
+const _isBool = Obj((obj) => obj === TRUE || obj === FALSE);
+const isBool = Obj(_isBool, isPred);
+setType(TRUE, isBool);
+setType(FALSE, isBool);
+
+function Bool(b) {
+    return b === true? TRUE : FALSE;
+}
+
+
+// Predicates continued
+// ====================
+_isPred.setDefault(isBool, _ => FALSE);
+_isPred.implementFor(
+    _List([isPred]),
+    isBool,
+    _ => TRUE
+);
 
 
 // List
 // ====
-const _isList = new MultiMethod("_isList", (x) => type(x));
-const isList = Obj(_isList, Map({type: isPred}));
+const _isList = new MultiMethod("isList", _type);
+const isList = Obj(_isList, isPred);
 
-_isList.implement(isList, (_) => true);
-_isList.setDefault((_) => false);
+_isList.setDefault(isBool, _ => FALSE);
+_isList.implementFor(
+    _List([isList]),
+    isBool, 
+    _ => true
+);
 
 function List(jsArray) {
     return Obj(
         _List(jsArray),
-        Map({
-            type: isList
-        })
+        isList
     );
 }
 
 
-// Polymorphic Top Level Fns
-// =========================
-const _isFn = new MultiMethod("_isFn", (x) => type(x));
-const isFn = Obj(_isFn, Map({type: isPred}));
-const dispatch = (...args) =>
-    _List(args).map((x) => type(x));
+// MultiFns
+// ========
+const _isMultiFn = new MultiMethod("isMultiFn", _type);
+const isMultiFn = Obj(_isMultiFn, isPred);
 
-function Fn(f) {
-    return Obj(f, Map({type: isFn}));
-}
+_isMultiFn.setDefault(isBool, _ => FALSE);
+_isMultiFn.implementFor(
+    _List([isMultiFn]),
+    isBool,
+    (_) => TRUE
+);
 
 function MultiFn(name) {
     return Obj(
-        new MultiMethod(name, dispatch),
-        Map({type: isFn})
+        new MultiMethod(name, _type),
+        isMultiFn
     );
 }
 
@@ -93,22 +111,41 @@ function Implement(multi, argTypes, retType, f) {
 
     let checkedF = (...args) => {
         let res = f(...args);
-        let actualRetType = type(res);
+        let actualRetType = _type(res);
 
         if(_is(retType, actualRetType))
             return res;
 
-        throw new Error(
-            `${jsMulti.mName} was expected to return `
-            + `${retType}, but actually returned ${actualRetType}.`);
+        throw new Error(`${jsMulti.mName} returned a value of the wrong type!`);
     };
-    
-    jsMulti.implement(jsArgTypes, checkedF);
+
+    jsMulti.implementFor(jsArgTypes, retType, checkedF);
 }
 
-function ImplementDefault(multi, f) {
+function ImplementDefault(multi, retType, f) {
     let jsMulti = val(multi);
-    jsMulti.setDefault(f);
+    jsMulti.setDefault(retType, f);
+}
+
+
+// Numbers
+// =======
+const isReal = MultiFn("isReal");
+setType(isReal, isPred);
+
+ImplementDefault(isReal, isBool, _ => FALSE);
+Implement(
+    isReal,
+    List([isReal]),
+    isBool, 
+    _ => TRUE
+);
+
+function Real(n) {
+    return Obj(
+        new BigNumber(n), 
+        isReal
+    );
 }
 
 
@@ -121,7 +158,7 @@ function _apply(f, args) {
 }
 
 const apply = MultiFn('apply');
-ImplementDefault(apply, _apply);
+ImplementDefault(apply, isAny, _apply);
 
 
 // Arithmetic
@@ -150,60 +187,109 @@ Implement(
     (x, y) => Real(x.get('val').times(y.get('val')))
 );
 
+const divide = MultiFn('divide');
+Implement(
+    divide,
+    List([isReal, isReal]),
+    isReal,
+    (x, y) => Real(x.get('val').div(y.get('val')))
+);
 
-// Boolean
-// =======
-const _isBool = new MultiMethod("_isBool", (x) => type(x));
-const isBool = Obj(_isBool, Map({type: isPred}));
+const mod = MultiFn('mod');
+Implement(
+    mod,
+    List([isReal, isReal]),
+    isReal,
+    (x, y) => Real(x.get('val').mod(y.get('val')))
+);
 
-_isBool.implement(isBool, (_) => true);
-_isBool.setDefault((_) => false);
-
-function _Bool(b) {
-    return Obj(b, Map({type: isBool}));
-}
-
-const TRUE = _Bool(true);
-const FALSE = _Bool(false);
-function Bool(b) {
-    if (_is(true, b))
-        return TRUE;
-    else if(_is(false, b))
-        return FALSE;
-    else
-        throw Error(`${b} is not a boolean!`);
-}
+const pow = MultiFn('pow');
+Implement(
+    pow,
+    List([isReal, isReal]),
+    isReal,
+    (x, y) => Real(x.get('val').pow(y.get('val')))
+);
 
 
 // Logic operators
 // ================
 const is = MultiFn('is');
-ImplementDefault(is, (x, y) => Bool(_is(x, y)));
+ImplementDefault(is, isBool, (x, y) => Bool(_is(x, y)));
+Implement(
+    is,
+    List([isReal, isReal]),
+    isBool,
+    (x, y) => Bool(x.get('val').eq(y.get('val')))
+);
 
 const isLessThanEq = MultiFn('isLessThanEq');
 Implement(
-    isLessThanEq, 
+    isLessThanEq,
     List([isReal, isReal]),
     isBool,
-    (x, y) => Bool(val(x) <= val(y))
+    (x, y) => Bool(x.get('val').lte(y.get('val')))
+);
+
+const isGreaterThanEq = MultiFn('isGreaterThanEq');
+Implement(
+    isGreaterThanEq,
+    List([isReal, isReal]),
+    isBool,
+    (x, y) => Bool(x.get('val').gte(y.get('val')))
 );
 
 
 // Strings
 // =======
-const _isString = new MultiMethod("_isString", (x) => type(x));
-const isString = Obj(_isString, Map({type: isPred}));
+const isString = MultiFn("isString");
+setType(isString, isPred);
 
-_isString.implement(isString, (_) => true);
-_isString.setDefault((_) => false);
+ImplementDefault(isString, isBool, _ => FALSE);
+Implement(
+    isString,
+    List([isString]), 
+    isBool,
+    _ => TRUE
+);
 
 function String(s) {
-    return Obj(s, Map({type: isString}));
+    return Obj(s, isString);
 }
 
 // toString
 const str = MultiFn('str');
-ImplementDefault(str, (x) => String('' + val(x)));
+ImplementDefault(str, isString, (x) => String('' + val(x)));
+
+
+// Fns
+// ===
+const isFn = MultiFn('isFn');
+setType(isFn, isPred);
+
+ImplementDefault(isFn, isBool, _ => FALSE);
+Implement(
+    isFn,
+    List([isFn]),
+    isBool,
+    _ => TRUE
+);
+Implement(
+    isFn,
+    List([isMultiFn]),
+    isBool,
+    _ => TRUE
+);
+Implement(
+    isFn,
+    List([isPred]),
+    isBool,
+    _ => TRUE
+);
+
+function Fn(f) {
+    return Obj(f, isFn);
+}
 
 
 // IO
@@ -216,33 +302,45 @@ function _println(...xs)  {
 const println = Fn(_println);
 
 
-// exports
-// =======
+// more types
+// ==========
+const type = Fn(_type);
+
+
 module.exports = {
-    type,
-    isPred,
-    Real,
-    isReal,
-    isFn,
-    Fn,
     MultiFn,
     Implement,
-    _apply,
-    apply,
-    add,
-    sub,
-    times,
+    ImplementDefault,
+    Obj,
+    val,
+    isAny, 
     isBool,
     Bool,
     TRUE,
     FALSE,
-    _is,
-    is,
-    isLessThanEq,
+    isPred,
+    isReal,
+    Real,
     isList,
     List,
-    isString,
+    _List,
+    apply,
+    _apply,
+    add,
+    sub,
+    times,
+    divide,
+    mod,
+    pow,
+    is,
+    _is,
+    isLessThanEq,
+    isGreaterThanEq,
     String,
+    isString,
     str,
-    println
+    isFn,
+    Fn,
+    println,
+    type
 };
