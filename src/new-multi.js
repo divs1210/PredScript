@@ -1,4 +1,4 @@
-const { isNull, prettify } = require('./util.js');
+const { isNull, prettify, pprint } = require('./util.js');
 const { Map, Set, is, getIn, setIn, List } = require('immutable');
 
 // type hierarchy
@@ -28,7 +28,7 @@ function isA(ancestor, descendent) {
 
 function derive(parent, child) {
     // update parent
-    if(is(NotFound, parentOf(child))) {
+    if(isNull(parentOf(child))) {
         hierarchy = setIn(hierarchy, ['parents', child], parent);
     } else {
         throw new Error(`Tried to set new parent for ${child}: ${parent}!`);
@@ -58,25 +58,26 @@ function type(obj) {
     return getIn(obj, ['meta', 'type']);
 }
 
-class MultiMethod {
-    constructor(name) {
+class MultiMethod extends Function {
+    constructor(mName) {
         // hack to make objects callable:
         // https://stackoverflow.com/a/40878674/1163490
         super('...args', 'return this.__self__.__call__(...args)');
         var self = this.bind(this);
         this.__self__ = self;
 
-        self.name = name;
+        self.mName = mName;
         self.impls = List();
-        self.defaultImplementation = (...args) => {
-            throw new Error(`MultiMethod ${name} not defined for args: ${prettify(args)}`);
+        self.defaultImpl = {};
+        self.defaultImpl.f = (...args) => {
+            throw new Error(`MultiMethod ${mName} not defined for args: ${prettify(args)}`);
         }
 
         return self;
     }
 
-    setDefault(impl) {
-        this.defaultImplementation = impl;
+    setDefault(f) {
+        this.defaultImpl = { f };
     }
 
     implementFor(argTypes, f) {
@@ -85,17 +86,15 @@ class MultiMethod {
 
     implementationFor(argTypes) {
         let matchingImpls = this.impls;
-        for (let i = 0; i < argTypes.length; i++) {
+        for (let i = 0; i < argTypes.size; i++) {
             let t = argTypes.get(i);
-            matchingImpls = matchingImpls.filter(impl => isA(impl.argTypes[i], t));
+            matchingImpls = matchingImpls.filter(impl => isA(impl.argTypes.get(i), t));
         }
 
-        // now filtered is a list of matching impls
-        // find impl with lowest types in the hierarchy
         let mostSpecificTypes = argTypes;
         let mostSpecificImpl;
-        while(mostSpecificTypes.every(arg => !isNull(arg))) {
-            for(let i = 0; i < mostSpecificTypes.length; i++) {
+        while(mostSpecificTypes.every(t => !isNull(t))) {
+            for(let i = 0; i < mostSpecificTypes.size; i++) {
                 let t = mostSpecificTypes[i];
                 mostSpecificImpl = matchingImpls.find(impl => is(t, impl.argTypes[i]));
 
@@ -106,17 +105,56 @@ class MultiMethod {
             mostSpecificTypes = mostSpecificTypes.map(parentOf);
         }
 
-        return !isNull(impl)?
-            impl :
-            this.defaultImplementation;
+        // mostSpecificImpl = mostSpecificImpl || matchingImpls.get(0);
+
+        return !isNull(mostSpecificImpl)?
+            mostSpecificImpl :
+            this.defaultImpl;
     }
 
     __call__(...args) {
-        let impl = this.implementationFor(args.map(type));
+        let impl = this.implementationFor(List(args).map(type));
         return impl.f(...args);
     }
 }
 
+// test
+// let isReal = {name: 'real'};
+// let isInt  = {name: 'int'};
+// let isEven = {name: 'even'};
+
+// derive(isReal, isInt);
+// derive(isInt, isEven);
+
+// let x = Map({
+//     val: 1,
+//     meta: Map({type: isInt})
+// });
+
+// let y = Map({
+//     val: 2,
+//     meta: Map({type: isEven})
+// });
+
+
+// // multimethod
+// let foo = new MultiMethod('foo');
+
+// // check default impl
+// // pprint('default:');
+// // foo(x, y);
+
+// // implement
+// foo.implementFor(List([isReal, isReal]), (x, y) => {
+//     return new Map({
+//         val: x.get('val') + y.get('val'),
+//         meta: Map({type: isReal})
+//     });
+// });
+
+// // check dispatch
+// pprint('For int, even:');
+// pprint(foo(x, y));
 
 module.exports = {
     parentOf,
