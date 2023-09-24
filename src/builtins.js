@@ -375,6 +375,14 @@ Implement(
     p => String(val(p).mName)
 );
 
+// concat
+Implement(
+    add,
+    List([isString, isString]),
+    isString,
+    (x, y) => String(val(x) + val(y))
+);
+
 
 // Fns
 // ===
