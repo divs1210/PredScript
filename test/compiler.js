@@ -118,6 +118,6 @@ function inc(x: isInt): isInt {
 // Let stmt
 // ========
 assert(is(
-    'let a = 1.2;',
+    'let a = Real(1.2);',
     compileExpr('let a: isReal = 1.2;')
 ));
