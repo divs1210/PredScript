@@ -192,7 +192,7 @@ function Real(n) {
     );
 }
 
-let BigNumberZERO = new BigNumber(0);
+const BigNumberZERO = new BigNumber(0);
 Implement(
     neg,
     List([isReal]),
