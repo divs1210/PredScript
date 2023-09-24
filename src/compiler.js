@@ -128,7 +128,7 @@ function compileAST(ast) {
         case 'program':
             return compileProgram(ast);
         default: {
-            console.error(`Unhandled AST:\n ${prettify(ast)}`);
+            console.error(`Unhandled AST ${prettify(ast.type)} at:\n ${prettify(ast.loc)}`);
             return '????';
         }
     }
