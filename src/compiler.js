@@ -76,7 +76,8 @@ function compileBlockExpression(node) {
 function compileLetStmt(node) {
     let varName = compileAST(node.varName);
     let varVal = compileAST(node.varVal);
-    return `let ${varName} = ${varVal};`;
+    let retType = compileAST(node.varType);
+    return `let ${varName} = as(${retType}, ${varVal});`;
 }
 
 function compileProgram(node) {
