@@ -73,7 +73,7 @@ function compileBlockExpression(node) {
     }
 }
 
-function compiledLetStmt(node) {
+function compileLetStmt(node) {
     let varName = compileAST(node.varName);
     let varVal = compileAST(node.varVal);
     return `let ${varName} = ${varVal};`;
@@ -136,7 +136,7 @@ function compileAST(ast) {
         case 'multifn-stmt':
             return compileMultiFn(ast);
         case 'let-stmt':
-            return compiledLetStmt(ast);
+            return compileLetStmt(ast);
         case 'program':
             return compileProgram(ast);
         default: {
