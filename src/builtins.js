@@ -19,9 +19,12 @@ function val(obj) {
 
 // primitives
 // ==========
-var TRUE  = Obj(true);
-var FALSE = Obj(false);
-let isAny = Obj(_ => TRUE);
+const TRUE  = Obj(true);
+const FALSE = Obj(false);
+
+const _isAny = _ => TRUE;
+_isAny.mName = 'isAny';
+const isAny = Obj(_isAny);
 
 function _type(obj) {
     return obj.get('meta').type || isAny;
@@ -46,7 +49,8 @@ setType(isAny, isPred);
 
 // Booleans
 // ========
-const _isBool = Obj((obj) => obj === TRUE || obj === FALSE);
+const _isBool = (obj) => obj === TRUE || obj === FALSE;
+_isBool.mName = 'isBool';
 const isBool = Obj(_isBool, isPred);
 setType(TRUE, isBool);
 setType(FALSE, isBool);
@@ -116,7 +120,9 @@ function Implement(multi, argTypes, retType, f) {
         if(isA(retType, actualRetType))
             return res;
 
-        throw new Error(`${jsMulti.mName} returned a value of the wrong type!`);
+        throw new Error(`${jsMulti.mName} returned a value of the wrong type!`
+            + `\nexpected: ${val(retType).mName}`
+            + `\n     got: ${val(actualRetType).mName}`);
     };
 
     jsMulti.implementFor(jsArgTypes, retType, checkedF);
@@ -351,11 +357,11 @@ Implement(
     List([isPred]),
     isString,
     p => {
-        if (_is(isAny, p))
-            return String('isAny');
-        else if (_is(isBool, p))
-            return String('isBool');
-        else
+        // if (_is(isAny, p))
+        //     return String('isAny');
+        // else if (_is(isBool, p))
+        //     return String('isBool');
+        // else
             return String(val(p).mName);
     }
 );
