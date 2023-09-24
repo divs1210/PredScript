@@ -126,7 +126,7 @@
 
     function letNode(obj) {
         return {
-            type:    'let',
+            type:    'let-stmt',
             varName: obj.name,
             varType: obj.type,
             varVal:  obj.val,
