@@ -23,10 +23,11 @@ function compileLiteral(node) {
 
 function compileBinaryExpression(node) {
     let opToFn = {
-        '*': 'times',
-        '/': 'div',
-        '+': 'add',
-        '-': 'sub',
+        '*':  'times',
+        '/':  'divide',
+        '+':  'add',
+        '-':  'sub',
+//      '**': 'pow',
         '<' : 'isLessThan',
         '<=': 'isLessThanEq',
         '==': 'is',
