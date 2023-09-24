@@ -90,6 +90,29 @@ function List(jsArray) {
 }
 
 
+// Casting
+// =======
+const ___AS__ = (type, obj) => setType(obj, type);
+
+const _AS = (type, obj) => {
+    let meta = obj.get('meta');
+    let newMeta = {};
+    for(key in meta)
+        newMeta[key] = meta[key];
+    newMeta.type = type;
+    return obj.set('meta', newMeta);
+};
+
+const _as = (pred, obj) => {
+    let t = _type(obj);
+    if(isA(pred, t))
+        return obj;
+    else if (val(pred)(obj) === TRUE)
+        return val(AS)(pred, obj);
+    throw new Error(`Cannot cast ${val(t).mName} to ${val(pred).mName}!`);
+};
+
+
 // MultiFns
 // ========
 const _isMultiFn = new MultiMethod("isMultiFn", _type);
@@ -109,34 +132,13 @@ function MultiFn(name) {
     );
 }
 
-// hard cast
-// needed to implement Implement
-const _AS = (type, obj) => {
-    let meta = obj.get('meta');
-    let newMeta = {};
-    for(key in meta)
-        newMeta[key] = meta[key];
-    newMeta.type = type;
-    return obj.set('meta', newMeta);
-};
-
-
 function Implement(multi, argTypes, retType, f) {
     let jsMulti = val(multi);
     let jsArgTypes = val(argTypes);
 
     let checkedF = (...args) => {
         let res = f(...args);
-        let actualRetType = _type(res);
-
-        if(isA(retType, actualRetType))
-            return res;
-        else if (val(retType)(res) === TRUE)
-            return _AS(retType, res);
-
-        throw new Error(`${jsMulti.mName} returned a value of the wrong type!`
-            + `\nexpected: ${val(retType).mName}`
-            + `\n     got: ${val(actualRetType).mName}`);
+        return _as(retType, res);
     };
 
     jsMulti.implementFor(jsArgTypes, retType, checkedF);
@@ -419,16 +421,9 @@ const println = Fn(_println);
 // ========
 const type = Fn(_type);
 
-const __AS__ = Fn((type, obj) => setType(obj, type));
+const __AS__ = Fn(___AS__);
 const AS = Fn(_AS);
-const as = Fn((pred, obj) => {
-    let t = _type(obj);
-    if(isA(pred, t))
-        return obj;
-    else if (val(pred)(obj) === TRUE)
-        return val(AS)(pred, obj);
-    throw new Error(`Cannot cast ${val(t).mName} to ${val(pred).mName}!`);
-});
+const as = Fn(_as);
 
 const derive = Obj((parent, child) => {
     _derive(parent, child);
