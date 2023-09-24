@@ -411,6 +411,7 @@ const println = Fn(_println);
 // more fns
 // ========
 const type = Fn(_type);
+
 const __AS__ = Fn((type, obj) => setType(obj, type));
 const AS = Fn((type, obj) => {
     let meta = obj.get('meta');
@@ -420,11 +421,12 @@ const AS = Fn((type, obj) => {
     newMeta.type = type;
     return obj.set('meta', newMeta);
 });
-// const as = Fn((type, obj)) => {
-//     let t = _type(obj);
-//     if(isA())
-//         return 
-// };
+const as = Fn((type, obj) => {
+    let t = _type(obj);
+    if(isA(type, t))
+        return val(AS)(type, obj);
+    throw new Error(`Cannot cast ${val(t).mName} to ${val(type).mName}!`);
+});
 
 
 module.exports = {
@@ -467,5 +469,6 @@ module.exports = {
     type,
     _type,
     __AS__,
-    AS
+    AS,
+    as
 };
