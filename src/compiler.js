@@ -12,6 +12,8 @@ function compileLiteral(node) {
             return `Real(${val})`;
         case 'bool':
             return `Bool(${val})`;
+        case 'string':
+            return `String("${val}")`;
         case 'null':
             return 'null'; // TODO: fix
         default: {
