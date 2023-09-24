@@ -1,5 +1,5 @@
 const { is, getIn, Set, setIn, Map, List } = require("immutable");
-const { isNull, prettify } = require("./util");
+const { isNull } = require("./util");
 
 // type hierarchy
 // ==============
@@ -79,8 +79,15 @@ function argTypesDistance(fromArgTypes, toArgTypes) {
     .reduce((x, y) => x + y, 0);
 }
 
+function argTypesToString(argTypes) {
+    let s = argTypes
+        .map(t => t.get('val').mName)
+        .join(', ')
+    return `[${s}]`;
+}
+
 class MultiMethod extends Function {
-    constructor(mName, getType) {
+    constructor(mName, getType, toStringBox) {
         // hack to make objects callable:
         // https://stackoverflow.com/a/40878674/1163490
         super('...args', 'return this.__self__.__call__(...args)');
@@ -92,8 +99,9 @@ class MultiMethod extends Function {
         self.impls = List();
         self.defaultImpl = {};
         self.defaultImpl.f = (...args) => {
+            let toString = toStringBox[0];
             throw new Error(`MultiMethod ${mName} not defined for args:` 
-                + `${prettify(args.map(arg => arg.get('val')))}`);
+                + `[${args.map(toString).join(', ')}]`);
         }
 
         return self;
@@ -137,11 +145,12 @@ class MultiMethod extends Function {
                     argTypesDistance(argTypes, nextBestFit.argTypes)
                 ))
             return bestFit;
-        else
-            throw new Error(`Ambiguous call to MultiMethod ${this.mName}`
-                + `\nargs types: ${prettify(argTypes.get('val'))}`
-                + `\nmethod 1: ${prettify(bestFit.argTypes)}`
-                + `\nmethod 2: ${prettify(nextBestFit.argTypes)}`);
+        else {
+            throw new Error(`Ambiguous call to MultiMethod ${this.mName}:`
+                + `\nargs types: ${argTypesToString(argTypes)}`
+                + `\n  method 1: ${argTypesToString(bestFit.argTypes)}`
+                + `\n  method 2: ${argTypesToString(nextBestFit.argTypes)}`);
+        }
     }
 
     __call__(...args) {

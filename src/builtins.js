@@ -38,7 +38,8 @@ function setType(obj, type) {
 
 // Predicates
 // ==========
-const _isPred = new MultiMethod('isPred', _type);
+const toStringBox = []; // needed for error reporting
+const _isPred = new MultiMethod('isPred', _type, toStringBox);
 const isPred = Obj(_isPred);
 setType(isPred, isPred);
 
@@ -73,7 +74,7 @@ _isPred.implementFor(
 
 // List
 // ====
-const _isList = new MultiMethod("isList", _type);
+const _isList = new MultiMethod("isList", _type, toStringBox);
 const isList = Obj(_isList, isPred);
 
 _isList.setDefault(isBool, _ => FALSE);
@@ -116,7 +117,7 @@ const _as = (pred, obj) => {
 
 // MultiFns
 // ========
-const _isMultiFn = new MultiMethod("isMultiFn", _type);
+const _isMultiFn = new MultiMethod("isMultiFn", _type, toStringBox);
 const isMultiFn = Obj(_isMultiFn, isPred);
 
 _isMultiFn.setDefault(isBool, _ => FALSE);
@@ -128,7 +129,7 @@ _isMultiFn.implementFor(
 
 function MultiFn(name) {
     return Obj(
-        new MultiMethod(name, _type),
+        new MultiMethod(name, _type, toStringBox),
         isMultiFn
     );
 }
@@ -390,6 +391,9 @@ function String(s) {
 
 // toString
 const str = MultiFn('str');
+// better errors from MultiMethods
+toStringBox[0] = (x) => val(str)(x).get('val');
+
 ImplementDefault(str, isString, (x) => String('' + val(x)));
 Implement(
     str,
@@ -480,7 +484,8 @@ module.exports = {
     Obj,
     val,
     isAny,
-    NULL, 
+    isNull,
+    NULL,
     isBool,
     Bool,
     TRUE,
