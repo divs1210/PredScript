@@ -1,6 +1,6 @@
 const { Map, is: _is, List: _List } = require('immutable');
 const BigNumber = require('bignumber.js');
-const { MultiMethod, derive } = require('./multi');
+const { MultiMethod, derive, isA } = require('./multi');
 
 // objects and types
 // =================
@@ -113,7 +113,7 @@ function Implement(multi, argTypes, retType, f) {
         let res = f(...args);
         let actualRetType = _type(res);
 
-        if(_is(retType, actualRetType))
+        if(isA(retType, actualRetType))
             return res;
 
         throw new Error(`${jsMulti.mName} returned a value of the wrong type!`);
