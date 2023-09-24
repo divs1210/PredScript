@@ -402,9 +402,10 @@ function _println(...xs)  {
 const println = Fn(_println);
 
 
-// more types
-// ==========
+// more fns
+// ========
 const type = Fn(_type);
+const AS = Fn((type, obj) => setType(obj, type));
 
 
 module.exports = {
@@ -445,5 +446,6 @@ module.exports = {
     Fn,
     println,
     type,
-    _type
+    _type,
+    AS
 };

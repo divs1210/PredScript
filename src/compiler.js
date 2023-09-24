@@ -98,6 +98,8 @@ function compileMultiFn(node) {
     let fBody = compileAST(node.body);
     let argNames = node.args.map((arg) => compileAST(arg.argName)).join(', ');
     let argTypes = node.args.map((arg) => compileAST(arg.argType)).join(', ');
+    let isPred = (node.args.length === 1) && (fReturnType === 'isBool');
+    let castString = isPred? `_apply(AS, List([isPred, ${fName}]));` : '';
 
     return `
 var ${fName} = ${fName} || MultiFn("${fName}");
@@ -107,6 +109,7 @@ Implement(
     ${fReturnType},
     (${argNames}) => ${fBody}
 );
+${castString}
     `.trim();
 }
 
