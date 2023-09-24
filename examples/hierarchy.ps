@@ -1,0 +1,19 @@
+function isEven(x: isInt): isBool {
+    mod(x, 2) == 0
+}
+
+derive(isInt, isEven);
+
+let e: isEven = 8;
+let i: isInt  = e + 1;
+
+function testing(x: isInt): isInt {
+    x + 1
+}
+
+function testing(x: isEven): isEven {
+    AS(x + 2)
+}
+
+println(testing(i))
+println(testing(e))

@@ -1,6 +1,6 @@
 const { Map, is: _is, List: _List } = require('immutable');
 const BigNumber = require('bignumber.js');
-const { MultiMethod, derive, isA } = require('./multi');
+const { MultiMethod, derive: _derive, isA } = require('./multi');
 
 // objects and types
 // =================
@@ -117,7 +117,8 @@ function Implement(multi, argTypes, retType, f) {
         let res = f(...args);
         let actualRetType = _type(res);
 
-        if(isA(retType, actualRetType))
+        if(isA(retType, actualRetType)
+        || (val(retType)(res) === TRUE))
             return res;
 
         throw new Error(`${jsMulti.mName} returned a value of the wrong type!`
@@ -158,7 +159,7 @@ function Real(n) {
 // Integers
 // ========
 const isInt = MultiFn("isInt");
-derive(isReal, isInt);
+_derive(isReal, isInt);
 setType(isInt, isPred);
 
 ImplementDefault(isInt, isBool, _ => FALSE);
@@ -370,7 +371,7 @@ Implement(
 // Fns
 // ===
 const isFn = MultiFn('isFn');
-derive(isFn, isMultiFn);
+_derive(isFn, isMultiFn);
 setType(isFn, isPred);
 
 ImplementDefault(isFn, isBool, _ => FALSE);
@@ -428,6 +429,16 @@ const as = Fn((pred, obj) => {
     throw new Error(`Cannot cast ${val(t).mName} to ${val(pred).mName}!`);
 });
 
+const derive = Obj((parent, child) => {
+    _derive(parent, child);
+    Implement(
+        parent,
+        List([child]),
+        isBool,
+        _ => TRUE
+    );
+});
+
 
 module.exports = {
     MultiFn,
@@ -470,5 +481,6 @@ module.exports = {
     _type,
     __AS__,
     AS,
-    as
+    as,
+    derive
 };
