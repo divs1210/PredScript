@@ -1,41 +1,47 @@
 {
     const nullNode = {
         type: 'null', 
-        value: null
+        value: null,
+        loc: location()
     };
 
     function numberNode(parsed) {
         return {
             type: 'number', 
-            value: parseFloat(parsed.flat(2).join(''))
+            value: parseFloat(parsed.flat(2).join('')),
+            loc: location()
         };
     }
 
     function boolNode(parsed) {
         return {
             type: 'bool', 
-            value: parsed === 'true'? true : false
+            value: parsed === 'true'? true : false,
+            loc: location()
         };
     }
 
     function stringNode(parsed) {
         return {
             type: 'string', 
-            value: parsed[1].map(x => x[1]).join('')
+            value: parsed[1].map(x => x[1]).join(''),
+            loc: location()
         };
     }
 
     function symbolNode(parsed) {
         return {
             type: 'symbol', 
-            value: parsed.flat(1).join('')
+            value: parsed.flat(1).join(''),
+            loc: location()
         };
     }
 
     function blockNode(parsed) {
         return {
             type: 'block-stmt', 
-            value: parsed.map(arr => arr[1])
+            value: parsed.map(arr => arr[1]),
+            loc: location()
         };
     }
 
@@ -43,7 +49,8 @@
         return {
             type: 'call-exp', 
             f:    f,
-            args: (args == null || args.length === 0) ? [] : [args[0]].concat(args[1].map(arg => arg[3]))
+            args: (args == null || args.length === 0) ? [] : [args[0]].concat(args[1].map(arg => arg[3])),
+            loc: location()
         };
     }
 
@@ -52,7 +59,8 @@
             type: 'if-exp',
             condExp: cond,
             thenExp: then,
-            elseExp: _else? _else[3]: null
+            elseExp: _else? _else[3]: null,
+            loc: location()
         };
     }
 
@@ -60,7 +68,8 @@
         return {
             type:  'unary-exp', 
             op:    op,
-            value: x
+            value: x,
+            loc: location()
         };
     }
 
@@ -74,7 +83,8 @@
                 type:  'binary-exp',
                 op:    op,
                 left:  x,
-                right: p0
+                right: p0,
+                loc: location()
             },
             pairs.slice(1)
         );
@@ -82,6 +92,7 @@
 
     function multiFnArgNode(obj) {
         obj.type = 'multifn-arg';
+        obj.loc = location();
         return obj;
     }
 
@@ -89,7 +100,8 @@
     function multiFnArgsNode(obj) {
         return {
             type: 'multifn-args',
-            args: [obj.x].concat(obj.xs.map(arr => arr[3]))
+            args: [obj.x].concat(obj.xs.map(arr => arr[3])),
+            loc: location()
         };
     }
 
@@ -99,7 +111,8 @@
             name: obj.fname,
             args: obj.args[2].args,
             body: obj.body,
-            retType: obj.retType
+            retType: obj.retType,
+            loc: location()
         }
     }
 
@@ -108,7 +121,8 @@
             type:    'let',
             varName: obj.name,
             varType: obj.type,
-            varVal:  obj.val
+            varVal:  obj.val,
+            loc: location()
         };
     }
 
@@ -119,21 +133,24 @@
     function exprStatementNode(expr) {
         return {
             type: 'expr-stmt',
-            value: expr
+            value: expr,
+            loc: location()
         };
     }
 
     function statementNode(stmt) {
         return {
             type: 'stmt',
-            value: stmt
+            value: stmt,
+            loc: location()
         };
     }
 
     function programNode(p) {
         return {
             type: 'program',
-            value: p.map(s => s[1])
+            value: p.map(s => s[1]),
+            loc: location()
         };
     }
 }
