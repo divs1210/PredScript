@@ -19,6 +19,7 @@ function val(obj) {
 
 // primitives
 // ==========
+const NULL  = Obj(null);
 const TRUE  = Obj(true);
 const FALSE = Obj(false);
 
@@ -37,7 +38,8 @@ function setType(obj, type) {
 
 // Predicates
 // ==========
-const _isPred = new MultiMethod('isPred', _type);
+const toStringBox = []; // needed for error reporting
+const _isPred = new MultiMethod('isPred', _type, toStringBox);
 const isPred = Obj(_isPred);
 setType(isPred, isPred);
 
@@ -49,7 +51,7 @@ setType(isAny, isPred);
 
 // Booleans
 // ========
-const _isBool = (obj) => obj === TRUE || obj === FALSE;
+const _isBool = (obj) => (obj === TRUE || obj === FALSE) ? TRUE : FALSE;
 _isBool.mName = 'isBool';
 const isBool = Obj(_isBool, isPred);
 setType(TRUE, isBool);
@@ -72,7 +74,7 @@ _isPred.implementFor(
 
 // List
 // ====
-const _isList = new MultiMethod("isList", _type);
+const _isList = new MultiMethod("isList", _type, toStringBox);
 const isList = Obj(_isList, isPred);
 
 _isList.setDefault(isBool, _ => FALSE);
@@ -115,7 +117,7 @@ const _as = (pred, obj) => {
 
 // MultiFns
 // ========
-const _isMultiFn = new MultiMethod("isMultiFn", _type);
+const _isMultiFn = new MultiMethod("isMultiFn", _type, toStringBox);
 const isMultiFn = Obj(_isMultiFn, isPred);
 
 _isMultiFn.setDefault(isBool, _ => FALSE);
@@ -127,7 +129,7 @@ _isMultiFn.implementFor(
 
 function MultiFn(name) {
     return Obj(
-        new MultiMethod(name, _type),
+        new MultiMethod(name, _type, toStringBox),
         isMultiFn
     );
 }
@@ -150,6 +152,26 @@ function ImplementDefault(multi, retType, f) {
 }
 
 
+// Null
+// ====
+const _isNull = (obj) => obj === NULL ? TRUE : FALSE;
+_isNull.mName = 'isNull';
+const isNull = Obj(_isNull, isPred);
+setType(NULL, isNull);
+
+
+// Bool contd
+// ==========
+const neg = MultiFn("neg");
+
+Implement(
+    neg,
+    List([isBool]),
+    isBool,
+    b => Bool(!val(b))
+);
+
+
 // Real Numbers
 // ============
 const isReal = MultiFn("isReal");
@@ -169,6 +191,14 @@ function Real(n) {
         isReal
     );
 }
+
+const BigNumberZERO = new BigNumber(0);
+Implement(
+    neg,
+    List([isReal]),
+    isReal,
+    r => Real(BigNumberZERO.minus(val(r)))
+);
 
 
 // Integers
@@ -361,6 +391,9 @@ function String(s) {
 
 // toString
 const str = MultiFn('str');
+// better errors from MultiMethods
+toStringBox[0] = (x) => val(str)(x).get('val');
+
 ImplementDefault(str, isString, (x) => String('' + val(x)));
 Implement(
     str,
@@ -373,6 +406,14 @@ Implement(
     List([isPred]),
     isString,
     p => String(val(p).mName)
+);
+
+// concat
+Implement(
+    add,
+    List([isString, isString]),
+    isString,
+    (x, y) => String(val(x) + val(y))
 );
 
 
@@ -442,11 +483,14 @@ module.exports = {
     ImplementDefault,
     Obj,
     val,
-    isAny, 
+    isAny,
+    isNull,
+    NULL,
     isBool,
     Bool,
     TRUE,
     FALSE,
+    neg,
     isPred,
     isReal,
     Real,

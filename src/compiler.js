@@ -12,8 +12,10 @@ function compileLiteral(node) {
             return `Real(${val})`;
         case 'bool':
             return `Bool(${val})`;
+        case 'string':
+            return `String("${val}")`;
         case 'null':
-            return 'null'; // TODO: fix
+            return `NULL`;
         default: {
             console.error(`Unhandled literal: ${prettify(val)} at ${prettify(node.loc)}`);
             return '????';
@@ -21,10 +23,30 @@ function compileLiteral(node) {
     }
 }
 
+function compileUnaryExpression(node) {
+    let opToFn = {
+        '!':  'neg',
+        '-':  'neg',
+    };
+
+    let { op, value } = node;
+    let fn = opToFn[op];
+
+    if (!isNull(fn)) {
+        let compiledValue  = compileAST(value);
+        return `_apply(${fn}, List([${compiledValue}]))`;   
+    } else {
+        console.error(`Unhandled unary expression: ${prettify(node)} at ${prettify(node.loc)}`);
+        return '????';
+    }
+}
+
+
 function compileBinaryExpression(node) {
     let opToFn = {
         '*':  'times',
         '/':  'divide',
+        '%':  'mod',
         '+':  'add',
         '-':  'minus',
 //      '**': 'pow',
@@ -127,6 +149,8 @@ function compileAST(ast) {
             return compileLiteral(ast);
         case 'symbol':
             return ast.value;
+        case 'unary-exp':
+            return compileUnaryExpression(ast);
         case 'binary-exp':
             return compileBinaryExpression(ast);
         case 'if-exp':

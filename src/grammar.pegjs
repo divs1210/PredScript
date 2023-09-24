@@ -177,7 +177,7 @@ expression = equality
 equality   = x:comparison _ pairs:(( ( '!=' / '==' ) _ comparison)*)    { return binaryNode(x, pairs);  }
 comparison = x:term   _ pairs:(( ( '>=' / '>' / '<=' / '<' ) _ term)*)  { return binaryNode(x, pairs);  }
 term       = x:factor _ pairs:(( ( '-' / '+' ) _ factor)*)              { return binaryNode(x, pairs);  }
-factor     = x:unary  _ pairs:(( ( '/' / '*' ) _ unary)*)               { return binaryNode(x, pairs);  }
+factor     = x:unary  _ pairs:(( ( '/' / '*' / '%' ) _ unary)*)         { return binaryNode(x, pairs);  }
 unary      = op:( '!' / '-' ) _ x:unary                                 { return unaryNode(op, x);      }
              / ifExpr
              / fnCall
