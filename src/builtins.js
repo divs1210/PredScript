@@ -421,11 +421,11 @@ const AS = Fn((type, obj) => {
     newMeta.type = type;
     return obj.set('meta', newMeta);
 });
-const as = Fn((type, obj) => {
+const as = Fn((pred, obj) => {
     let t = _type(obj);
-    if(isA(type, t))
-        return val(AS)(type, obj);
-    throw new Error(`Cannot cast ${val(t).mName} to ${val(type).mName}!`);
+    if(isA(pred, t) || (val(pred)(obj) === TRUE))
+        return val(AS)(pred, obj);        
+    throw new Error(`Cannot cast ${val(t).mName} to ${val(pred).mName}!`);
 });
 
 
