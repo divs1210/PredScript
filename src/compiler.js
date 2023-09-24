@@ -27,6 +27,7 @@ function compileBinaryExpression(node) {
     let opToFn = {
         '*':  'times',
         '/':  'divide',
+        '%':  'mod',
         '+':  'add',
         '-':  'minus',
 //      '**': 'pow',
