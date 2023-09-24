@@ -4,7 +4,7 @@ const {
     isPred, _type, 
     isReal, Real, 
     MultiFn, Implement, _apply, apply,
-    add, sub, times, 
+    add, minus, times, 
     is, isBool, isLessThanEq,
     isList, List, TRUE, FALSE} = require('../src/builtins.js');
 const { val } = require('../src/util.js');
@@ -93,7 +93,7 @@ assert(_is(
 
 assert(_is(
     -1,
-    _apply(sub, List([Real(1), Real(2)])).get('val').toNumber()
+    _apply(minus, List([Real(1), Real(2)])).get('val').toNumber()
 ));
 
 assert(_is(

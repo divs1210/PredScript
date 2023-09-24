@@ -57,7 +57,7 @@ assert(is(
 // Complex expressions
 // ===================
 assert(is(
-    '_apply(times, List([n, _apply(apply, List([fact, List([_apply(sub, List([n, Int(1)]))])]))]))',
+    '_apply(times, List([n, _apply(apply, List([fact, List([_apply(minus, List([n, Int(1)]))])]))]))',
     compileExpr('n * fact(n - 1)')
 ));
 

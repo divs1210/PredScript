@@ -5,7 +5,7 @@ const {
     List,
     MultiFn, Implement, _apply,
     isLessThanEq, TRUE,
-    times, sub
+    times, minus
 } = require('../src/builtins.js');
 
 
@@ -20,7 +20,7 @@ Implement(
         if (is(TRUE, lessThanEqOne)) {
             return Real(1);
         } else {
-            let decX = _apply(sub, List([x, Real(1)]));
+            let decX = _apply(minus, List([x, Real(1)]));
             let factDecX = _apply(fact, List([decX]));
             return _apply(times, List([x, factDecX]));
         }

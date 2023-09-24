@@ -196,13 +196,13 @@ Implement(
     add,
     List([isInt, isInt]),
     isInt,
-    (x, y) => Int(x.get('val').add(y.get('val')))
+    (x, y) => Int(x.get('val').plus(y.get('val')))
 );
 Implement(
     add,
     List([isReal, isReal]),
     isReal,
-    (x, y) => Real(x.get('val').add(y.get('val')))
+    (x, y) => Real(x.get('val').plus(y.get('val')))
 );
 
 const minus = MultiFn('sub');
