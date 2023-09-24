@@ -1,12 +1,14 @@
 const { is } = require("immutable");
 const { parse, parseExpr } = require("./parser");
-const { isNull, prettify } = require("./util");
+const { isNull, prettify, pprint } = require("./util");
 const builtins = require('./builtins');
 
 function compileLiteral(node) {
     let val = node.value;
     switch(node.type) {
-        case 'number': 
+        case 'int': 
+            return `Int(${val})`;
+        case 'real':
             return `Real(${val})`;
         case 'bool':
             return `Bool(${val})`;
@@ -106,7 +108,8 @@ function compileAST(ast) {
         return 'null';
 
     switch (ast.type) {
-        case 'number':
+        case 'int':
+        case 'real':
         case 'bool':
         case 'string':
         case 'null':
