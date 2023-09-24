@@ -150,6 +150,18 @@ function ImplementDefault(multi, retType, f) {
 }
 
 
+// Bool contd
+// ==========
+const neg = MultiFn("neg");
+
+Implement(
+    neg,
+    List([isBool]),
+    isBool,
+    b => Bool(!val(b))
+);
+
+
 // Real Numbers
 // ============
 const isReal = MultiFn("isReal");
@@ -169,6 +181,14 @@ function Real(n) {
         isReal
     );
 }
+
+let BigNumberZERO = new BigNumber(0);
+Implement(
+    neg,
+    List([isReal]),
+    isReal,
+    r => Real(BigNumberZERO.minus(val(r)))
+);
 
 
 // Integers
@@ -486,5 +506,6 @@ module.exports = {
     __AS__,
     AS,
     as,
-    derive
+    derive,
+    neg
 };

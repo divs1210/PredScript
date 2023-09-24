@@ -23,6 +23,25 @@ function compileLiteral(node) {
     }
 }
 
+function compileUnaryExpression(node) {
+    let opToFn = {
+        '!':  'neg',
+        '-':  'neg',
+    };
+
+    let { op, value } = node;
+    let fn = opToFn[op];
+
+    if (!isNull(fn)) {
+        let compiledValue  = compileAST(value);
+        return `_apply(${fn}, List([${compiledValue}]))`;   
+    } else {
+        console.error(`Unhandled unary expression: ${prettify(node)} at ${prettify(node.loc)}`);
+        return '????';
+    }
+}
+
+
 function compileBinaryExpression(node) {
     let opToFn = {
         '*':  'times',
@@ -130,6 +149,8 @@ function compileAST(ast) {
             return compileLiteral(ast);
         case 'symbol':
             return ast.value;
+        case 'unary-exp':
+            return compileUnaryExpression(ast);
         case 'binary-exp':
             return compileBinaryExpression(ast);
         case 'if-exp':
