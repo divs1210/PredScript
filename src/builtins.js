@@ -412,6 +412,14 @@ const println = Fn(_println);
 // ========
 const type = Fn(_type);
 const __AS__ = Fn((type, obj) => setType(obj, type));
+const AS = Fn((type, obj) => {
+    let meta = obj.get('meta');
+    let newMeta = {};
+    for(key in meta)
+        newMeta[key] = meta[key];
+    newMeta.type = type;
+    return obj.set('meta', newMeta);
+});
 // const as = Fn((type, obj)) => {
 //     let t = _type(obj);
 //     if(isA())
@@ -458,5 +466,6 @@ module.exports = {
     println,
     type,
     _type,
-    __AS__
+    __AS__,
+    AS
 };
