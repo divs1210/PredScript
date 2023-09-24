@@ -411,7 +411,12 @@ const println = Fn(_println);
 // more fns
 // ========
 const type = Fn(_type);
-const AS = Fn((type, obj) => setType(obj, type));
+const __AS__ = Fn((type, obj) => setType(obj, type));
+// const as = Fn((type, obj)) => {
+//     let t = _type(obj);
+//     if(isA())
+//         return 
+// };
 
 
 module.exports = {
@@ -453,5 +458,5 @@ module.exports = {
     println,
     type,
     _type,
-    AS
+    __AS__
 };
