@@ -1,0 +1,13 @@
+let x: isInt = 1;
+let y: isBool = AS(isBool, x);
+
+println(type(x));
+println(type(y));
+
+__AS__(isInt, y);
+println(type(y));
+
+let z: isReal = as(isReal, 1);
+println(type(z));
+
+as(isInt, true);

@@ -1,6 +1,6 @@
 const { Map, is: _is, List: _List } = require('immutable');
 const BigNumber = require('bignumber.js');
-const { MultiMethod, derive, isA } = require('./multi');
+const { MultiMethod, derive: _derive, isA } = require('./multi');
 
 // objects and types
 // =================
@@ -19,9 +19,12 @@ function val(obj) {
 
 // primitives
 // ==========
-var TRUE  = Obj(true);
-var FALSE = Obj(false);
-let isAny = Obj(_ => TRUE);
+const TRUE  = Obj(true);
+const FALSE = Obj(false);
+
+const _isAny = _ => TRUE;
+_isAny.mName = 'isAny';
+const isAny = Obj(_isAny);
 
 function _type(obj) {
     return obj.get('meta').type || isAny;
@@ -46,7 +49,8 @@ setType(isAny, isPred);
 
 // Booleans
 // ========
-const _isBool = Obj((obj) => obj === TRUE || obj === FALSE);
+const _isBool = (obj) => obj === TRUE || obj === FALSE;
+_isBool.mName = 'isBool';
 const isBool = Obj(_isBool, isPred);
 setType(TRUE, isBool);
 setType(FALSE, isBool);
@@ -86,6 +90,29 @@ function List(jsArray) {
 }
 
 
+// Casting
+// =======
+const ___AS__ = (type, obj) => setType(obj, type);
+
+const _AS = (type, obj) => {
+    let meta = obj.get('meta');
+    let newMeta = {};
+    for(key in meta)
+        newMeta[key] = meta[key];
+    newMeta.type = type;
+    return obj.set('meta', newMeta);
+};
+
+const _as = (pred, obj) => {
+    let t = _type(obj);
+    if(isA(pred, t))
+        return obj;
+    else if (val(pred)(obj) === TRUE)
+        return val(AS)(pred, obj);
+    throw new Error(`Cannot cast ${val(t).mName} to ${val(pred).mName}!`);
+};
+
+
 // MultiFns
 // ========
 const _isMultiFn = new MultiMethod("isMultiFn", _type);
@@ -111,12 +138,7 @@ function Implement(multi, argTypes, retType, f) {
 
     let checkedF = (...args) => {
         let res = f(...args);
-        let actualRetType = _type(res);
-
-        if(isA(retType, actualRetType))
-            return res;
-
-        throw new Error(`${jsMulti.mName} returned a value of the wrong type!`);
+        return _as(retType, res);
     };
 
     jsMulti.implementFor(jsArgTypes, retType, checkedF);
@@ -152,7 +174,7 @@ function Real(n) {
 // Integers
 // ========
 const isInt = MultiFn("isInt");
-derive(isReal, isInt);
+_derive(isReal, isInt);
 setType(isInt, isPred);
 
 ImplementDefault(isInt, isBool, _ => FALSE);
@@ -344,13 +366,20 @@ Implement(
     str,
     List([isInt]),
     isString,
-    i => String(i.get('val').toFixed(0))
+    i => String(val(i).toFixed(0))
+);
+Implement(
+    str,
+    List([isPred]),
+    isString,
+    p => String(val(p).mName)
 );
 
 
 // Fns
 // ===
 const isFn = MultiFn('isFn');
+_derive(isFn, isMultiFn);
 setType(isFn, isPred);
 
 ImplementDefault(isFn, isBool, _ => FALSE);
@@ -388,9 +417,23 @@ function _println(...xs)  {
 const println = Fn(_println);
 
 
-// more types
-// ==========
+// more fns
+// ========
 const type = Fn(_type);
+
+const __AS__ = Fn(___AS__);
+const AS = Fn(_AS);
+const as = Fn(_as);
+
+const derive = Obj((parent, child) => {
+    _derive(parent, child);
+    Implement(
+        parent,
+        List([child]),
+        isBool,
+        _ => TRUE
+    );
+});
 
 
 module.exports = {
@@ -431,5 +474,9 @@ module.exports = {
     Fn,
     println,
     type,
-    _type
+    _type,
+    __AS__,
+    AS,
+    as,
+    derive
 };
