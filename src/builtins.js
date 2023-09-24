@@ -344,13 +344,27 @@ Implement(
     str,
     List([isInt]),
     isString,
-    i => String(i.get('val').toFixed(0))
+    i => String(val(i).toFixed(0))
+);
+Implement(
+    str,
+    List([isPred]),
+    isString,
+    p => {
+        if (_is(isAny, p))
+            return String('isAny');
+        else if (_is(isBool, p))
+            return String('isBool');
+        else
+            return String(val(p).mName);
+    }
 );
 
 
 // Fns
 // ===
 const isFn = MultiFn('isFn');
+derive(isFn, isMultiFn);
 setType(isFn, isPred);
 
 ImplementDefault(isFn, isBool, _ => FALSE);
