@@ -109,7 +109,9 @@ function MultiFn(name) {
     );
 }
 
-const $_AS = (type, obj) => {
+// hard cast
+// needed to implement Implement
+const _AS = (type, obj) => {
     let meta = obj.get('meta');
     let newMeta = {};
     for(key in meta)
@@ -131,7 +133,7 @@ function Implement(multi, argTypes, retType, f) {
             return res;
         else if(val(retType)(res) === TRUE) {
             // hard cast res to retType
-            return $_AS(retType, res);
+            return _AS(retType, res);
         }
 
         throw new Error(`${jsMulti.mName} returned a value of the wrong type!`
@@ -420,14 +422,7 @@ const println = Fn(_println);
 const type = Fn(_type);
 
 const __AS__ = Fn((type, obj) => setType(obj, type));
-const AS = Fn((type, obj) => {
-    let meta = obj.get('meta');
-    let newMeta = {};
-    for(key in meta)
-        newMeta[key] = meta[key];
-    newMeta.type = type;
-    return obj.set('meta', newMeta);
-});
+const AS = Fn(_AS);
 const as = Fn((pred, obj) => {
     let t = _type(obj);
     if(isA(pred, t) || (val(pred)(obj) === TRUE))
