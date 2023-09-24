@@ -109,6 +109,16 @@ function MultiFn(name) {
     );
 }
 
+const $_AS = (type, obj) => {
+    let meta = obj.get('meta');
+    let newMeta = {};
+    for(key in meta)
+        newMeta[key] = meta[key];
+    newMeta.type = type;
+    return obj.set('meta', newMeta);
+};
+
+
 function Implement(multi, argTypes, retType, f) {
     let jsMulti = val(multi);
     let jsArgTypes = val(argTypes);
@@ -117,9 +127,12 @@ function Implement(multi, argTypes, retType, f) {
         let res = f(...args);
         let actualRetType = _type(res);
 
-        if(isA(retType, actualRetType)
-        || (val(retType)(res) === TRUE))
+        if(isA(retType, actualRetType))
             return res;
+        else if(val(retType)(res) === TRUE) {
+            // hard cast res to retType
+            return $_AS(retType, res);
+        }
 
         throw new Error(`${jsMulti.mName} returned a value of the wrong type!`
             + `\nexpected: ${val(retType).mName}`
