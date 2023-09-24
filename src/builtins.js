@@ -19,7 +19,7 @@ function val(obj) {
 
 // primitives
 // ==========
-const NULL = Obj(null);
+const NULL  = Obj(null);
 const TRUE  = Obj(true);
 const FALSE = Obj(false);
 
