@@ -73,6 +73,12 @@ function compileBlockExpression(node) {
     }
 }
 
+function compileLetStmt(node) {
+    let varName = compileAST(node.varName);
+    let varVal = compileAST(node.varVal);
+    return `let ${varName} = ${varVal};`;
+}
+
 function compileProgram(node) {
     let allBuiltins = Object.keys(builtins).join(', ');
     let requireBuiltins = `const {${ allBuiltins }} = require('./src/builtins');\n\n`;
@@ -129,6 +135,8 @@ function compileAST(ast) {
             return compileAST(ast.value);
         case 'multifn-stmt':
             return compileMultiFn(ast);
+        case 'let-stmt':
+            return compileLetStmt(ast);
         case 'program':
             return compileProgram(ast);
         default: {
