@@ -1,6 +1,6 @@
 const { Map, is: _is, List: _List } = require('immutable');
 const BigNumber = require('bignumber.js');
-const { MultiMethod } = require('./multi');
+const { MultiMethod, derive } = require('./multi');
 
 // objects and types
 // =================
@@ -152,6 +152,7 @@ function Real(n) {
 // Integers
 // ========
 const isInt = MultiFn("isInt");
+derive(isReal, isInt);
 setType(isInt, isPred);
 
 ImplementDefault(isInt, isBool, _ => FALSE);
@@ -170,7 +171,7 @@ Implement(
 
 function Int(n) {
     return Obj(
-        new BigNumber(n).integerValue(), 
+        (new BigNumber(n)).integerValue(),
         isInt
     );
 }
@@ -204,18 +205,18 @@ Implement(
     (x, y) => Real(x.get('val').add(y.get('val')))
 );
 
-const sub = MultiFn('sub');
+const minus = MultiFn('sub');
 Implement(
-    sub,
+    minus,
     List([isInt, isInt]),
     isInt,
-    (x, y) => Int(x.get('val').sub(y.get('val')))
+    (x, y) => Int(x.get('val').minus(y.get('val')))
 );
 Implement(
-    sub,
+    minus,
     List([isReal, isReal]),
     isReal,
-    (x, y) => Real(x.get('val').sub(y.get('val')))
+    (x, y) => Real(x.get('val').minus(y.get('val')))
 );
 
 const times = MultiFn('times');
@@ -339,6 +340,12 @@ function String(s) {
 // toString
 const str = MultiFn('str');
 ImplementDefault(str, isString, (x) => String('' + val(x)));
+Implement(
+    str,
+    List([isInt]),
+    isString,
+    i => String(i.get('val').toFixed(0))
+);
 
 
 // Fns
@@ -408,7 +415,7 @@ module.exports = {
     apply,
     _apply,
     add,
-    sub,
+    minus,
     times,
     divide,
     mod,

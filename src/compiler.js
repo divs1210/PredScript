@@ -26,7 +26,7 @@ function compileBinaryExpression(node) {
         '*':  'times',
         '/':  'divide',
         '+':  'add',
-        '-':  'sub',
+        '-':  'minus',
 //      '**': 'pow',
         '<' : 'isLessThan',
         '<=': 'isLessThanEq',

@@ -1,0 +1,8 @@
+function fact(n: isInt): isInt {
+    if (n <= 1)
+        1
+    else
+        n * fact(n - 1)
+}
+
+println(fact(500))
