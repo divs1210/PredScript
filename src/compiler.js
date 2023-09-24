@@ -13,7 +13,7 @@ function compileLiteral(node) {
         case 'null':
             return 'null';
         default: {
-            console.error(`Unhandled literal: ${prettify(val)}`);
+            console.error(`Unhandled literal: ${prettify(val)} at ${prettify(node.loc)}`);
             return '????';
         }
     }
@@ -40,7 +40,7 @@ function compileBinaryExpression(node) {
         let compiledRight = compileAST(right);    
         return `_apply(${fn}, List([${compiledLeft}, ${compiledRight}]))`;   
     } else {
-        console.error(`Unhandled binary expression: ${prettify(node)}`);
+        console.error(`Unhandled binary expression: ${prettify(node)} at ${prettify(node.loc)}`);
         return '????';
     }
 }
@@ -128,7 +128,7 @@ function compileAST(ast) {
         case 'program':
             return compileProgram(ast);
         default: {
-            console.error(`Unhandled AST:\n ${prettify(ast)}`);
+            console.error(`Unhandled AST ${prettify(ast.type)} at:\n ${prettify(ast.loc)}`);
             return '????';
         }
     }
