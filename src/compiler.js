@@ -13,7 +13,7 @@ function compileLiteral(node) {
         case 'bool':
             return `Bool(${val})`;
         case 'null':
-            return 'null';
+            return 'null'; // TODO: fix
         default: {
             console.error(`Unhandled literal: ${prettify(val)} at ${prettify(node.loc)}`);
             return '????';
