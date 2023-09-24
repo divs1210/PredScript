@@ -131,10 +131,8 @@ function Implement(multi, argTypes, retType, f) {
 
         if(isA(retType, actualRetType))
             return res;
-        else if(val(retType)(res) === TRUE) {
-            // hard cast res to retType
+        else if (val(retType)(res) === TRUE)
             return _AS(retType, res);
-        }
 
         throw new Error(`${jsMulti.mName} returned a value of the wrong type!`
             + `\nexpected: ${val(retType).mName}`
