@@ -74,7 +74,7 @@ function compileBlockExpression(node) {
 }
 
 function compiledLetStmt(node) {
-    return `_apply(let, List([${node.varName.value}, ${node.varType.value}, ${node.varVal.value}]))`;
+    return `let ${node.varName.value} = ${node.varVal.value};`;
 }
 
 function compileProgram(node) {
