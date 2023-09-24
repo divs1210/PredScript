@@ -15,7 +15,7 @@ function compileLiteral(node) {
         case 'string':
             return `String("${val}")`;
         case 'null':
-            return 'null'; // TODO: fix
+            return `NULL`;
         default: {
             console.error(`Unhandled literal: ${prettify(val)} at ${prettify(node.loc)}`);
             return '????';

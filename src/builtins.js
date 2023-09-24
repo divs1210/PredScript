@@ -19,6 +19,7 @@ function val(obj) {
 
 // primitives
 // ==========
+const NULL = Obj(null);
 const TRUE  = Obj(true);
 const FALSE = Obj(false);
 
@@ -49,7 +50,7 @@ setType(isAny, isPred);
 
 // Booleans
 // ========
-const _isBool = (obj) => obj === TRUE || obj === FALSE;
+const _isBool = (obj) => (obj === TRUE || obj === FALSE) ? TRUE : FALSE;
 _isBool.mName = 'isBool';
 const isBool = Obj(_isBool, isPred);
 setType(TRUE, isBool);
@@ -148,6 +149,14 @@ function ImplementDefault(multi, retType, f) {
     let jsMulti = val(multi);
     jsMulti.setDefault(retType, f);
 }
+
+
+// Null
+// ====
+const _isNull = (obj) => obj === NULL ? TRUE : FALSE;
+_isNull.mName = 'isNull';
+const isNull = Obj(_isNull, isPred);
+setType(NULL, isNull);
 
 
 // Bool contd
@@ -470,11 +479,13 @@ module.exports = {
     ImplementDefault,
     Obj,
     val,
-    isAny, 
+    isAny,
+    NULL, 
     isBool,
     Bool,
     TRUE,
     FALSE,
+    neg,
     isPred,
     isReal,
     Real,
@@ -506,6 +517,5 @@ module.exports = {
     __AS__,
     AS,
     as,
-    derive,
-    neg
+    derive
 };
