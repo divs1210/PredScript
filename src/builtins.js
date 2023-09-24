@@ -423,8 +423,10 @@ const __AS__ = Fn((type, obj) => setType(obj, type));
 const AS = Fn(_AS);
 const as = Fn((pred, obj) => {
     let t = _type(obj);
-    if(isA(pred, t) || (val(pred)(obj) === TRUE))
-        return val(AS)(pred, obj);        
+    if(isA(pred, t))
+        return obj;
+    else if (val(pred)(obj) === TRUE)
+        return val(AS)(pred, obj);
     throw new Error(`Cannot cast ${val(t).mName} to ${val(pred).mName}!`);
 });
 
