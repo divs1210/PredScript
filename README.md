@@ -94,8 +94,8 @@ $ cd PredScript
 $ npm i
 ...
 $ node compile.js examples/poly.ps
-Compiled code in: ./out.js
-$ node out.js
+...
+$ node dist/index.js
 true -5
 ```
 
