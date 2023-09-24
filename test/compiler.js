@@ -5,8 +5,8 @@ const { is } = require('immutable');
 // numbers
 // =======
 assert(is(
-    'Real(1)',
-    compileExpr('1')
+    'Int(123)',
+    compileExpr('123')
 ));
 
 assert(is(
@@ -57,7 +57,7 @@ assert(is(
 // Complex expressions
 // ===================
 assert(is(
-    '_apply(times, List([n, _apply(apply, List([fact, List([_apply(sub, List([n, Real(1)]))])]))]))',
+    '_apply(times, List([n, _apply(apply, List([fact, List([_apply(minus, List([n, Int(1)]))])]))]))',
     compileExpr('n * fact(n - 1)')
 ));
 
@@ -102,13 +102,13 @@ assert(is(
 var inc = inc || MultiFn("inc");
 Implement(
     inc,
-    List([isReal]),
-    isReal,
-    (x) => _apply(add, List([x, Real(1)]))
+    List([isInt]),
+    isInt,
+    (x) => _apply(add, List([x, Int(1)]))
 );
     `.trim(),
     compileExpr(`
-function inc(x: isReal): isReal {
+function inc(x: isInt): isInt {
     x + 1;
 }
     `)

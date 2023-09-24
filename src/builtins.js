@@ -1,6 +1,6 @@
 const { Map, is: _is, List: _List } = require('immutable');
 const BigNumber = require('bignumber.js');
-const { MultiMethod } = require('./multi');
+const { MultiMethod, derive } = require('./multi');
 
 // objects and types
 // =================
@@ -128,8 +128,8 @@ function ImplementDefault(multi, retType, f) {
 }
 
 
-// Numbers
-// =======
+// Real Numbers
+// ============
 const isReal = MultiFn("isReal");
 setType(isReal, isPred);
 
@@ -149,6 +149,34 @@ function Real(n) {
 }
 
 
+// Integers
+// ========
+const isInt = MultiFn("isInt");
+derive(isReal, isInt);
+setType(isInt, isPred);
+
+ImplementDefault(isInt, isBool, _ => FALSE);
+Implement(
+    isInt,
+    List([isInt]),
+    isBool, 
+    _ => TRUE
+);
+Implement(
+    isReal,
+    List([isInt]),
+    isBool, 
+    _ => TRUE
+);
+
+function Int(n) {
+    return Obj(
+        (new BigNumber(n)).integerValue(),
+        isInt
+    );
+}
+
+
 // Apply
 // =====
 function _apply(f, args) {
@@ -162,24 +190,42 @@ ImplementDefault(apply, isAny, _apply);
 
 
 // Arithmetic
-// ==========
+// ===========
 const add = MultiFn('add');
+Implement(
+    add,
+    List([isInt, isInt]),
+    isInt,
+    (x, y) => Int(x.get('val').plus(y.get('val')))
+);
 Implement(
     add,
     List([isReal, isReal]),
     isReal,
-    (x, y) => Real(x.get('val').add(y.get('val')))
+    (x, y) => Real(x.get('val').plus(y.get('val')))
 );
 
-const sub = MultiFn('sub');
+const minus = MultiFn('sub');
 Implement(
-    sub,
+    minus,
+    List([isInt, isInt]),
+    isInt,
+    (x, y) => Int(x.get('val').minus(y.get('val')))
+);
+Implement(
+    minus,
     List([isReal, isReal]),
     isReal,
-    (x, y) => Real(x.get('val').sub(y.get('val')))
+    (x, y) => Real(x.get('val').minus(y.get('val')))
 );
 
 const times = MultiFn('times');
+Implement(
+    times,
+    List([isInt, isInt]),
+    isInt,
+    (x, y) => Int(x.get('val').times(y.get('val')))
+);
 Implement(
     times,
     List([isReal, isReal]),
@@ -190,6 +236,12 @@ Implement(
 const divide = MultiFn('divide');
 Implement(
     divide,
+    List([isInt, isInt]),
+    isInt,
+    (x, y) => Int(x.get('val').div(y.get('val')))
+);
+Implement(
+    divide,
     List([isReal, isReal]),
     isReal,
     (x, y) => Real(x.get('val').div(y.get('val')))
@@ -198,12 +250,24 @@ Implement(
 const mod = MultiFn('mod');
 Implement(
     mod,
+    List([isInt, isInt]),
+    isInt,
+    (x, y) => Int(x.get('val').mod(y.get('val')))
+);
+Implement(
+    mod,
     List([isReal, isReal]),
     isReal,
     (x, y) => Real(x.get('val').mod(y.get('val')))
 );
 
 const pow = MultiFn('pow');
+Implement(
+    pow,
+    List([isInt, isInt]),
+    isInt,
+    (x, y) => Int(x.get('val').pow(y.get('val')))
+);
 Implement(
     pow,
     List([isReal, isReal]),
@@ -223,12 +287,28 @@ Implement(
     (x, y) => Bool(x.get('val').eq(y.get('val')))
 );
 
+const isLessThan = MultiFn('isLessThan');
+Implement(
+    isLessThan,
+    List([isReal, isReal]),
+    isBool,
+    (x, y) => Bool(x.get('val').lt(y.get('val')))
+);
+
 const isLessThanEq = MultiFn('isLessThanEq');
 Implement(
     isLessThanEq,
     List([isReal, isReal]),
     isBool,
     (x, y) => Bool(x.get('val').lte(y.get('val')))
+);
+
+const isGreaterThan = MultiFn('isGreaterThan');
+Implement(
+    isGreaterThan,
+    List([isReal, isReal]),
+    isBool,
+    (x, y) => Bool(x.get('val').gt(y.get('val')))
 );
 
 const isGreaterThanEq = MultiFn('isGreaterThanEq');
@@ -260,6 +340,12 @@ function String(s) {
 // toString
 const str = MultiFn('str');
 ImplementDefault(str, isString, (x) => String('' + val(x)));
+Implement(
+    str,
+    List([isInt]),
+    isString,
+    i => String(i.get('val').toFixed(0))
+);
 
 
 // Fns
@@ -321,13 +407,15 @@ module.exports = {
     isPred,
     isReal,
     Real,
+    isInt,
+    Int,
     isList,
     List,
     _List,
     apply,
     _apply,
     add,
-    sub,
+    minus,
     times,
     divide,
     mod,

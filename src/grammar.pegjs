@@ -5,9 +5,17 @@
         loc: location()
     };
 
-    function numberNode(parsed) {
+    function intNode(parsed) {
         return {
-            type: 'number', 
+            type: 'int',
+            value: parseInt(parsed.join('')),
+            loc: location()
+        };
+    }
+
+    function realNode(parsed) {
+        return {
+            type: 'real', 
             value: parseFloat(parsed.flat(2).join('')),
             loc: location()
         };
@@ -179,11 +187,12 @@ ifExpr     = 'if' _ '(' _ cond:expression _ ')' _ then:expression _else:((_ 'els
                                                                                      { return ifNode(cond, then, _else); }
 fnCall     = f:primary _ '(' _ args:((expression (_ ',' _ expression)*)?) _ ')'      { return fnCallNode(f, args);       }
 
-primary    = NUMBER / STRING / BOOL / NULL / SYMBOL / block / grouping
+primary    = REAL / INTEGER / STRING / BOOL / NULL / SYMBOL / block / grouping
 grouping   = '(' _ e:expression _ ')'                                                { return groupingNode(e);           }
 block      = '{' _ b:((_ exprStatement / letStatement _)*) _ '}'                     { return blockNode(b);              }
 
-NUMBER      = n:([0-9]+ ('.' [0-9]+)?)                         { return numberNode(n); }
+INTEGER     = i:([0-9]+)                                       { return intNode(i);    }
+REAL        = n:([0-9]+ '.' [0-9]+)                            { return realNode(n);   }
 BOOL        = b:('true' / 'false')                             { return boolNode(b);   } 
 NULL        = 'null'                                           { return nullNode;      }
 STRING      = s:('"' (!'"' .)* '"')                            { return stringNode(s); }
