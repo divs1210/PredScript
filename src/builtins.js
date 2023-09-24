@@ -357,14 +357,7 @@ Implement(
     str,
     List([isPred]),
     isString,
-    p => {
-        // if (_is(isAny, p))
-        //     return String('isAny');
-        // else if (_is(isBool, p))
-        //     return String('isBool');
-        // else
-            return String(val(p).mName);
-    }
+    p => String(val(p).mName)
 );
 
 
