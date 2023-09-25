@@ -416,6 +416,18 @@ Implement(
     isString,
     (x, y) => String(val(x) + val(y))
 );
+Implement(
+    add,
+    List([isString, isAny]),
+    isString,
+    (x, y) => String(val(x) + val(str)(y).get('val'))
+);
+Implement(
+    add,
+    List([isAny, isString]),
+    isString,
+    (x, y) => String(val(str)(x).get('val') + val(y))
+);
 
 
 // Fns
