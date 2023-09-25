@@ -56,6 +56,7 @@ _isBool.mName = 'isBool';
 const isBool = Obj(_isBool, isPred);
 setType(TRUE, isBool);
 setType(FALSE, isBool);
+_derive(isAny, isBool);
 
 function Bool(b) {
     return b === true? TRUE : FALSE;
@@ -64,7 +65,14 @@ function Bool(b) {
 
 // Predicates continued
 // ====================
-_isPred.setDefault(isBool, _ => FALSE);
+// TODO: the following 2
+// should happen automatically
+// for predicates
+_isPred.implementFor(
+    _List([isAny]),
+    isBool,
+    _ => False
+);
 _isPred.implementFor(
     _List([isPred]),
     isBool,
@@ -76,12 +84,20 @@ _isPred.implementFor(
 // ====
 const _isList = new MultiMethod("isList", _type);
 const isList = Obj(_isList, isPred);
+_derive(isAny, isList);
 
-_isList.setDefault(isBool, _ => FALSE);
+// TODO: the following 2
+// should happen automatically
+// for predicates
+_isList.implementFor(
+    _List([isAny]),
+    isBool,
+    _ => FALSE
+);
 _isList.implementFor(
     _List([isList]),
     isBool, 
-    _ => true
+    _ => TRUE
 );
 
 function List(jsArray) {
@@ -168,7 +184,7 @@ const _isNull = (obj) => obj === NULL ? TRUE : FALSE;
 _isNull.mName = 'isNull';
 const isNull = Obj(_isNull, isPred);
 setType(NULL, isNull);
-Derive(isAny, isNull);
+_derive(isAny, isNull);
 
 
 // Bool contd
@@ -187,7 +203,7 @@ Implement(
 // ============
 const isReal = MultiFn("isReal");
 setType(isReal, isPred);
-Derive(isAny, isReal);
+_derive(isAny, isReal);
 
 // TODO: the following 2
 // should happen automatically
@@ -398,7 +414,7 @@ Implement(
 // =======
 const isString = MultiFn("isString");
 setType(isString, isPred);
-Derive(isAny, isString);
+_derive(isAny, isString);
 
 // TODO: the following 2
 // should happen automatically
@@ -428,7 +444,7 @@ Implement(
     str,
     List([isAny]),
     isString,
-    i => String('' + val(x))
+    i => String('' + val(i))
 );
 Implement(
     str,
