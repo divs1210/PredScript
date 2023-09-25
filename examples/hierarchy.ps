@@ -1,11 +1,15 @@
+// define new predicate
 function isEven(x: isInt): isBool {
     x % 2 == 0
 }
 
+// all isEvens are valid isInts
 derive(isInt, isEven);
 
 let i: isInt  = 1;
 let e: isEven = 4;
-let sum: isInt = i + e;
 
-println("sum obtained from integer addition: " + sum);
+// + defined for [isInt, isInt] -> isInt
+// called for [isInt, isEven]
+let sum: isInt = i + e;
+println(sum);

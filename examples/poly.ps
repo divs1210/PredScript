@@ -1,3 +1,6 @@
+// ==================================
+// new predicates
+// ==================================
 function isEven(x: isInt): isBool {
     x % 2 == 0
 }
@@ -6,19 +9,28 @@ function isOdd(x: isInt): isBool {
     !isEven(x)
 }
 
+// isEven and isOdd derive from isInt
 derive(isInt, isEven);
 derive(isInt, isOdd);
 
 
+// ==================================
+// an increment function
+// ==================================
 function inc(x: isInt): isInt {
     x + 1
 }
 
+// it can now be overridden
+// for our new predicates!
+
 function inc(x: isEven): isOdd {
+    // integer addition
     x + 1
 }
 
 function inc(x: isOdd): isEven {
+    // integer addition
     x + 1
 }
 
