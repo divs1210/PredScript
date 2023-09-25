@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const path = require('node:path'); 
 const fs = require('fs');
 const { compile } = require('./src/compiler');
@@ -7,6 +9,7 @@ let [_, __, fileName] = process.argv;
 let filePath = path.join(__dirname, fileName);
 let code = fs.readFileSync(filePath, 'utf8');
 let compiledCode = compile(code);
+let intermediateFile = path.join(__dirname, 'dist', 'index.temp.js');
 
 exec('npm i @vercel/ncc -g', (nccErr, nccStdout, nccStderr) => {
     if (nccErr)
@@ -18,13 +21,13 @@ exec('npm i @vercel/ncc -g', (nccErr, nccStdout, nccStderr) => {
             if (dirError || dirStderr)
                 console.error('Could not create ./dist directory!');
             else {
-                fs.writeFile('./dist/index.temp.js', compiledCode, (err) => {
+                fs.writeFile(intermediateFile, compiledCode, (err) => {
                     if(err)
                         console.error(err);
                     else {
-                        console.log("Intermediate output in: ./dist/index.temp.js");
+                        console.log(`Intermediate output in: ${intermediateFile}`);
                 
-                        exec("ncc build ./dist/index.temp.js -o dist", (error, stdout, stderr) => {
+                        exec(`ncc build ${intermediateFile} -o ${__dirname}/dist`, (error, stdout, stderr) => {
                             if (error)
                                 console.error(error.message);
                             else if (stderr)

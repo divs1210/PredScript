@@ -1,7 +1,9 @@
 const fs = require('fs');
 const peg = require("pegjs");
+const path = require('node:path'); 
 
-const grammar = fs.readFileSync('src/grammar.pegjs', 'utf8');
+let filePath = path.join(__dirname, 'grammar.pegjs');
+const grammar = fs.readFileSync(filePath, 'utf8');
 const _parse = peg.generate(grammar).parse;
 
 const stripComments = (code) =>

@@ -7,6 +7,9 @@
         "test": "node --test"
     },
     "keywords": [],
+    "bin": {
+        "psc": "./compile.js"
+    },
     "author": "",
     "license": "MIT",
     "dependencies": {
