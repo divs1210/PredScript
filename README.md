@@ -50,7 +50,7 @@ fetchUserById(5).await(this);
 - Dynamically type check at runtime
   - do it efficiently
   - runtime can be directed to skip arbitrary checks (for optimization)
-- Polymorphic af
+- Polymorphic
 - Look and feel similar to JS
 
 ## Usage
