@@ -2,7 +2,11 @@
 
 # PredScript
 
-Predicates as Types. Compiles to JS.
+Predicates as Types.
+
+Statically and dynamically checked.
+
+Compiled to JS.
 
 **!! BEWARE: WIP !!**
 
@@ -38,6 +42,17 @@ fetchUserById(5).await(this);
 //  dob: "1991-02-23" 
 // }
 ```
+
+## Design goals
+
+- Types can be arbitrary predicates (like `isEmailString` and `isPosInt`)
+- Statically type check as much as possible at compile time
+- Dynamically type check at runtime
+  - do it efficiently
+  - runtime can be directed to skip arbitrary checks (for optimization)
+- Polymorphic
+- Compile to JS
+- Look and feel similar to JS
 
 ## Usage
 
