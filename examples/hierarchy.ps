@@ -4,17 +4,8 @@ function isEven(x: isInt): isBool {
 
 derive(isInt, isEven);
 
-let e: isEven = 8;
-let i: isInt  = e + 1;
+let i: isInt  = 1;
+let e: isEven = 4;
+let sum: isInt = i + e;
 
-function testing(x: isInt): isInt {
-    x + 1
-}
-
-function testing(x: isEven): isEven {
-    x + 2
-}
-
-println(testing(i))
-println(testing(e))
-println(type(testing(e)))
+println("sum obtained from integer addition: " + sum);

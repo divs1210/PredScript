@@ -521,6 +521,7 @@ function Fn(f) {
 function _println(...xs)  {
     let strs = xs.map((x) => val(_apply(str, List([x]))));
     console.log(strs.join(' '));
+    return NULL;
 }
 
 const println = Fn(_println);
@@ -533,6 +534,8 @@ const type = Fn(_type);
 const __AS__ = Fn(___AS__);
 const AS = Fn(_AS);
 const as = Fn(_as);
+
+const derive = Fn(Derive);
 
 
 module.exports = {
@@ -582,5 +585,5 @@ module.exports = {
     __AS__,
     AS,
     as,
-    Derive
+    derive
 };
