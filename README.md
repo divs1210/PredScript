@@ -41,16 +41,19 @@ fetchUserById(5).await(this);
 
 ## Usage
 
+### Install
+
 ```shell
 $ git clone https://github.com/divs1210/PredScript
-...
 $ cd PredScript
 $ npm i
-...
+```
+
+### Compile and run examples
+
+```shell
 $ node compile.js examples/poly.ps
-...
 $ node dist/index.js
-true -5
 ```
 
 ## License
