@@ -10,13 +10,13 @@ let compiledCode = compile(code);
 
 exec('npm i @vercel/ncc -g', (nccErr, nccStdout, nccStderr) => {
     if (nccErr)
-        console.log(`error: ${error.message}`);
+        console.error(nccErr.message);
     else if (nccStderr)
-        console.log(`stderr: ${stderr}`);
+        console.error(nccStderr);
     else {
         exec('mkdir -p dist', (dirError, dirStdout, dirStderr) => {
-            if (dirError)
-                console.error('Could not creats ./dist directory!');
+            if (dirError || dirStderr)
+                console.error('Could not create ./dist directory!');
             else {
                 fs.writeFile('./dist/index.temp.js', compiledCode, (err) => {
                     if(err)
@@ -26,11 +26,11 @@ exec('npm i @vercel/ncc -g', (nccErr, nccStdout, nccStderr) => {
                 
                         exec("ncc build ./dist/index.temp.js -o dist", (error, stdout, stderr) => {
                             if (error)
-                                console.error(`error: ${error.message}`);
+                                console.error(error.message);
                             else if (stderr)
-                                console.error(`stderr: ${stderr}`);
+                                console.error(stderr);
                             else
-                                console.log(`stdout: ${stdout}`);
+                                console.log(stdout);
                         });
                     }
                 });
