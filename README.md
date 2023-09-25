@@ -4,56 +4,10 @@
 
 Predicates as Types. Compiles to JS.
 
-**!!WIP!!**
+**!! BEWARE: WIP !!**
 
 
-## Demo
-
-```typescript
-// define new predicate isEven
-function isEven(x: isInt): isBool {
-    x % 2 == 0
-}
-
-// define new predicate isOdd
-function isOdd(x: isInt): isBool {
-    !isEven(x)
-}
-
-// use these predicates as normal functions
-isEven(5) // => false: isBool
-isOdd(3)  // =>  true: isBool
-
-
-// now consider a simple function
-function inc(x: isInt): isInt {
-    x + 1
-}
-
-inc(4) // => 5: isInt
-
-// this can be overridden for our new predicates!
-function inc(x: isEven): isOdd {
-    x
-    .as!(asInt, this) // forced type cast
-    .inc(this)
-    .as!(isOdd, this) // forced type cast
-}
-
-function inc(x: isOdd): isEven {
-    x
-    .as!(asInt, this)
-    .inc(this)
-    .as!(isEven, this)
-}
-
-// `as` does a checked conversion at runtime
-let e: isEven = as(isEven, 2);
-inc(e) // => 3: isOdd 
-inc(as(isOdd, 11)) // => 12: isEven 
-```
-
-## Real world use case
+## Use Case
 
 ```typescript
 let isUser: isPred =
@@ -103,4 +57,4 @@ true -5
 
 MIT License
 
-(C) Divyansh Prakash
+(C) Divyansh Prakash, 2023
