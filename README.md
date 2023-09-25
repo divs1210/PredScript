@@ -49,7 +49,7 @@ $ cd PredScript
 $ npm i
 ```
 
-### Compile and run examples
+### Compile and run [examples](/examples)
 
 ```shell
 $ node compile.js examples/poly.ps
