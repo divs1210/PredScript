@@ -7,6 +7,7 @@ const { MultiMethod, derive: _derive, isA } = require('./multi');
 const Obj = (val, type) =>
       Map({
           val:  val,
+          // mutable meta
           meta: {
             type: type || null
           }
