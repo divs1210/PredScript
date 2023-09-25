@@ -51,6 +51,7 @@ fetchUserById(5).await(this);
   - do it efficiently
   - runtime can be directed to skip arbitrary checks (for optimization)
 - Polymorphic
+- Compile to JS
 - Look and feel similar to JS
 
 ## Usage
