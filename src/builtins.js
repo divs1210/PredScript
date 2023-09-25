@@ -7,6 +7,7 @@ const { MultiMethod, derive: _derive, isA } = require('./multi');
 const Obj = (val, type) =>
       Map({
           val:  val,
+          // mutable meta
           meta: {
             type: type || null
           }
@@ -38,8 +39,7 @@ function setType(obj, type) {
 
 // Predicates
 // ==========
-const toStringBox = []; // needed for error reporting
-const _isPred = new MultiMethod('isPred', _type, toStringBox);
+const _isPred = new MultiMethod('isPred', _type);
 const isPred = Obj(_isPred);
 setType(isPred, isPred);
 
@@ -56,6 +56,7 @@ _isBool.mName = 'isBool';
 const isBool = Obj(_isBool, isPred);
 setType(TRUE, isBool);
 setType(FALSE, isBool);
+_derive(isAny, isBool);
 
 function Bool(b) {
     return b === true? TRUE : FALSE;
@@ -64,7 +65,14 @@ function Bool(b) {
 
 // Predicates continued
 // ====================
-_isPred.setDefault(isBool, _ => FALSE);
+// TODO: the following 2
+// should happen automatically
+// for predicates
+_isPred.implementFor(
+    _List([isAny]),
+    isBool,
+    _ => False
+);
 _isPred.implementFor(
     _List([isPred]),
     isBool,
@@ -74,14 +82,22 @@ _isPred.implementFor(
 
 // List
 // ====
-const _isList = new MultiMethod("isList", _type, toStringBox);
+const _isList = new MultiMethod("isList", _type);
 const isList = Obj(_isList, isPred);
+_derive(isAny, isList);
 
-_isList.setDefault(isBool, _ => FALSE);
+// TODO: the following 2
+// should happen automatically
+// for predicates
+_isList.implementFor(
+    _List([isAny]),
+    isBool,
+    _ => FALSE
+);
 _isList.implementFor(
     _List([isList]),
     isBool, 
-    _ => true
+    _ => TRUE
 );
 
 function List(jsArray) {
@@ -117,7 +133,7 @@ const _as = (pred, obj) => {
 
 // MultiFns
 // ========
-const _isMultiFn = new MultiMethod("isMultiFn", _type, toStringBox);
+const _isMultiFn = new MultiMethod("isMultiFn", _type);
 const isMultiFn = Obj(_isMultiFn, isPred);
 
 _isMultiFn.setDefault(isBool, _ => FALSE);
@@ -129,7 +145,7 @@ _isMultiFn.implementFor(
 
 function MultiFn(name) {
     return Obj(
-        new MultiMethod(name, _type, toStringBox),
+        new MultiMethod(name, _type),
         isMultiFn
     );
 }
@@ -151,6 +167,16 @@ function ImplementDefault(multi, retType, f) {
     jsMulti.setDefault(retType, f);
 }
 
+function Derive(parent, child) {
+    _derive(parent, child);
+    Implement(
+        parent,
+        _List([child]),
+        isBool,
+        _ => TRUE
+    );
+};
+
 
 // Null
 // ====
@@ -158,6 +184,7 @@ const _isNull = (obj) => obj === NULL ? TRUE : FALSE;
 _isNull.mName = 'isNull';
 const isNull = Obj(_isNull, isPred);
 setType(NULL, isNull);
+_derive(isAny, isNull);
 
 
 // Bool contd
@@ -176,8 +203,17 @@ Implement(
 // ============
 const isReal = MultiFn("isReal");
 setType(isReal, isPred);
+_derive(isAny, isReal);
 
-ImplementDefault(isReal, isBool, _ => FALSE);
+// TODO: the following 2
+// should happen automatically
+// for predicates
+Implement(
+    isReal,
+    List([isAny]),
+    isBool, 
+    _ => FALSE
+);
 Implement(
     isReal,
     List([isReal]),
@@ -204,21 +240,30 @@ Implement(
 // Integers
 // ========
 const isInt = MultiFn("isInt");
-_derive(isReal, isInt);
 setType(isInt, isPred);
+Derive(isReal, isInt);
 
-ImplementDefault(isInt, isBool, _ => FALSE);
+// TODO: the following 2
+// should happen automatically
+// for predicates
+Implement(
+    isInt,
+    List([isAny]),
+    isBool, 
+    _ => FALSE
+);
 Implement(
     isInt,
     List([isInt]),
     isBool, 
     _ => TRUE
 );
+
 Implement(
-    isReal,
-    List([isInt]),
+    isInt,
+    List([isReal]),
     isBool, 
-    _ => TRUE
+    r => val(r).integerValue().eq(val(r)) ? TRUE : FALSE
 );
 
 function Int(n) {
@@ -376,8 +421,17 @@ Implement(
 // =======
 const isString = MultiFn("isString");
 setType(isString, isPred);
+_derive(isAny, isString);
 
-ImplementDefault(isString, isBool, _ => FALSE);
+// TODO: the following 2
+// should happen automatically
+// for predicates
+Implement(
+    isString,
+    List([isAny]), 
+    isBool,
+    _ => FALSE
+);
 Implement(
     isString,
     List([isString]), 
@@ -391,10 +445,14 @@ function String(s) {
 
 // toString
 const str = MultiFn('str');
-// better errors from MultiMethods
-toStringBox[0] = (x) => val(str)(x).get('val');
 
-ImplementDefault(str, isString, (x) => String('' + val(x)));
+// ImplementDefault(str, isString, (x) => String('' + val(x)));
+Implement(
+    str,
+    List([isAny]),
+    isString,
+    i => String('' + val(i))
+);
 Implement(
     str,
     List([isInt]),
@@ -415,30 +473,40 @@ Implement(
     isString,
     (x, y) => String(val(x) + val(y))
 );
+Implement(
+    add,
+    List([isString, isAny]),
+    isString,
+    (x, y) => String(val(x) + val(str)(y).get('val'))
+);
+Implement(
+    add,
+    List([isAny, isString]),
+    isString,
+    (x, y) => String(val(str)(x).get('val') + val(y))
+);
 
 
 // Fns
 // ===
 const isFn = MultiFn('isFn');
-_derive(isFn, isMultiFn);
 setType(isFn, isPred);
+_derive(isAny, isFn);
+Derive(isFn, isMultiFn);
+Derive(isFn, isPred);
 
-ImplementDefault(isFn, isBool, _ => FALSE);
+// TODO: the following 2
+// should happen automatically
+// for predicates
+Implement(
+    isFn,
+    List([isAny]), 
+    isBool,
+    _ => FALSE
+);
 Implement(
     isFn,
     List([isFn]),
-    isBool,
-    _ => TRUE
-);
-Implement(
-    isFn,
-    List([isMultiFn]),
-    isBool,
-    _ => TRUE
-);
-Implement(
-    isFn,
-    List([isPred]),
     isBool,
     _ => TRUE
 );
@@ -453,6 +521,7 @@ function Fn(f) {
 function _println(...xs)  {
     let strs = xs.map((x) => val(_apply(str, List([x]))));
     console.log(strs.join(' '));
+    return NULL;
 }
 
 const println = Fn(_println);
@@ -466,15 +535,7 @@ const __AS__ = Fn(___AS__);
 const AS = Fn(_AS);
 const as = Fn(_as);
 
-const derive = Obj((parent, child) => {
-    _derive(parent, child);
-    Implement(
-        parent,
-        List([child]),
-        isBool,
-        _ => TRUE
-    );
-});
+const derive = Fn(Derive);
 
 
 module.exports = {
@@ -509,7 +570,9 @@ module.exports = {
     pow,
     is,
     _is,
+    isLessThan,
     isLessThanEq,
+    isGreaterThan,
     isGreaterThanEq,
     String,
     isString,

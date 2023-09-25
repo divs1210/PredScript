@@ -1,9 +1,34 @@
-function not(x: isBool): isBool {
-    if (x) { false } else { true }
+function isEven(x: isInt): isBool {
+    x % 2 == 0
 }
 
-function not(x: isReal): isReal {
-    0 - x
+function isOdd(x: isInt): isBool {
+    !isEven(x)
 }
 
-println(not(false), not(5))
+derive(isInt, isEven);
+derive(isInt, isOdd);
+
+
+function inc(x: isInt): isInt {
+    x + 1
+}
+
+function inc(x: isEven): isOdd {
+    x + 1
+}
+
+function inc(x: isOdd): isEven {
+    x + 1
+}
+
+let incInt: isInt = inc(1);
+println("incInt: " + type(incInt) + " " + incInt);
+
+let even: isEven = 2;
+let incEven: isOdd = inc(even);
+println("incEven: " + type(incEven) + " " + incEven);
+
+let odd: isOdd = 3;
+let incOdd: isEven = inc(odd);
+println("incOdd: " + type(incOdd) + " " + incOdd);

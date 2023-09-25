@@ -87,7 +87,7 @@ function argTypesToString(argTypes) {
 }
 
 class MultiMethod extends Function {
-    constructor(mName, getType, toStringBox) {
+    constructor(mName, getType) {
         // hack to make objects callable:
         // https://stackoverflow.com/a/40878674/1163490
         super('...args', 'return this.__self__.__call__(...args)');
@@ -99,9 +99,8 @@ class MultiMethod extends Function {
         self.impls = List();
         self.defaultImpl = {};
         self.defaultImpl.f = (...args) => {
-            let toString = toStringBox[0];
-            throw new Error(`MultiMethod ${mName} not defined for args:` 
-                + `[${args.map(toString).join(', ')}]`);
+            throw new Error(`MultiMethod ${mName} not defined for arg types:` 
+                + `${argTypesToString(self.getArgTypes(args))}`);
         }
 
         return self;
@@ -123,6 +122,10 @@ class MultiMethod extends Function {
                     return false;
             return true;
         });
+    }
+
+    getArgTypes(args) {
+        return List(args).map(arg => this.getType(arg));
     }
 
     // TODO: memoize
@@ -154,9 +157,7 @@ class MultiMethod extends Function {
     }
 
     __call__(...args) {
-        let impl = this.implementationFor(
-            List(args).map(arg => this.getType(arg)));
-
+        let impl = this.implementationFor(this.getArgTypes(args));
         return impl.f(...args);
     }
 }
