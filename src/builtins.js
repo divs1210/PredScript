@@ -259,6 +259,13 @@ Implement(
     _ => TRUE
 );
 
+Implement(
+    isInt,
+    List([isReal]),
+    isBool, 
+    r => val(r).integerValue().eq(val(r)) ? TRUE : FALSE
+);
+
 function Int(n) {
     return Obj(
         (new BigNumber(n)).integerValue(),
@@ -560,7 +567,9 @@ module.exports = {
     pow,
     is,
     _is,
+    isLessThan,
     isLessThanEq,
+    isGreaterThan,
     isGreaterThanEq,
     String,
     isString,
@@ -573,5 +582,5 @@ module.exports = {
     __AS__,
     AS,
     as,
-    derive: Derive
+    Derive
 };
