@@ -151,6 +151,16 @@ function ImplementDefault(multi, retType, f) {
     jsMulti.setDefault(retType, f);
 }
 
+function Derive(parent, child) {
+    _derive(parent, child);
+    Implement(
+        parent,
+        _List([child]),
+        isBool,
+        _ => TRUE
+    );
+};
+
 
 // Null
 // ====
@@ -158,6 +168,7 @@ const _isNull = (obj) => obj === NULL ? TRUE : FALSE;
 _isNull.mName = 'isNull';
 const isNull = Obj(_isNull, isPred);
 setType(NULL, isNull);
+Derive(isAny, isNull);
 
 
 // Bool contd
@@ -176,8 +187,17 @@ Implement(
 // ============
 const isReal = MultiFn("isReal");
 setType(isReal, isPred);
+Derive(isAny, isReal);
 
-ImplementDefault(isReal, isBool, _ => FALSE);
+// TODO: the following 2
+// should happen automatically
+// for predicates
+Implement(
+    isReal,
+    List([isAny]),
+    isBool, 
+    _ => FALSE
+);
 Implement(
     isReal,
     List([isReal]),
@@ -204,18 +224,20 @@ Implement(
 // Integers
 // ========
 const isInt = MultiFn("isInt");
-_derive(isReal, isInt);
 setType(isInt, isPred);
+Derive(isReal, isInt);
 
-ImplementDefault(isInt, isBool, _ => FALSE);
+// TODO: the following 2
+// should happen automatically
+// for predicates
 Implement(
     isInt,
-    List([isInt]),
+    List([isAny]),
     isBool, 
-    _ => TRUE
+    _ => FALSE
 );
 Implement(
-    isReal,
+    isInt,
     List([isInt]),
     isBool, 
     _ => TRUE
@@ -376,8 +398,17 @@ Implement(
 // =======
 const isString = MultiFn("isString");
 setType(isString, isPred);
+Derive(isAny, isString);
 
-ImplementDefault(isString, isBool, _ => FALSE);
+// TODO: the following 2
+// should happen automatically
+// for predicates
+Implement(
+    isString,
+    List([isAny]), 
+    isBool,
+    _ => FALSE
+);
 Implement(
     isString,
     List([isString]), 
@@ -392,7 +423,13 @@ function String(s) {
 // toString
 const str = MultiFn('str');
 
-ImplementDefault(str, isString, (x) => String('' + val(x)));
+// ImplementDefault(str, isString, (x) => String('' + val(x)));
+Implement(
+    str,
+    List([isAny]),
+    isString,
+    i => String('' + val(x))
+);
 Implement(
     str,
     List([isInt]),
@@ -430,25 +467,22 @@ Implement(
 // Fns
 // ===
 const isFn = MultiFn('isFn');
-_derive(isFn, isMultiFn);
 setType(isFn, isPred);
+Derive(isFn, isMultiFn);
+Derive(isFn, isPred);
 
-ImplementDefault(isFn, isBool, _ => FALSE);
+// TODO: the following 2
+// should happen automatically
+// for predicates
+Implement(
+    isFn,
+    List([isAny]), 
+    isBool,
+    _ => FALSE
+);
 Implement(
     isFn,
     List([isFn]),
-    isBool,
-    _ => TRUE
-);
-Implement(
-    isFn,
-    List([isMultiFn]),
-    isBool,
-    _ => TRUE
-);
-Implement(
-    isFn,
-    List([isPred]),
     isBool,
     _ => TRUE
 );
@@ -475,16 +509,6 @@ const type = Fn(_type);
 const __AS__ = Fn(___AS__);
 const AS = Fn(_AS);
 const as = Fn(_as);
-
-const derive = Obj((parent, child) => {
-    _derive(parent, child);
-    Implement(
-        parent,
-        List([child]),
-        isBool,
-        _ => TRUE
-    );
-});
 
 
 module.exports = {
@@ -532,5 +556,5 @@ module.exports = {
     __AS__,
     AS,
     as,
-    derive
+    derive: Derive
 };
