@@ -484,6 +484,7 @@ Implement(
 // ===
 const isFn = MultiFn('isFn');
 setType(isFn, isPred);
+_derive(isAny, isFn);
 Derive(isFn, isMultiFn);
 Derive(isFn, isPred);
 
