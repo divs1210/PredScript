@@ -104,7 +104,7 @@ function compileLetStmt(node) {
 
 function compileProgram(node) {
     let allBuiltins = Object.keys(builtins).join(', ');
-    let requireBuiltins = `const {${ allBuiltins }} = require('PredScript/builtins');\n\n`;
+    let requireBuiltins = `const {${ allBuiltins }} = require('predscript/builtins');\n\n`;
 
     let countExprs = node.value.length;
     if (is(0, countExprs))

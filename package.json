@@ -1,5 +1,5 @@
 {
-    "name": "PredScript",
+    "name": "predscript",
     "version": "1.0.0",
     "description": "Predicates as Types. Compiles to JS.",
     "exports": {
