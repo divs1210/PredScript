@@ -3,7 +3,8 @@ const { parse, parseExpr } = require("./parser");
 const { isNull: _isNull, prettify, pprint, val } = require("./util");
 const { 
     isNull, isAny, isBool,
-    isReal, isInt, 
+    isReal, isInt,
+    isString,
     isFn, isPred, isMultiFn, str 
 } = require("./builtins");
 const { isA } = require("./multi");
