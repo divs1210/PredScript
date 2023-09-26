@@ -5,10 +5,44 @@ const {
     isNull, isAny, isBool,
     isReal, isInt,
     isString,
-    isFn, isPred, isMultiFn, str 
+    isFn, isPred, isMultiFn, str, _is 
 } = require("./builtins");
 const { isA } = require("./multi");
 
+// ENV
+// ===
+const builtinEnv = {
+    __parent__: null,
+    isNull,
+    isAny,
+    isBool,
+    isReal,
+    isInt,
+    isString,
+    isFn,
+    isMultiFn,
+    isPred
+};
+
+function envMake(parentEnv, bindings) {
+    return {
+        __parent__: parentEnv,
+        ...bindings
+    };
+}
+
+function envFetch(env, name) {
+    if (_isNull(env))
+        throw new Error(`No definition found for ${name}!`);
+    else if (!_isNull(env[name]))
+        return env[name];
+    else
+        return envFetch(env.__parent__, name);
+}
+
+
+// TC
+// ==
 function tcLiteral(node) {
     let val = node.value;
     switch(node.type) {
@@ -133,7 +167,7 @@ function tcAST(ast, env) {
         case 'null':
             return tcLiteral(ast);
         case 'symbol':
-            return env[ast.value];
+            return envFetch(env, ast.value);
         case 'unary-exp':
             return tcUnaryExpression(ast, env);
         case 'binary-exp':
@@ -158,18 +192,6 @@ function tcAST(ast, env) {
         }
     }
 }
-
-const builtinEnv = {
-    isNull,
-    isAny,
-    isBool,
-    isReal,
-    isInt,
-    isString,
-    isFn,
-    isMultiFn,
-    isPred
-};
 
 function tc(codeString) {
     // console.log(`Input:\n${codeString}\n`);
