@@ -31,13 +31,16 @@ function envMake(parentEnv, bindings) {
     };
 }
 
-function envFetch(env, name) {
+function envFetch(env, name, loc) {
     if (_isNull(env))
-        throw new Error(`No definition found for ${name}!`);
+        throw new Error(
+            `No definition found for ${name}`
+            + ` on line: ${loc.start.line}, col: ${loc.start.column}`
+        );
     else if (!_isNull(env[name]))
         return env[name];
     else
-        return envFetch(env.__parent__, name);
+        return envFetch(env.__parent__, name, loc);
 }
 
 
@@ -167,7 +170,7 @@ function tcAST(ast, env) {
         case 'null':
             return tcLiteral(ast);
         case 'symbol':
-            return envFetch(env, ast.value);
+            return envFetch(env, ast.value, ast.loc);
         case 'unary-exp':
             return tcUnaryExpression(ast, env);
         case 'binary-exp':
@@ -217,7 +220,7 @@ function tcExpr(codeString) {
     return jsCodeString;
 }
 
-console.log('tc: ' + val(tcExpr('let a: isInt = 5.1;')).mName);
+console.log('tc: ' + val(tcExpr('let a: isIntu = 5.1;')).mName);
 
 module.exports = {
     tc,
