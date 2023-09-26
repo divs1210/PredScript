@@ -16,42 +16,48 @@ const { isA } = require("./multi");
 
 // ENV
 // ===
-const builtinEnv = {
-    __parent__: null,
-
+const builtinEnv = [
     // predicates
-    isNull:    _type(isNull),
-    isAny:     _type(isAny),
-    isBool:    _type(isBool),
-    isReal:    _type(isReal),
-    isInt:     _type(isInt),
-    isString:  _type(isString),
-    isFn:      _type(isFn),
-    isMultiFn: _type(isMultiFn),
-    isPred:    _type(isPred),
+    'isNull',
+    'isAny',
+    'isBool',
+    'isReal',
+    'isInt',
+    'isString',
+    'isFn',
+    'isMultiFn',
+    'isPred',
 
     // others
-    type:   _type(type),
+    'type',
 
-    neg:    _type(neg),
-    add:    _type(add),
-    minus:  _type(minus),
-    times:  _type(times),
-    divide: _type(divide),
-    mod:    _type(mod),
+    'neg',
+    'add',
+    'minus',
+    'times',
+    'divide',
+    'mod',
 
-    is:              _type(is),
-    isLessThan:      _type(isLessThan),
-    isLessThanEq:    _type(isLessThanEq),
-    isGreaterThan:   _type(isGreaterThan),
-    isGreaterThanEq: _type(isGreaterThanEq),
+    'is',
+    'isLessThan',
+    'isLessThanEq',
+    'isGreaterThan',
+    'isGreaterThanEq',
 
-    str:   _type(str),
-    apply: _type(apply),
+    'str',
+    'apply',
 
     // higher order preds
-    union: _type(union)
-};
+    'union'
+]
+.reduce((acc, x) => {
+    let v = eval(x);
+    acc[x] = {
+        type: _type(v),
+        val: v
+    }
+    return acc;
+}, {__parent__: null});
 
 function envMake(parentEnv, bindings) {
     return {
@@ -179,8 +185,20 @@ function tcIfExpression(node, env) {
 
 // TODO
 function tcCallExpression(node, env) {
-    // check that apply is implemented for f
+    // check if apply is implemented for f
     let fType = tcAST(node.f, env);
+    let applyImpls = val(apply).impls;
+    let isImpl = applyImpls.some(impl =>
+        isA(impl.argTypes.get(0), fType)
+    );
+
+    if(!isImpl)
+        throw new Error(
+            `Type Error on line: ${loc.start.line}, col: ${loc.start.column}`
+            + `\nNo implementation of apply found for ${val(fType).mName}!`
+            + `\nIt can not be used as a function.`
+        );
+
     let args = node.args.map(exp => tcAST(exp, env)).join(', ');
     return isAny;
 }
@@ -188,7 +206,7 @@ function tcCallExpression(node, env) {
 function tcBlockExpression(node, env) {
     switch (node.value.length) {
         case 0:  return isNull;
-        case 1:  return tcAST(node.value[0],     env);
+        case 1:  return tcAST(node.value[0], env);
         default: {
             return node
             .value
@@ -199,7 +217,7 @@ function tcBlockExpression(node, env) {
 }
 
 function tcLetStmt(node, env) {
-    let varName = node.varName.value;
+    let varName      = node.varName.value;
     let actualType   = tcAST(node.varVal,  env);
     let expectedType = tcAST(node.varType, env);
     
@@ -236,7 +254,7 @@ function tcMultiFn(node, env) {
     let fBodyReturnType = tcBlockExpression(node.body, fnEnv);
     check(fReturnType, fBodyReturnType, node.loc);
 
-    return isMultiFn;
+    return isNull;
 }
 
 function tcAST(ast, env) {
@@ -251,7 +269,7 @@ function tcAST(ast, env) {
         case 'null':
             return tcLiteral(ast);
         case 'symbol':
-            return envFetch(env, ast.value, ast.loc);
+            return envFetch(env, ast.value, ast.loc).val;
         case 'unary-exp':
             return tcUnaryExpression(ast, env);
         case 'binary-exp':
@@ -311,20 +329,17 @@ let x: isInt = { "hello"; 1; };
 
 // function
 function haba(x: isInt): isString {
-    "hello";
+   "hello";
 }
 
 // fn calls
-let t: isPred = type(1);
-
-// isFn
-// fnOf(listOf(isAny), isAny)
+// let t: isPred = type(1);
 
 // multifn calls (+ is a call to add)
-let sum: isReal = 1 + 2.4;
+// let sum: isReal = 1 + 2.4;
 
 // casting
-let sum: isReal = AS(isReal, true);
+// let sum: isReal = AS(isReal, true);
 `)).mName);
 
 
