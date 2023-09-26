@@ -44,6 +44,18 @@ function envFetch(env, name, loc) {
 }
 
 
+// Unify
+// =====
+function check(expectedType, actualType, loc) {
+    if (!isA(expectedType, actualType))
+        throw new Error(
+            `Type Error on line: ${loc.start.line}, col: ${loc.start.column}`
+            + `\nexpected: ${val(expectedType).mName}`
+            + `\n  actual: ${val(actualType).mName}`
+        );
+}
+
+
 // TC
 // ==
 function tcLiteral(node) {
@@ -131,15 +143,11 @@ function tcLetStmt(node, env) {
     let varName = node.varName.value;
     let actualType   = tcAST(node.varVal,  env);
     let expectedType = tcAST(node.varType, env);
-    if (isA(expectedType, actualType)) {
-        env[varName] = actualType;
-        return isAny;
-    }
-    throw new Error(
-        `Type Error on line: ${node.loc.start.line}, col: ${node.loc.start.column}`
-        + `\nexpected: ${val(expectedType).mName}`
-        + `\n  actual: ${val(actualType).mName}`
-        );
+    
+    check(expectedType, actualType, node.loc);
+    env[varName] = actualType;
+    
+    return isNull;
 }
 
 function tcProgram(node, env) {
@@ -147,13 +155,18 @@ function tcProgram(node, env) {
 }
 
 function tcMultiFn(node, env) {
-    let fName = tcAST(node.name);
-    let fReturnType = tcAST(node.retType);
-    let fBody = tcAST(node.body);
-    let argNames = node.args.map((arg) => tcAST(arg.argName)).join(', ');
-    let argTypes = node.args.map((arg) => tcAST(arg.argType)).join(', ');
+    let fName = node.name.value;
+    let argNames = node.args.map(arg => arg.argName.value);
+    let argTypes = node.args.map(arg => arg.argType.value);
     let isPred = (node.args.length === 1) && (fReturnType === 'isBool');
-    let castString = isPred? `_apply(__AS__, List([isPred, ${fName}]));` : '';
+
+    // do this before evaluating body
+    // in case of recursion
+    if(isPred)
+        env[fName] = isPred;
+
+    let fReturnType = node.retType.value;    
+    let fBody = tcAST(node.body);
 
     return isAny;
 }
