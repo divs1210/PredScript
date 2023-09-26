@@ -161,12 +161,14 @@ function tcBinaryExpression(node, env) {
     }
 }
 
+// TODO
 function tcIfExpression(expr, env) {
     let { condExp, thenExp, elseExp } = expr;
     let [cond, then, alt] = [condExp, thenExp, elseExp].map(exp => tcAST(exp, env));
     return isAny;
 }
 
+// TODO
 function tcCallExpression(node, env) {
     // check that apply is implemented for f
     let fType = tcAST(node.f, env);
