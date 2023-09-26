@@ -15,7 +15,7 @@ No matter how awesome your static type checker is -
 whether you use [TypeScript](https://www.typescriptlang.org/),
 or meticulously prove each line with [Agda](https://agda.github.io/agda/),
 chances are that you are going to have to
-validate some data that originates from outside your process.
+[validate some data](https://blog.logrocket.com/dynamic-type-validation-in-typescript/) that originates from outside your process.
 
 At that point, static type checkers are not available,
 and there has to be some different validation strategy -
