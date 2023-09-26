@@ -540,6 +540,7 @@ const derive = Fn(Derive);
 
 module.exports = {
     MultiFn,
+    isMultiFn,
     Implement,
     ImplementDefault,
     Obj,
