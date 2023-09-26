@@ -549,7 +549,7 @@ function _union(...preds) {
     
     const f = (obj) => set.has(_type(obj))? TRUE: FALSE;
     f.mName = mName;
-    f.members = set;
+    // f.members = set;
 
     let newPred = Fn(f);
     setType(newPred, isPred);
@@ -558,6 +558,10 @@ function _union(...preds) {
 
 const union = Fn(_union);
 
+// TODO:
+// 1. type our multis using union, ex: 
+//   add :: union(int, int => int | real, real => real | string, string => string | ....)
+// 2. when a user implements a multifn, update its type
 
 module.exports = {
     MultiFn,
