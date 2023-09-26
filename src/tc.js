@@ -194,7 +194,7 @@ function tcCallExpression(node, env) {
     if(!isImpl)
         throw new Error(
             `Type Error on line: ${node.loc.start.line}, col: ${node.loc.start.column}`
-            + `\nNo implementation of apply found for ${val(psF).mName}.`
+            + `\nNo implementation of apply found for: ${val(psFType).mName}.`
             + `\nIt can not be used as a function.`
         );
 
@@ -222,7 +222,7 @@ function tcLetStmt(node, env) {
     check(expectedType, actualType, node.loc);
     env[varName] = {
         type: actualType,
-        val:  '__unknown__'
+        val:  builtins.Obj('__unknown__', actualType)
     };
     
     return isNull;
