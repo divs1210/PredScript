@@ -8,7 +8,12 @@
     "scripts": {
         "test": "node --test"
     },
-    "keywords": [],
+    "keywords": [
+        "PredScript",
+        "compiler",
+        "language",
+        "javascript"
+    ],
     "bin": {
         "psc": "./compile.js"
     },
