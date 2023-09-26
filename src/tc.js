@@ -1,16 +1,15 @@
 const { parse, parseExpr } = require("./parser");
 const { isNull: _isNull, prettify, val } = require("./util");
+const builtins = require("./builtins");
 const { 
     isNull, isAny, isBool,
     isReal, isInt,
     isString,
-    isFn, isPred, isMultiFn, 
-    _type, type, 
-    minus, times, divide, mod, add, neg, str, 
+    isMultiFn, 
+    _type, 
     apply, 
-    is, isLessThan, isLessThanEq, isGreaterThan, isGreaterThanEq,
     union
-} = require("./builtins");
+} = builtins;
 const { isA } = require("./multi");
 
 
@@ -51,7 +50,7 @@ const builtinEnv = [
     'union'
 ]
 .reduce((acc, x) => {
-    let v = eval(x);
+    let v = eval(`builtins['${x}']`);
     acc[x] = {
         type: _type(v),
         val: v
@@ -185,21 +184,20 @@ function tcIfExpression(node, env) {
 
 // TODO
 function tcCallExpression(node, env) {
-    // check if apply is implemented for f
-    let fType = tcAST(node.f, env);
+    let psF = tcAST(node.f, env);
+    let psFType = _type(psF);
     let applyImpls = val(apply).impls;
     let isImpl = applyImpls.some(impl =>
-        isA(impl.argTypes.get(0), fType)
+        isA(impl.argTypes.get(0), psFType)
     );
 
     if(!isImpl)
         throw new Error(
-            `Type Error on line: ${loc.start.line}, col: ${loc.start.column}`
-            + `\nNo implementation of apply found for ${val(fType).mName}!`
+            `Type Error on line: ${node.loc.start.line}, col: ${node.loc.start.column}`
+            + `\nNo implementation of apply found for ${val(psF).mName}.`
             + `\nIt can not be used as a function.`
         );
 
-    let args = node.args.map(exp => tcAST(exp, env)).join(', ');
     return isAny;
 }
 
@@ -222,7 +220,10 @@ function tcLetStmt(node, env) {
     let expectedType = tcAST(node.varType, env);
     
     check(expectedType, actualType, node.loc);
-    env[varName] = actualType;
+    env[varName] = {
+        type: actualType,
+        val:  '__unknown__'
+    };
     
     return isNull;
 }
@@ -253,6 +254,8 @@ function tcMultiFn(node, env) {
     let fnEnv = envMake(env, argPairs);
     let fBodyReturnType = tcBlockExpression(node.body, fnEnv);
     check(fReturnType, fBodyReturnType, node.loc);
+
+    // TODO define dummy val
 
     return isNull;
 }
@@ -318,7 +321,6 @@ function tcExpr(codeString) {
     
     return jsCodeString;
 }
-
 
 console.log('tc: ' + val(tc(`
 // let
