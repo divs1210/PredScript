@@ -65,16 +65,19 @@ function envMake(parentEnv, bindings) {
     };
 }
 
-function envFetch(env, name, loc) {
-    if (_isNull(env))
-        throw new Error(
-            `No definition found for ${name}`
-            + ` on line: ${loc.start.line}, col: ${loc.start.column}`
-        );
-    else if (!_isNull(env[name]))
+function envFetch(env, name, loc, dontThrow) {
+    if (_isNull(env)) {
+        if(dontThrow)
+            return null;
+        else
+            throw new Error(
+                `No definition found for ${name}`
+                + ` on line: ${loc.start.line}, col: ${loc.start.column}`
+            );
+    } else if (!_isNull(env[name]))
         return env[name];
     else
-        return envFetch(env.__parent__, name, loc);
+        return envFetch(env.__parent__, name, loc, dontThrow);
 }
 
 
@@ -220,6 +223,8 @@ function tcLetStmt(node, env) {
     let expectedType = tcAST(node.varType, env);
     
     check(expectedType, actualType, node.loc);
+
+    // dummy obj in env
     env[varName] = {
         type: actualType,
         val:  builtins.Obj('__unknown__', actualType)
@@ -239,11 +244,16 @@ function tcMultiFn(node, env) {
     // do this before evaluating body
     // in case of recursion
     let isPred = (node.args.length === 1) && (fReturnType === isBool);
-    if(isPred)
-        env[fName] = isPred;
-    else
-        env[fName] = isMultiFn;
+    let multiType = isPred? isPred : isMultiFn;
 
+    // define dummy multimethod if not already defined
+    let existingMulti = envFetch(env, fName, node.loc, true);
+    if(!existingMulti)
+        env[fName] = {
+            type: multiType,
+            val: builtins.MultiFn(fName)
+        };
+    
     let argNames = node.args.map(arg => arg.argName.value);
     let argTypes = node.args.map(arg => tcAST(arg.argType, env));
     
@@ -253,9 +263,18 @@ function tcMultiFn(node, env) {
 
     let fnEnv = envMake(env, argPairs);
     let fBodyReturnType = tcBlockExpression(node.body, fnEnv);
-    check(fReturnType, fBodyReturnType, node.loc);
 
-    // TODO define dummy val
+    // implement dummy multi
+    // before checking body
+    // in case of recursion
+    builtins.Implement(
+        env[fName].val,
+        builtins.List([argTypes]),
+        fReturnType,
+        _ => null
+    );
+
+    check(fReturnType, fBodyReturnType, node.loc);
 
     return isNull;
 }
