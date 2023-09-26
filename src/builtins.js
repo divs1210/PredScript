@@ -513,8 +513,6 @@ function Fn(f) {
 
 // Apply
 // =====
-// Apply
-// =====
 function _apply(f, args) {
     let jsF = val(f);
     let jsArgs = val(args);
