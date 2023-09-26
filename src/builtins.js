@@ -538,7 +538,6 @@ const as = Fn(_as);
 const derive = Fn(Derive);
 
 
-
 // higher order types
 // ==================
 function _union(...preds) {
