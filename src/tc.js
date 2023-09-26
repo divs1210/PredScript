@@ -1,11 +1,14 @@
-const { is } = require("immutable");
 const { parse, parseExpr } = require("./parser");
-const { isNull: _isNull, prettify, pprint, val } = require("./util");
+const { isNull: _isNull, prettify, val } = require("./util");
 const { 
     isNull, isAny, isBool,
     isReal, isInt,
     isString,
-    isFn, isPred, isMultiFn, str, _is 
+    isFn, isPred, isMultiFn, 
+    _type, type, 
+    minus, times, divide, mod, add, neg, str, 
+    apply, 
+    is, isLessThan, isLessThanEq, isGreaterThan, isGreaterThanEq
 } = require("./builtins");
 const { isA } = require("./multi");
 
@@ -14,15 +17,36 @@ const { isA } = require("./multi");
 // ===
 const builtinEnv = {
     __parent__: null,
-    isNull,
-    isAny,
-    isBool,
-    isReal,
-    isInt,
-    isString,
-    isFn,
-    isMultiFn,
-    isPred
+
+    // predicates
+    isNull:    _type(isNull),
+    isAny:     _type(isAny),
+    isBool:    _type(isBool),
+    isReal:    _type(isReal),
+    isInt:     _type(isInt),
+    isString:  _type(isString),
+    isFn:      _type(isFn),
+    isMultiFn: _type(isMultiFn),
+    isPred:    _type(isPred),
+
+    // others
+    type:   _type(type),
+
+    neg:    _type(neg),
+    add:    _type(add),
+    minus:  _type(minus),
+    times:  _type(times),
+    divide: _type(divide),
+    mod:    _type(mod),
+
+    is:              _type(is),
+    isLessThan:      _type(isLessThan),
+    isLessThanEq:    _type(isLessThanEq),
+    isGreaterThan:   _type(isGreaterThan),
+    isGreaterThanEq: _type(isGreaterThanEq),
+
+    str:   _type(str),
+    apply: _type(apply)
 };
 
 function envMake(parentEnv, bindings) {
@@ -86,8 +110,16 @@ function tcUnaryExpression(node, env) {
     let fn = opToFn[op];
 
     if (!_isNull(fn)) {
-        let tcdValue  = tcAST(value, env);
-        return isAny;
+        return tcCallExpression({
+            type: 'call-exp',
+            f: {
+                type: 'symbol',
+                value: fn,
+                loc: node.loc
+            },
+            args: [value],
+            loc: node.loc
+        });
     } else {
         console.error(`Unhandled unary expression: ${prettify(node)} at ${prettify(node.loc)}`);
         return isAny;
@@ -101,7 +133,7 @@ function tcBinaryExpression(node, env) {
         '%':  'mod',
         '+':  'add',
         '-':  'minus',
-//      '**': 'pow',
+//      '**': 'pow', TODO: add to parser
         '<' : 'isLessThan',
         '<=': 'isLessThanEq',
         '==': 'is',
@@ -129,7 +161,8 @@ function tcIfExpression(expr, env) {
 }
 
 function tcCallExpression(node, env) {
-    let f = tcAST(node.f, env);
+    // check that apply is implemented for f
+    let fType = tcAST(node.f, env);
     let args = node.args.map(exp => tcAST(exp, env)).join(', ');
     return isAny;
 }
@@ -264,7 +297,10 @@ function haba(x: isInt): isString {
 }
 
 // fn calls
-let sum: isPred = type(1);
+let t: isPred = type(1);
+
+// isFn
+// fnOf(listOf(isAny), isAny)
 
 // multifn calls (+ is a call to add)
 let sum: isReal = 1 + 2.4;
