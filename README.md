@@ -12,8 +12,9 @@ that uses predicates as types, and looks like JavaScript.
 ## Why
 
 No matter how awesome your static type checker is -
-whether you use TypeScript, or meticulously prove each line
-with Coq or Agda, chances are that you are going to have to
+whether you use [TypeScript](https://www.typescriptlang.org/),
+or meticulously prove each line with [Agda](https://agda.github.io/agda/),
+chances are that you are going to have to
 validate some data that originates from outside your process.
 
 At that point, static type checkers are not available,
