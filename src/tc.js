@@ -134,7 +134,7 @@ function tcCallExpression(node, env) {
 
 function tcBlockExpression(node, env) {
     switch (node.value.length) {
-        case 0:  return `isNull`;
+        case 0:  return isNull;
         case 1:  return tcAST(node.value[0],     env);
         default: return tcAST(node.value.at(-1), env);
     }
@@ -157,21 +157,28 @@ function tcProgram(node, env) {
 
 function tcMultiFn(node, env) {
     let fName = node.name.value;
-    let argNames = node.args.map(arg => arg.argName.value);
-    let argTypes = node.args.map(arg => arg.argType.value);
-    let isPred = (node.args.length === 1) && (fReturnType === 'isBool');
+    let fReturnType = tcAST(node.retType, env);
 
     // do this before evaluating body
     // in case of recursion
+    let isPred = (node.args.length === 1) && (fReturnType === isBool);
     if(isPred)
         env[fName] = isPred;
     else
         env[fName] = isMultiFn;
 
-    let fReturnType = node.retType.value;    
-    let fBody = tcAST(node.body);
+    let argNames = node.args.map(arg => arg.argName.value);
+    let argTypes = node.args.map(arg => tcAST(arg.argType, env));
+    
+    let argPairs = {};
+    for (let i = 0; i < node.args.length; i++)
+        argPairs[argNames[i]] = argTypes[i];
 
-    return isAny;
+    let fnEnv = envMake(env, argPairs);
+    let fBodyReturnType = tcBlockExpression(node.body, fnEnv);
+    check(fReturnType, fBodyReturnType);
+
+    return fBodyReturnType;
 }
 
 function tcAST(ast, env) {
