@@ -22,7 +22,8 @@ leading to a dynamic type checker, and a different type system
 for describing dynamic types. (`EmailString`, `PastDateString`)
 
 What if a language's static type system was built around
-validators that could be checked at compile time as well as at runtime?
+validators that could be checked at compile time,
+as well as efficiently at runtime?
 
 That's the question PredScript wants to answer.
 
