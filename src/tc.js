@@ -220,7 +220,9 @@ function tcExpr(codeString) {
     return jsCodeString;
 }
 
-// console.log('tc: ' + val(tcExpr('let a: isInt = 5;')).mName);
+// console.log('tc: ' + val(tcExpr(`
+// let a: isInt = 5;
+// `)).mName);
 
 module.exports = {
     tc,
