@@ -170,9 +170,9 @@ function tcIfExpression(node, env) {
     let [condType, thenType, elseType] = 
         [condExp, thenExp, elseExp].map(exp => tcAST(exp, env));
 
-    check(isBool, condType, condExp.node.loc);
-    check(isAny,  thenType, thenExp.node.loc);
-    check(isAny,  elseType, elseExp.node.loc);
+    check(isBool, condType, condExp.loc);
+    check(isAny,  thenType, thenExp.loc);
+    check(isAny,  elseType, elseExp.loc);
 
     return val(union)(thenType, elseType);
 }
