@@ -54,6 +54,8 @@ function check(expectedType, actualType, loc) {
             + `\nexpected: ${val(expectedType).mName}`
             + `\n  actual: ${val(actualType).mName}`
         );
+    else
+        return actualType;
 }
 
 
@@ -136,7 +138,12 @@ function tcBlockExpression(node, env) {
     switch (node.value.length) {
         case 0:  return isNull;
         case 1:  return tcAST(node.value[0],     env);
-        default: return tcAST(node.value.at(-1), env);
+        default: {
+            return node
+            .value
+            .map(expr => check(isAny, tcAST(expr, env)))
+            .pop();
+        }
     }
 }
 
@@ -152,7 +159,6 @@ function tcLetStmt(node, env) {
 }
 
 function tcProgram(node, env) {
-    // TODO: dont do this
     return tcBlockExpression(node, env);
 }
 
@@ -244,22 +250,19 @@ function tcExpr(codeString) {
     return jsCodeString;
 }
 
-// // let
-// console.log('tc: ' + val(tcExpr(`
-// let a: isInt = 5;
-// `)).mName);
 
-// // block
-// console.log('tc: ' + val(tcExpr(`
-// let x: isInt = { "hello"; 1; };
-// `)).mName);
+console.log('tc: ' + val(tc(`
+// let
+let a: isInt = 5;
 
-// // function
-// console.log('tc: ' + val(tcExpr(`
-// function haba(x: isInt): isString {
-//     "hello";
-// }
-// `)).mName);
+// block
+let x: isInt = { "hello"; 1; };
+
+// function
+function haba(x: isInt): isString {
+    "hello";
+}
+`)).mName);
 
 
 module.exports = {
