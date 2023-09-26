@@ -6,8 +6,8 @@ const { compile } = require('./src/compiler');
 const { exec } = require("child_process");
 
 let [_, __, fileName] = process.argv;
-let filePath = path.join(__dirname, fileName);
-let code = fs.readFileSync(filePath, 'utf8');
+
+let code = fs.readFileSync(fileName, 'utf8');
 let compiledCode = compile(code);
 let intermediateFile = path.join(__dirname, 'dist', 'index.temp.js');
 
