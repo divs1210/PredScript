@@ -106,10 +106,6 @@ class MultiMethod extends Function {
         return self;
     }
 
-    setDefault(retType, f) {
-        this.defaultImpl = { retType, f };
-    }
-
     implementFor(argTypes, retType, f) {
         this.impls = this.impls.push({argTypes, retType, f});
     }
@@ -144,7 +140,7 @@ class MultiMethod extends Function {
         let nextBestFit = sorted.get(1);
 
         if(isNull(bestFit))
-            return this.defaultImpl;
+            return null;
         else if (isNull(nextBestFit))
             return bestFit;
         else if (!is(
@@ -161,7 +157,8 @@ class MultiMethod extends Function {
     }
 
     __call__(...args) {
-        let impl = this.implementationFor(this.getArgTypes(args));
+        let impl = this.implementationFor(this.getArgTypes(args))
+                || this.defaultImpl;
         return impl.f(...args);
     }
 }

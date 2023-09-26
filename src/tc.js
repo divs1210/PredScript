@@ -185,21 +185,24 @@ function tcIfExpression(node, env) {
     return val(union)(thenType, elseType);
 }
 
-// TODO
 function tcCallExpression(node, env) {
     let psF = tcAST(node.f, env);
+
+    // check if f can be applied
     let psFType = _type(psF);
     let applyImpls = val(apply).impls;
     let isImpl = applyImpls.some(impl =>
-        isA(impl.argTypes.get(0), psFType)
-    );
-
+        isA(impl.argTypes.get(0), psFType));
     if(!isImpl)
         throw new Error(
             `Type Error on line: ${node.loc.start.line}, col: ${node.loc.start.column}`
             + `\nNo implementation of apply found for: ${val(psFType).mName}.`
             + `\nIt can not be used as a function.`
         );
+
+    // TODO:
+    // find matching impl
+    let actualImpl = val(apply).implementationFor();
 
     return isAny;
 }
