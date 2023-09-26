@@ -1,11 +1,9 @@
-let isPrimitiveNum: isPred = union(isReal, isInt);
+let isIntOrBool: isPred = union(isInt, isBool);
 
-println(isPrimitiveNum);
+println(isIntOrBool);
 
-println(type(isPrimitiveNum));
+println(isIntOrBool(1));
 
-println(isPrimitiveNum(1));
+println(isIntOrBool(true));
 
-println(isPrimitiveNum(1.3));
-
-println(isPrimitiveNum(true));
+println(isIntOrBool("hello"));
