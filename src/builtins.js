@@ -136,11 +136,15 @@ const _as = (pred, obj) => {
 const _isMultiFn = new MultiMethod("isMultiFn", _type);
 const isMultiFn = Obj(_isMultiFn, isPred);
 
-_isMultiFn.setDefault(isBool, _ => FALSE);
+_isMultiFn.implementFor(
+    _List([isAny]),
+    isBool,
+    _ => FALSE
+);
 _isMultiFn.implementFor(
     _List([isMultiFn]),
     isBool,
-    (_) => TRUE
+    _ => TRUE
 );
 
 function MultiFn(name) {
@@ -160,11 +164,6 @@ function Implement(multi, argTypes, retType, f) {
     };
 
     jsMulti.implementFor(jsArgTypes, retType, checkedF);
-}
-
-function ImplementDefault(multi, retType, f) {
-    let jsMulti = val(multi);
-    jsMulti.setDefault(retType, f);
 }
 
 function Derive(parent, child) {
@@ -274,18 +273,6 @@ function Int(n) {
 }
 
 
-// Apply
-// =====
-function _apply(f, args) {
-    let jsF = val(f);
-    let jsArgs = val(args);
-    return jsF(...jsArgs);
-}
-
-const apply = MultiFn('apply');
-ImplementDefault(apply, isAny, _apply);
-
-
 // Arithmetic
 // ===========
 const add = MultiFn('add');
@@ -376,7 +363,12 @@ Implement(
 // Logic operators
 // ================
 const is = MultiFn('is');
-ImplementDefault(is, isBool, (x, y) => Bool(_is(x, y)));
+Implement(
+    is,
+    List([isAny, isAny]),
+    isBool,
+    (x, y) => Bool(_is(x, y))
+);
 Implement(
     is,
     List([isReal, isReal]),
@@ -445,8 +437,6 @@ function String(s) {
 
 // toString
 const str = MultiFn('str');
-
-// ImplementDefault(str, isString, (x) => String('' + val(x)));
 Implement(
     str,
     List([isAny]),
@@ -516,6 +506,25 @@ function Fn(f) {
 }
 
 
+// Apply
+// =====
+// Apply
+// =====
+function _apply(f, args) {
+    let jsF = val(f);
+    let jsArgs = val(args);
+    return jsF(...jsArgs);
+}
+
+const apply = MultiFn('apply');
+Implement(
+    apply,
+    List([isFn, isList]),
+    isAny,
+    _apply
+);
+
+
 // IO
 // ==
 function _println(...xs)  {
@@ -567,7 +576,6 @@ module.exports = {
     MultiFn,
     isMultiFn,
     Implement,
-    ImplementDefault,
     Obj,
     val,
     isAny,
