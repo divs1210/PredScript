@@ -2,7 +2,9 @@
     "name": "PredScript",
     "version": "1.0.0",
     "description": "Predicates as Types. Compiles to JS.",
-    "main": "index.js",
+    "exports": {
+        "./builtins": "./src/builtins.js"
+    },
     "scripts": {
         "test": "node --test"
     },
