@@ -110,7 +110,10 @@ function List(jsArray) {
 
 // Casting
 // =======
-const ___AS__ = (type, obj) => setType(obj, type);
+const ___AS__ = (type, obj) => {
+    setType(obj, type);
+    return NULL;
+}
 
 const _AS = (type, obj) => {
     let meta = obj.get('meta');
@@ -164,6 +167,7 @@ function Implement(multi, argTypes, retType, f) {
     };
 
     jsMulti.implementFor(jsArgTypes, retType, checkedF);
+    return NULL;
 }
 
 function Derive(parent, child) {
@@ -174,6 +178,7 @@ function Derive(parent, child) {
         isBool,
         _ => TRUE
     );
+    return NULL;
 };
 
 
