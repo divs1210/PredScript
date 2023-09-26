@@ -1,12 +1,22 @@
 {
-    "name": "PredScript",
+    "name": "predscript",
     "version": "1.0.0",
     "description": "Predicates as Types. Compiles to JS.",
-    "main": "index.js",
+    "exports": {
+        "./builtins": "./src/builtins.js"
+    },
     "scripts": {
         "test": "node --test"
     },
-    "keywords": [],
+    "keywords": [
+        "PredScript",
+        "compiler",
+        "language",
+        "javascript"
+    ],
+    "bin": {
+        "psc": "./compile.js"
+    },
     "author": "",
     "license": "MIT",
     "dependencies": {
