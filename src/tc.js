@@ -158,13 +158,25 @@ function tcAST(ast, env) {
     }
 }
 
+const builtinEnv = {
+    isNull,
+    isAny,
+    isBool,
+    isReal,
+    isInt,
+    isString,
+    isFn,
+    isMultiFn,
+    isPred
+};
+
 function tc(codeString) {
     // console.log(`Input:\n${codeString}\n`);
 
     let ast = parse(codeString);
     // console.log(`AST:\n${prettify(ast)}\n`);
 
-    let jsCodeString = tcAST(ast, {});
+    let jsCodeString = tcAST(ast, builtinEnv);
     // console.log(`tcd:\n${jsCodeString}\n`);
 
     return jsCodeString;
@@ -174,11 +186,9 @@ function tcExpr(codeString) {
     // console.log(`Input:\n${codeString}\n`);
 
     let ast = parseExpr(codeString);
-    console.log(`AST:\n${prettify(ast)}\n`);
+    // console.log(`AST:\n${prettify(ast)}\n`);
 
-    let jsCodeString = tcAST(ast, {
-        isInt: isInt
-    });
+    let jsCodeString = tcAST(ast, builtinEnv);
     // console.log(`tcd:\n${jsCodeString}\n`);
     
     return jsCodeString;
