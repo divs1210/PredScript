@@ -8,7 +8,8 @@ const {
     _type, type, 
     minus, times, divide, mod, add, neg, str, 
     apply, 
-    is, isLessThan, isLessThanEq, isGreaterThan, isGreaterThanEq
+    is, isLessThan, isLessThanEq, isGreaterThan, isGreaterThanEq,
+    union
 } = require("./builtins");
 const { isA } = require("./multi");
 
@@ -46,7 +47,10 @@ const builtinEnv = {
     isGreaterThanEq: _type(isGreaterThanEq),
 
     str:   _type(str),
-    apply: _type(apply)
+    apply: _type(apply),
+
+    // higher order preds
+    union: _type(union)
 };
 
 function envMake(parentEnv, bindings) {
@@ -161,11 +165,13 @@ function tcBinaryExpression(node, env) {
     }
 }
 
-// TODO
-function tcIfExpression(expr, env) {
-    let { condExp, thenExp, elseExp } = expr;
-    let [cond, then, alt] = [condExp, thenExp, elseExp].map(exp => tcAST(exp, env));
-    return isAny;
+function tcIfExpression(node, env) {
+    let { condExp, thenExp, elseExp } = node;
+    let [condType, thenType, elseType] = 
+        [condExp, thenExp, elseExp].map(exp => tcAST(exp, env));
+
+    check(isBool, condType, node.loc);
+    return val(union)(thenType, elseType);
 }
 
 // TODO

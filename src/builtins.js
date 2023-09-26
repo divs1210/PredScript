@@ -1,4 +1,4 @@
-const { Map, is: _is, List: _List } = require('immutable');
+const { Map, is: _is, List: _List, Set } = require('immutable');
 const BigNumber = require('bignumber.js');
 const { MultiMethod, derive: _derive, isA } = require('./multi');
 
@@ -538,6 +538,26 @@ const as = Fn(_as);
 const derive = Fn(Derive);
 
 
+
+// higher order types
+// ==================
+function _union(name, ...preds) {
+    let set = Set(preds);
+    let f = obj => 
+        set.has(_type(obj))?
+            TRUE:
+            FALSE;
+
+    f.mName = name;
+    let obj = Fn(f);
+    setType(obj, isPred);
+
+    return f;
+}
+
+const union = Fn(_union);
+
+
 module.exports = {
     MultiFn,
     isMultiFn,
@@ -586,5 +606,6 @@ module.exports = {
     __AS__,
     AS,
     as,
-    derive
+    derive,
+    union
 };
