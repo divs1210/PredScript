@@ -117,9 +117,13 @@ class MultiMethod extends Function {
     matchingImpls(argTypes) {
         let s = argTypes.size;
         return this.impls.filter(impl => {
+            if (!is(s, impl.argTypes.size))
+                return false;
+
             for (let i = 0; i < s; i++)
                 if (!isA(impl.argTypes.get(i), argTypes.get(i)))
                     return false;
+
             return true;
         });
     }
