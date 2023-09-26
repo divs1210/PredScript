@@ -152,6 +152,7 @@ function tcLetStmt(node, env) {
 }
 
 function tcProgram(node, env) {
+    // TODO: dont do this
     return tcBlockExpression(node, env);
 }
 
@@ -243,13 +244,23 @@ function tcExpr(codeString) {
     return jsCodeString;
 }
 
+// // let
 // console.log('tc: ' + val(tcExpr(`
-// function haba(x: isInt): isString {
-//     1.5; "hello";
-// }
-
 // let a: isInt = 5;
 // `)).mName);
+
+// // block
+// console.log('tc: ' + val(tcExpr(`
+// let x: isInt = { "hello"; 1; };
+// `)).mName);
+
+// // function
+// console.log('tc: ' + val(tcExpr(`
+// function haba(x: isInt): isString {
+//     "hello";
+// }
+// `)).mName);
+
 
 module.exports = {
     tc,
