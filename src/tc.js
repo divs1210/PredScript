@@ -119,9 +119,9 @@ function tcUnaryExpression(node, env) {
             },
             args: [value],
             loc: node.loc
-        });
+        }, env);
     } else {
-        console.error(`Unhandled unary expression: ${prettify(node)} at ${prettify(node.loc)}`);
+        console.error(`Unhandled unary operator on line: ${node.loc.start.line}, col: ${node.loc.start.column}`);
         return isAny;
     }
 }
@@ -145,11 +145,18 @@ function tcBinaryExpression(node, env) {
     let fn = opToFn[op];
 
     if (!_isNull(fn)) {
-        let tcdLeft  = tcAST(left, env);
-        let tcdRight = tcAST(right, env);    
-        return isAny;   
+        return tcCallExpression({
+            type: 'call-exp',
+            f: {
+                type: 'symbol',
+                value: fn,
+                loc: node.loc
+            },
+            args: [left, right],
+            loc: node.loc
+        }, env);
     } else {
-        console.error(`Unhandled binary expression: ${prettify(node)} at ${prettify(node.loc)}`);
+        console.error(`Unknown binary operator on line: ${node.loc.start.line}, col: ${node.loc.start.column}`);
         return isAny;
     }
 }
