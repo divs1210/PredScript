@@ -9,6 +9,7 @@ const {
 } = require("./builtins");
 const { isA } = require("./multi");
 
+
 // ENV
 // ===
 const builtinEnv = {
@@ -134,7 +135,7 @@ function tcCallExpression(node, env) {
 function tcBlockExpression(node, env) {
     switch (node.value.length) {
         case 0:  return `isNull`;
-        case 1:  return tcAST(node.value[0], env);
+        case 1:  return tcAST(node.value[0],     env);
         default: return tcAST(node.value.at(-1), env);
     }
 }
@@ -151,7 +152,7 @@ function tcLetStmt(node, env) {
 }
 
 function tcProgram(node, env) {
-    return isAny;
+    return tcBlockExpression(node, env);
 }
 
 function tcMultiFn(node, env) {
@@ -164,6 +165,8 @@ function tcMultiFn(node, env) {
     // in case of recursion
     if(isPred)
         env[fName] = isPred;
+    else
+        env[fName] = isMultiFn;
 
     let fReturnType = node.retType.value;    
     let fBody = tcAST(node.body);
