@@ -176,7 +176,7 @@ function tcMultiFn(node, env) {
 
     let fnEnv = envMake(env, argPairs);
     let fBodyReturnType = tcBlockExpression(node.body, fnEnv);
-    check(fReturnType, fBodyReturnType);
+    check(fReturnType, fBodyReturnType, node.loc);
 
     return fBodyReturnType;
 }
@@ -244,6 +244,10 @@ function tcExpr(codeString) {
 }
 
 // console.log('tc: ' + val(tcExpr(`
+// function haba(x: isInt): isString {
+//     1.5; "hello";
+// }
+
 // let a: isInt = 5;
 // `)).mName);
 
