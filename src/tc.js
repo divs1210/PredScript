@@ -185,7 +185,7 @@ function tcMultiFn(node, env) {
     let fBodyReturnType = tcBlockExpression(node.body, fnEnv);
     check(fReturnType, fBodyReturnType, node.loc);
 
-    return fBodyReturnType;
+    return isMultiFn;
 }
 
 function tcAST(ast, env) {
@@ -262,6 +262,15 @@ let x: isInt = { "hello"; 1; };
 function haba(x: isInt): isString {
     "hello";
 }
+
+// fn calls
+let sum: isPred = type(1);
+
+// multifn calls (+ is a call to add)
+let sum: isReal = 1 + 2.4;
+
+// casting
+let sum: isReal = AS(isReal, true);
 `)).mName);
 
 
