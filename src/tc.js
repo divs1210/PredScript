@@ -290,7 +290,7 @@ function tcMultiFn(node, env) {
     // in case of recursion
     builtins.Implement(
         env[fName].val,
-        builtins.List([argTypes]),
+        builtins.List(argTypes),
         fReturnType,
         _ => null
     );
