@@ -181,7 +181,7 @@ function tcIfExpression(node, env) {
     elseExp = elseExp || {
         type: 'null', 
         value: null,
-        loc: thenExp.loc
+        loc: node.loc
     };
 
     let [condType, thenType, elseType] = 

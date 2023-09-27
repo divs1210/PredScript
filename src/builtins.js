@@ -650,6 +650,7 @@ function _union(predA, predB) {
 
     let newPred = Fn(f);
     setType(newPred, isPred);
+    _derive(isAny, newPred);
     return newPred;
 }
 _union.mName = 'union';
