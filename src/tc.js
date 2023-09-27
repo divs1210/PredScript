@@ -329,29 +329,29 @@ function tcAST(ast, env) {
     }
 }
 
-function tc(codeString) {
-    // console.log(`Input:\n${codeString}\n`);
+// function tc(codeString) {
+//     // console.log(`Input:\n${codeString}\n`);
 
-    let ast = parse(codeString);
-    // console.log(`AST:\n${prettify(ast)}\n`);
+//     let ast = parse(codeString);
+//     // console.log(`AST:\n${prettify(ast)}\n`);
 
-    let jsCodeString = tcAST(ast, builtinEnv);
-    // console.log(`tcd:\n${jsCodeString}\n`);
+//     let jsCodeString = tcAST(ast, builtinEnv);
+//     // console.log(`tcd:\n${jsCodeString}\n`);
 
-    return jsCodeString;
-}
+//     return jsCodeString;
+// }
 
-function tcExpr(codeString) {
-    // console.log(`Input:\n${codeString}\n`);
+// function tcExpr(codeString) {
+//     // console.log(`Input:\n${codeString}\n`);
 
-    let ast = parseExpr(codeString);
-    // console.log(`AST:\n${prettify(ast)}\n`);
+//     let ast = parseExpr(codeString);
+//     // console.log(`AST:\n${prettify(ast)}\n`);
 
-    let jsCodeString = tcAST(ast, builtinEnv);
-    // console.log(`tcd:\n${jsCodeString}\n`);
+//     let jsCodeString = tcAST(ast, builtinEnv);
+//     // console.log(`tcd:\n${jsCodeString}\n`);
     
-    return jsCodeString;
-}
+//     return jsCodeString;
+// }
 
 // console.log('tc: ' + val(tc(`
 // // let
@@ -377,6 +377,5 @@ function tcExpr(codeString) {
 
 
 module.exports = {
-    tc,
-    tcExpr
+    tcAST
 };
