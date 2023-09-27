@@ -292,6 +292,8 @@ function tcMultiFn(node, env) {
 }
 
 function tcAST(ast, env) {
+    env = env || builtinEnv;
+
     if(_isNull(ast))
         return isNull;
 
