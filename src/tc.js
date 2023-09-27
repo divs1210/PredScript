@@ -186,10 +186,10 @@ function tcIfExpression(node, env) {
 }
 
 function tcCallExpression(node, env) {
-    let psF = tcAST(node.f, env);
+    let fnOrMultiFn = tcAST(node.f, env);
 
     // check if f can be applied
-    let psFType = _type(psF);
+    let psFType = _type(fnOrMultiFn);
     let applyImpls = val(apply).impls;
     let isImpl = applyImpls.some(impl =>
         isA(impl.argTypes.get(0), psFType));
@@ -200,11 +200,18 @@ function tcCallExpression(node, env) {
             + `\nIt can not be used as a function.`
         );
 
-    // TODO:
-    // find matching impl
-    let actualImpl = val(apply).implementationFor();
+    let argTypes = builtins._List(node.args).map(arg => tcAST(arg, env));
+    let argTypesStr = '[' + argTypes.map(t => val(t).mName).join(", ") + ']';
+    let actualImpl = val(fnOrMultiFn).implementationFor?.(argTypes);
+    console.log(fnOrMultiFn);
+    if(!actualImpl) {
+        throw new Error(
+            `Type Error on line: ${node.loc.start.line}, col: ${node.loc.start.column}`
+            + `\nNo matching implementation of ${val(fnOrMultiFn).mName} found for args: ${argTypesStr}`
+        );
+    }
 
-    return isAny;
+    return actualImpl.retType;
 }
 
 function tcBlockExpression(node, env) {

@@ -133,7 +133,7 @@ class MultiMethod extends Function {
         let matchingImpls = this.matchingImpls(argTypes);
 
         if(matchingImpls.isEmpty())
-            return this.defaultImpl;
+            return null;
 
         let sorted = matchingImpls.sortBy(impl => argTypesDistance(argTypes, impl.argTypes));
         let bestFit = sorted.get(0);
