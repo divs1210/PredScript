@@ -50,10 +50,15 @@ const builtinEnv = [
     'union',
 
     // IO
-    'println'
+    'println',
+
+    // casting
+    'as',
+    'AS',
+    '__AS__'
 ]
 .reduce((acc, x) => {
-    let v = eval(`builtins['${x}']`);
+    let v = builtins[x];
     acc[x] = {
         type: _type(v),
         val: v
