@@ -277,7 +277,10 @@ function tcMultiFn(node, env) {
     
     let argPairs = {};
     for (let i = 0; i < node.args.length; i++)
-        argPairs[argNames[i]] = argTypes[i];
+        argPairs[argNames[i]] = {
+            type: argTypes[i],
+            val: '__unknown__'
+        };
 
     let fnEnv = envMake(env, argPairs);
     let fBodyReturnType = tcBlockExpression(node.body, fnEnv);
