@@ -1,3 +1,4 @@
+const { parse } = require("./parser");
 const { isNull: _isNull, prettify, val } = require("./util");
 const builtins = require("./builtins");
 const { 
@@ -354,7 +355,9 @@ function tcAST(ast, env) {
 
 // TEST
 // ====
-console.log('tc: ' + val(tcAST(`
+console.log('tc: ' + val(tcAST(parse(`
+null;
+
 // let
 // let a: isInt = 5;
 
@@ -374,7 +377,7 @@ console.log('tc: ' + val(tcAST(`
 
 // casting
 // let sum: isReal = AS(isReal, true);
-`)).mName);
+`))).mName);
 
 
 module.exports = {
