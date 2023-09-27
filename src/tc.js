@@ -1,4 +1,3 @@
-const { parse, parseExpr } = require("./parser");
 const { isNull: _isNull, prettify, val } = require("./util");
 const builtins = require("./builtins");
 const { 
@@ -11,6 +10,7 @@ const {
     union
 } = builtins;
 const { isA } = require("./multi");
+const { is } = require("immutable");
 
 
 // ENV
@@ -59,10 +59,9 @@ const builtinEnv = [
 ]
 .reduce((acc, x) => {
     let v = builtins[x];
-    acc[x] = {
-        type: _type(v),
-        val: v
-    }
+    let t = _type(v);
+    // fns are their own type
+    acc[x] = isA(builtins.isFn, t)? v: t;
     return acc;
 }, {__parent__: null});
 
@@ -199,32 +198,36 @@ function tcIfExpression(node, env) {
     return val(union)(thenType, elseType);
 }
 
+// TODO
+// fetch the implementation
 function tcCallExpression(node, env) {
-    let multiFn = tcAST(node.f, env);
-
-    // check if f can be applied
-    let psFType = _type(multiFn);
-    let applyImpls = val(apply).impls;
-    let isImpl = applyImpls.some(impl =>
-        isA(impl.argTypes.get(0), psFType));
-    if(!isImpl)
-        throw new Error(
-            `Type Error on line: ${node.loc.start.line}, col: ${node.loc.start.column}`
-            + `\nNo implementation of apply found for: ${val(psFType).mName}.`
-            + `\nIt can not be used as a function.`
-        );
-
+    let calleeType = tcAST(node.f, env);
     let argTypes = builtins._List(node.args).map(arg => tcAST(arg, env));
-    let argTypesStr = '[' + argTypes.map(t => val(t).mName).join(", ") + ']';
-    let actualImpl = val(multiFn).implementationFor(argTypes);
-    if(!actualImpl) {
-        throw new Error(
-            `Type Error on line: ${node.loc.start.line}, col: ${node.loc.start.column}`
-            + `\nNo matching implementation of ${val(multiFn).mName} found for args: ${argTypesStr}`
-        );
-    }
 
-    return actualImpl.retType;
+    if(isA(builtins.isFn, calleeType)) {
+        let actualImpl = val(calleeType).implementationFor(argTypes);
+        if(!actualImpl) {
+            let argTypesStr = '[' + argTypes.map(t => val(t).mName).join(", ") + ']';
+            throw new Error(
+                `Type Error on line: ${node.loc.start.line}, col: ${node.loc.start.column}`
+                + `\nNo matching implementation of ${val(calleeType).mName} found for args: ${argTypesStr}`
+            );
+        }
+        return actualImpl.retType;
+    } else {
+        // check if it can be called,
+        // ie apply is implemented for it
+        let applyImpls = val(apply).impls;
+        let isImpl = applyImpls.some(impl =>
+            isA(impl.argTypes.get(0), calleeType));
+        
+        if(!isImpl)
+            throw new Error(
+                `Type Error on line: ${node.loc.start.line}, col: ${node.loc.start.column}`
+                + `\nNo implementation of apply found for: ${val(calleeType).mName}.`
+                + `\nIt can not be used as a function.`
+            );
+    }
 }
 
 function tcBlockExpression(node, env) {
@@ -244,14 +247,10 @@ function tcLetStmt(node, env) {
     let varName      = node.varName.value;
     let actualType   = tcAST(node.varVal,  env);
     let expectedType = tcAST(node.varType, env);
-    
+
     check(expectedType, actualType, node.loc);
 
-    // dummy obj in env
-    env[varName] = {
-        type: actualType,
-        val:  builtins.Obj(actualType, actualType)
-    };
+    env[varName] = actualType;
     
     return isNull;
 }
@@ -264,40 +263,44 @@ function tcMultiFn(node, env) {
     let fName = node.name.value;
     let fReturnType = tcAST(node.retType, env);
 
-    // do this before evaluating body
-    // in case of recursion
-    let isPred = (node.args.length === 1) && (fReturnType === isBool);
-    let multiType = isPred? isPred : isMultiFn;
-
     // define dummy multimethod if not already defined
-    let existingMulti = envFetch(env, fName, node.loc, true);
-    if(!existingMulti)
-        env[fName] = {
-            type: multiType,
-            val: builtins.MultiFn(fName)
-        };
+    let existingBinding = envFetch(env, fName, node.loc, true);
+    let existingFn;
+    // binding doesn't exist
+    if(!existingBinding) {
+        existingFn = builtins.MultiFn(fName);
+        env[fName] = existingFn;
+    } // existing binding is a type, ie not a Fn value
+    else if(val(builtins.isPred)(existingBinding)) {
+        throw new Error(
+            `Error on line: ${node.loc.start.line}, col: ${node.loc.start.column}`
+            + `\n${val(fName)} is already defined with type ${val(existingBinding).mName}.`
+        );
+    } // else binding exists and is a multifn
+    existingFn = existingBinding;
     
     let argNames = node.args.map(arg => arg.argName.value);
     let argTypes = node.args.map(arg => tcAST(arg.argType, env));
     
-    let argPairs = {};
+    let envArgs = {};
     for (let i = 0; i < node.args.length; i++)
-        argPairs[argNames[i]] = {
-            type: argTypes[i],
-            val: argTypes[i]
-        };
+        envArgs[argNames[i]] = argTypes[i];
 
-    let fnEnv = envMake(env, argPairs);
+    let fnEnv = envMake(env, envArgs);
     let fBodyReturnType = tcBlockExpression(node.body, fnEnv);
 
-    // implement dummy multi
+    // implement dummy fn
     // before checking body
     // in case of recursion
     builtins.Implement(
-        env[fName].val,
-        builtins.List(argTypes),
+        existingFn,
+        // convert multis in argtypes to isFn
+        builtins.List(argTypes.map(argType =>
+            val(builtins.isPred)(argType)? argType: builtins.isFn)),
+        // convert to isMultiFn if multi
         fReturnType,
-        _ => null
+        // no f
+        null
     );
 
     check(fReturnType, fBodyReturnType, node.loc);
@@ -319,7 +322,7 @@ function tcAST(ast, env) {
         case 'null':
             return tcLiteral(ast);
         case 'symbol':
-            return envFetch(env, ast.value, ast.loc).val;
+            return envFetch(env, ast.value, ast.loc);
         case 'unary-exp':
             return tcUnaryExpression(ast, env);
         case 'binary-exp':
@@ -345,27 +348,33 @@ function tcAST(ast, env) {
     }
 }
 
-// console.log('tc: ' + val(tc(`
-// // let
+// UTIL
+// ====
+
+
+// TEST
+// ====
+console.log('tc: ' + val(tcAST(`
+// let
 // let a: isInt = 5;
 
-// // block
+// block
 // let x: isInt = { "hello"; 1; };
 
-// // function
+// function
 // function haba(x: isInt): isString {
 //    "hello";
 // }
 
-// // fn calls
+// fn calls
 // let t: isPred = type(1);
 
-// // multifn calls (+ is a call to add)
-// // let sum: isReal = 1 + 2.4;
+// multifn calls (+ is a call to add)
+// let sum: isReal = 1 + 2.4;
 
-// // casting
-// // let sum: isReal = AS(isReal, true);
-// `)).mName);
+// casting
+// let sum: isReal = AS(isReal, true);
+`)).mName);
 
 
 module.exports = {

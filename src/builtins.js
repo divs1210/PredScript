@@ -1,6 +1,7 @@
 const { Map, is: _is, List: _List, Set } = require('immutable');
 const BigNumber = require('bignumber.js');
 const { MultiMethod, derive: _derive, isA } = require('./multi');
+const { val } = require('./util');
 
 // objects and types
 // =================
@@ -13,10 +14,6 @@ const Obj = (val, type) =>
           }
       });
 
-function val(obj) {
-    return obj.get('val');
-}
-
 
 // primitives
 // ==========
@@ -28,7 +25,7 @@ const _isAny = _ => TRUE;
 const isAny = Obj(_isAny);
 
 function _type(obj) {
-    return obj.get('meta').type || isAny;
+    return obj.get('meta').type
 }
 
 function setType(obj, type) {
@@ -650,6 +647,7 @@ function _union(predA, predB) {
 
     let newPred = Fn(f);
     setType(newPred, isPred);
+    // TODO: should derive from lowest common ancestor
     _derive(isAny, newPred);
     return newPred;
 }

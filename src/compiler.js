@@ -1,6 +1,6 @@
 const { is } = require("immutable");
 const { parse, parseExpr } = require("./parser");
-const { tcAST } = require("./tc");
+// const { tcAST } = require("./tc");
 const { isNull, prettify } = require("./util");
 const builtins = require('./builtins');
 
@@ -181,7 +181,7 @@ function compile(codeString) {
     let ast = parse(codeString);
     // console.log(`AST:\n${prettify(ast)}\n`);
 
-    tcAST(ast);
+    // tcAST(ast);
 
     let jsCodeString = compileAST(ast);
     // console.log(`Compiled:\n${jsCodeString}\n`);
@@ -195,7 +195,7 @@ function compileExpr(codeString) {
     let ast = parseExpr(codeString);
     // console.log(`AST:\n${prettify(ast)}\n`);
 
-    tcAST(ast);
+    // tcAST(ast);
 
     let jsCodeString = compileAST(ast);
     // console.log(`Compiled:\n${jsCodeString}\n`);
