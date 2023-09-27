@@ -236,15 +236,30 @@ function Derive(parent, child) {
     );
     return NULL;
 };
+Derive.mName = 'derive';
+Derive.implementationFor = () => {
+    return {
+        argTypes: _List([isPred, isPred]),
+        retType: isNull,
+        f: Derive
+    };
+};
 
 
 // Null
 // ====
 const _isNull = (obj) => obj === NULL ? TRUE : FALSE;
-_isNull.mName = 'isNull';
 const isNull = Obj(_isNull, isPred);
 setType(NULL, isNull);
 _derive(isAny, isNull);
+_isNull.mName = 'isNull';
+_isNull.implementationFor = () => {
+    return {
+        argTypes: _List([isAny]),
+        retType: isBool,
+        f: _isNull
+    };
+};
 
 
 // Bool contd
@@ -586,11 +601,19 @@ Implement(
 
 // IO
 // ==
-function _println(...xs)  {
-    let strs = xs.map((x) => val(_apply(str, List([x]))));
-    console.log(strs.join(' '));
+function _println(x)  {
+    let jsString = val(str)(x).get('val');
+    console.log(jsString);
     return NULL;
 }
+_println.mName = 'println';
+_println.implementationFor = () => {
+    return {
+        argTypes: _List([isAny]),
+        retType: isNull,
+        f: _println
+    };
+};
 
 const println = Fn(_println);
 
