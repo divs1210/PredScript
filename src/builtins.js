@@ -25,7 +25,6 @@ const TRUE  = Obj(true);
 const FALSE = Obj(false);
 
 const _isAny = _ => TRUE;
-_isAny.mName = 'isAny';
 const isAny = Obj(_isAny);
 
 function _type(obj) {
@@ -52,11 +51,18 @@ setType(isAny, isPred);
 // Booleans
 // ========
 const _isBool = (obj) => (obj === TRUE || obj === FALSE) ? TRUE : FALSE;
-_isBool.mName = 'isBool';
 const isBool = Obj(_isBool, isPred);
 setType(TRUE, isBool);
 setType(FALSE, isBool);
 _derive(isAny, isBool);
+_isBool.mName = 'isBool';
+_isBool.implementationFor = () => {
+    return {
+        argTypes: _List([isAny]),
+        retType: isBool,
+        f: _isBool
+    };
+};
 
 function Bool(b) {
     return b === true? TRUE : FALSE;
@@ -65,6 +71,7 @@ function Bool(b) {
 
 // can fully define isAny now
 // ==========================
+_isAny.mName = 'isAny';
 _isAny.implementationFor = () => {
     return {
         argTypes: _List([isAny]),
@@ -73,6 +80,9 @@ _isAny.implementationFor = () => {
     };
 }
 
+// this has to be done for
+// all builtin fns
+// that are not multimethods
 _type.mName = "type";
 _type.implementationFor = () => {
     return {
