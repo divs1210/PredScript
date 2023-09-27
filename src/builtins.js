@@ -626,10 +626,6 @@ function _union(...preds) {
 
 const union = Fn(_union);
 
-// TODO:
-// 1. type our multis using union, ex: 
-//   add :: union(int, int => int | real, real => real | string, string => string | ....)
-// 2. when a user implements a multifn, update its type
 
 module.exports = {
     MultiFn,
