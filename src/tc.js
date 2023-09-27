@@ -245,7 +245,7 @@ function tcLetStmt(node, env) {
     // dummy obj in env
     env[varName] = {
         type: actualType,
-        val:  builtins.Obj('__unknown__', actualType)
+        val:  builtins.Obj(actualType, actualType)
     };
     
     return isNull;
@@ -279,7 +279,7 @@ function tcMultiFn(node, env) {
     for (let i = 0; i < node.args.length; i++)
         argPairs[argNames[i]] = {
             type: argTypes[i],
-            val: '__unknown__'
+            val: argTypes[i]
         };
 
     let fnEnv = envMake(env, argPairs);
@@ -334,35 +334,11 @@ function tcAST(ast, env) {
         case 'program':
             return tcProgram(ast, env);
         default: {
-            console.error(`Unhandled AST ${prettify(ast.type)} at:\n ${prettify(ast.loc)}`);
+            console.error(`Unhandled AST on line: ${ast.loc.start.line}, col: ${ast.loc.start.column}: ${prettify(ast.type)}`);
             return isAny;
         }
     }
 }
-
-// function tc(codeString) {
-//     // console.log(`Input:\n${codeString}\n`);
-
-//     let ast = parse(codeString);
-//     // console.log(`AST:\n${prettify(ast)}\n`);
-
-//     let jsCodeString = tcAST(ast, builtinEnv);
-//     // console.log(`tcd:\n${jsCodeString}\n`);
-
-//     return jsCodeString;
-// }
-
-// function tcExpr(codeString) {
-//     // console.log(`Input:\n${codeString}\n`);
-
-//     let ast = parseExpr(codeString);
-//     // console.log(`AST:\n${prettify(ast)}\n`);
-
-//     let jsCodeString = tcAST(ast, builtinEnv);
-//     // console.log(`tcd:\n${jsCodeString}\n`);
-    
-//     return jsCodeString;
-// }
 
 // console.log('tc: ' + val(tc(`
 // // let
