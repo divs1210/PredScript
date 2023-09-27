@@ -631,8 +631,8 @@ const derive = Fn(Derive);
 
 // higher order types
 // ==================
-function _union(...preds) {
-    let set = Set(preds);
+function _union(predA, predB) {
+    let set = Set([predA, predB]);
     let mName = set
         .map(pred => val(pred).mName)
         .join(', ');
@@ -640,12 +640,26 @@ function _union(...preds) {
     
     const f = (obj) => set.has(_type(obj))? TRUE: FALSE;
     f.mName = mName;
-    // f.members = set;
+    f.implementationFor = () => {
+        return {
+            argTypes: _List([isAny]),
+            retType: isBool,
+            f: f
+        };
+    }
 
     let newPred = Fn(f);
     setType(newPred, isPred);
     return newPred;
 }
+_union.mName = 'union';
+_union.implementationFor = () => {
+    return {
+        argTypes: _List([isPred, isPred]),
+        retType: isPred,
+        f: _union
+    };
+};
 
 const union = Fn(_union);
 
