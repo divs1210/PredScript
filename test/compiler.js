@@ -56,7 +56,6 @@ assert(is(
 
 // Complex expressions
 // ===================
-console.log(compileExpr('5 * minus(5, 1)'));
 assert(is(
     '_apply(times, List([Int(5), _apply(apply, List([minus, List([Int(5), Int(1)])]))]))',
     compileExpr('5 * minus(5, 1)')

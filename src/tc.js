@@ -178,6 +178,12 @@ function tcBinaryExpression(node, env) {
 
 function tcIfExpression(node, env) {
     let { condExp, thenExp, elseExp } = node;
+    elseExp = elseExp || {
+        type: 'null', 
+        value: null,
+        loc: thenExp.loc
+    };
+
     let [condType, thenType, elseType] = 
         [condExp, thenExp, elseExp].map(exp => tcAST(exp, env));
 
