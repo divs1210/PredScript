@@ -47,7 +47,10 @@ const builtinEnv = [
     'apply',
 
     // higher order preds
-    'union'
+    'union',
+
+    // IO
+    'println'
 ]
 .reduce((acc, x) => {
     let v = eval(`builtins['${x}']`);
@@ -186,10 +189,10 @@ function tcIfExpression(node, env) {
 }
 
 function tcCallExpression(node, env) {
-    let fnOrMultiFn = tcAST(node.f, env);
+    let multiFn = tcAST(node.f, env);
 
     // check if f can be applied
-    let psFType = _type(fnOrMultiFn);
+    let psFType = _type(multiFn);
     let applyImpls = val(apply).impls;
     let isImpl = applyImpls.some(impl =>
         isA(impl.argTypes.get(0), psFType));
@@ -202,11 +205,11 @@ function tcCallExpression(node, env) {
 
     let argTypes = builtins._List(node.args).map(arg => tcAST(arg, env));
     let argTypesStr = '[' + argTypes.map(t => val(t).mName).join(", ") + ']';
-    let actualImpl = val(fnOrMultiFn).implementationFor?.(argTypes);
+    let actualImpl = val(multiFn).implementationFor(argTypes);
     if(!actualImpl) {
         throw new Error(
             `Type Error on line: ${node.loc.start.line}, col: ${node.loc.start.column}`
-            + `\nNo matching implementation of ${val(fnOrMultiFn).mName} found for args: ${argTypesStr}`
+            + `\nNo matching implementation of ${val(multiFn).mName} found for args: ${argTypesStr}`
         );
     }
 
@@ -350,27 +353,27 @@ function tcExpr(codeString) {
     return jsCodeString;
 }
 
-console.log('tc: ' + val(tc(`
-// let
-let a: isInt = 5;
+// console.log('tc: ' + val(tc(`
+// // let
+// let a: isInt = 5;
 
-// block
-let x: isInt = { "hello"; 1; };
+// // block
+// let x: isInt = { "hello"; 1; };
 
-// function
-function haba(x: isInt): isString {
-   "hello";
-}
+// // function
+// function haba(x: isInt): isString {
+//    "hello";
+// }
 
-// fn calls
+// // fn calls
 // let t: isPred = type(1);
 
-// multifn calls (+ is a call to add)
-// let sum: isReal = 1 + 2.4;
+// // multifn calls (+ is a call to add)
+// // let sum: isReal = 1 + 2.4;
 
-// casting
-// let sum: isReal = AS(isReal, true);
-`)).mName);
+// // casting
+// // let sum: isReal = AS(isReal, true);
+// `)).mName);
 
 
 module.exports = {
