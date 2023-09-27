@@ -63,6 +63,26 @@ function Bool(b) {
 }
 
 
+// can fully define isAny now
+// ==========================
+_isAny.implementationFor = () => {
+    return {
+        argTypes: _List([isAny]),
+        retType: isBool,
+        f: _isAny
+    };
+}
+
+_type.mName = "type";
+_type.implementationFor = () => {
+    return {
+        argTypes: _List([isAny]),
+        retType: isPred,
+        f: _type
+    };
+}
+
+
 // Predicates continued
 // ====================
 // TODO: the following 2
