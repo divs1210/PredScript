@@ -144,6 +144,15 @@ const ___AS__ = (type, obj) => {
     setType(obj, type);
     return NULL;
 }
+___AS__.mName = '__AS__';
+___AS__.implementationFor = () => {
+    return {
+        argTypes: _List([isPred, isAny]),
+        retType: isNull,
+        f: ___AS__
+    };
+};
+
 
 const _AS = (type, obj) => {
     let meta = obj.get('meta');
@@ -153,6 +162,15 @@ const _AS = (type, obj) => {
     newMeta.type = type;
     return obj.set('meta', newMeta);
 };
+_AS.mName = 'AS';
+_AS.implementationFor = () => {
+    return {
+        argTypes: _List([isPred, isAny]),
+        retType: isAny,
+        f: _AS
+    };
+};
+
 
 const _as = (pred, obj) => {
     let t = _type(obj);
@@ -161,6 +179,14 @@ const _as = (pred, obj) => {
     else if (val(pred)(obj) === TRUE)
         return val(AS)(pred, obj);
     throw new Error(`Cannot cast ${val(t).mName} to ${val(pred).mName}!`);
+};
+_as.mName = 'as';
+_as.implementationFor = () => {
+    return {
+        argTypes: _List([isPred, isAny]),
+        retType: isAny,
+        f: _as
+    };
 };
 
 
