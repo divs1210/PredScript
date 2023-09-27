@@ -203,7 +203,6 @@ function tcCallExpression(node, env) {
     let argTypes = builtins._List(node.args).map(arg => tcAST(arg, env));
     let argTypesStr = '[' + argTypes.map(t => val(t).mName).join(", ") + ']';
     let actualImpl = val(fnOrMultiFn).implementationFor?.(argTypes);
-    console.log(fnOrMultiFn);
     if(!actualImpl) {
         throw new Error(
             `Type Error on line: ${node.loc.start.line}, col: ${node.loc.start.column}`
