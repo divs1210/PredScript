@@ -5,13 +5,11 @@ const {
     isNull, isAny, isBool,
     isReal, isInt,
     isString,
-    isMultiFn, 
     _type, 
     apply, 
     union
 } = builtins;
 const { isA } = require("./multi");
-const { is } = require("immutable");
 
 
 // ENV
@@ -62,7 +60,7 @@ const builtinEnv = [
     let v = builtins[x];
     let t = _type(v);
     // fns are their own type
-    acc[x] = isA(builtins.isFn, t)? v: t;
+    acc[x] = isFnObject(v)? v: t;
     return acc;
 }, {__parent__: null});
 
@@ -92,6 +90,18 @@ function envFetch(env, name, loc, dontThrow) {
 // Unify
 // =====
 function check(expectedType, actualType, loc) {
+    // // if expected type is not a predicate,
+    // // check if actualtype and expected type
+    // // are the same object in mem
+    // if (isFnObject(expectedType)) {
+    //     if (expectedType === actualType)
+    //         return actualType;
+    //     throw new Error(
+    //         `Type Error on line: ${loc.start.line}, col: ${loc.start.column}`
+    //         + `\nexpected: ${val(expectedType).mName}`
+    //         + `\n  actual: ${val(actualType).mName}`
+    //     );
+    // } else 
     if (!isA(expectedType, actualType))
         throw new Error(
             `Type Error on line: ${loc.start.line}, col: ${loc.start.column}`
@@ -199,14 +209,19 @@ function tcIfExpression(node, env) {
     return val(union)(thenType, elseType);
 }
 
-// TODO
-// fetch the implementation
+// TODO:
+// special case AS and __AS__
 function tcCallExpression(node, env) {
     let calleeType = tcAST(node.f, env);
     let argTypes = builtins._List(node.args).map(arg => tcAST(arg, env));
 
-    if(isA(builtins.isFn, calleeType)) {
-        let actualImpl = val(calleeType).implementationFor(argTypes);
+    // if it is a Fn, find its correct implementation
+    // and return its return type
+    if(isFnObject(calleeType)) {
+        // convert Fns in argTypes to isFn
+        let actualArgTypes = argTypes.map(argType =>
+            isFnObject(argType)? builtins.isFn : argType);
+        let actualImpl = val(calleeType).implementationFor(actualArgTypes);
         if(!actualImpl) {
             let argTypesStr = '[' + argTypes.map(t => val(t).mName).join(", ") + ']';
             throw new Error(
@@ -228,6 +243,8 @@ function tcCallExpression(node, env) {
                 + `\nNo implementation of apply found for: ${val(calleeType).mName}.`
                 + `\nIt can not be used as a function.`
             );
+        else // TODO
+            throw new Error('Not implemented!');
     }
 }
 
@@ -238,7 +255,7 @@ function tcBlockExpression(node, env) {
         default: {
             return node
             .value
-            .map(expr => check(isAny, tcAST(expr, env)))
+            .map(expr => check(isAny, tcAST(expr, env), node.loc))
             .pop();
         }
     }
@@ -249,7 +266,11 @@ function tcLetStmt(node, env) {
     let actualType   = tcAST(node.varVal,  env);
     let expectedType = tcAST(node.varType, env);
 
-    check(expectedType, actualType, node.loc);
+    check(
+        expectedType,
+        actualType, 
+        node.loc
+    );
 
     env[varName] = actualType;
     
@@ -269,15 +290,15 @@ function tcMultiFn(node, env) {
     let existingFn;
     // binding doesn't exist
     if(!existingBinding) {
-        existingFn = builtins.MultiFn(fName);
-        env[fName] = existingFn;
+        existingBinding = builtins.MultiFn(fName);
+        env[fName] = existingBinding;
     } // existing binding is a type, ie not a Fn value
-    else if(val(builtins.isPred)(existingBinding)) {
+    else if(!isFnObject(existingBinding)) {
         throw new Error(
             `Error on line: ${node.loc.start.line}, col: ${node.loc.start.column}`
             + `\n${val(fName)} is already defined with type ${val(existingBinding).mName}.`
         );
-    } // else binding exists and is a multifn
+    } // binding exists and is a multifn
     existingFn = existingBinding;
     
     let argNames = node.args.map(arg => arg.argName.value);
@@ -297,14 +318,18 @@ function tcMultiFn(node, env) {
         existingFn,
         // convert multis in argtypes to isFn
         builtins.List(argTypes.map(argType =>
-            val(builtins.isPred)(argType)? argType: builtins.isFn)),
+            isFnObject(argType)? builtins.isFn : argType)),
         // convert to isMultiFn if multi
-        fReturnType,
+        isFnObject(fReturnType)? builtins.isFn: fReturnType,
         // no f
         null
     );
 
-    check(fReturnType, fBodyReturnType, node.loc);
+    check(
+        fReturnType,
+        fBodyReturnType,
+        node.loc
+    );
 
     return isNull;
 }
@@ -349,8 +374,13 @@ function tcAST(ast, env) {
     }
 }
 
+
 // UTIL
 // ====
+function isFnObject(obj) {
+    let t = obj.get('meta').type;
+    return isA(builtins.isFn, t);
+}
 
 
 // TEST
