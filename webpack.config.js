@@ -4,6 +4,8 @@ module.exports = {
   mode: 'development',
   output: {
     filename: 'index.js',
+    path: path.resolve(__dirname, './dist'),
+
   },
   resolve: {
     fallback: {
@@ -16,7 +18,6 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js$/,
         exclude: [
           path.resolve(__dirname, './src/parser.js'),
           path.resolve(__dirname, './src/grammar.pegjs'),

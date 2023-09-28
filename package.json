@@ -6,6 +6,7 @@
     "exports": {
         "./builtins": "./src/builtins.js"
     },
+    "main":  "./src/builtins.js",
     "scripts": {
         "test": "node --test"
     },
@@ -17,12 +18,6 @@
     ],
     "bin": {
         "psc": "./compile.js"
-    },
-    "browser": {
-        "fs": false,
-        "path": false,
-        "child_process": false,
-        "./builtins": "./src/builtins.js"
     },
     "author": "",
     "license": "MIT",

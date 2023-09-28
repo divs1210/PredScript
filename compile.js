@@ -24,7 +24,7 @@ exec('npm i webpack webpack-cli -g', (wpErr, wpStdout, wpStderr) => {
                     else {
                         console.log('Intermediate output in: dist/index.temp.js');
                 
-                        exec('webpack-cli b ./dist/index.temp.js -o ./dist', (error, stdout, stderr) => {
+                        exec('webpack-cli b ./dist/index.temp.js', (error, stdout, stderr) => {
                             if (error)
                                 console.error(error.message);
                             else if (stderr)
