@@ -60,7 +60,7 @@ const builtinEnv = [
     let v = builtins[x];
     let t = _type(v);
     // fns are their own type
-    acc[x] = isA(builtins.isFn, t)? v: t;
+    acc[x] = isFnObject(v)? v: t;
     return acc;
 }, {__parent__: null});
 
