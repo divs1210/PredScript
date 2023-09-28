@@ -2,6 +2,7 @@
     "name": "predscript",
     "version": "1.0.0",
     "description": "Predicates as Types. Compiles to JS.",
+    "private": true,
     "exports": {
         "./builtins": "./src/builtins.js"
     },
@@ -17,12 +18,23 @@
     "bin": {
         "psc": "./compile.js"
     },
+    "browser": {
+        "fs": false,
+        "path": false,
+        "child_process": false,
+        "./builtins": "./src/builtins.js"
+    },
     "author": "",
     "license": "MIT",
     "dependencies": {
-        "@vercel/ncc": "^0.38.0",
         "bignumber.js": "^9.1.1",
         "immutable": "^5.0.0-beta.4",
-        "pegjs": "^0.10.0"
+        "path-browserify": "^1.0.1",
+        "pegjs": "^0.10.0",
+        "webpack": "^5.88.2"
+    },
+    "devDependencies": {
+        "file-loader": "^6.2.0",
+        "webpack-cli": "^5.1.4"
     }
 }

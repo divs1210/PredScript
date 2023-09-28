@@ -1,6 +1,6 @@
 const fs = require('fs');
 const peg = require("pegjs");
-const path = require('node:path');
+const path = require('path'); 
 
 let filePath = path.join(__dirname, 'grammar.pegjs');
 const grammar = fs.readFileSync(filePath, 'utf8');

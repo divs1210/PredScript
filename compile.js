@@ -1,20 +1,18 @@
 #!/usr/bin/env node
 
-const path = require('node:path'); 
 const fs = require('fs');
 const { compile } = require('./src/compiler');
 const { exec } = require("child_process");
 
 let [_, __, fileName] = process.argv;
-
 let code = fs.readFileSync(fileName, 'utf8');
 let compiledCode = compile(code);
 
-exec('npm i @vercel/ncc -g', (nccErr, nccStdout, nccStderr) => {
-    if (nccErr)
-        console.error(nccErr.message);
-    else if (nccStderr)
-        console.error(nccStderr);
+exec('npm i webpack webpack-cli -g', (wpErr, wpStdout, wpStderr) => {
+    if (wpErr)
+        console.error(wpErr.message);
+    else if (wpStderr)
+        console.error(wpStderr);
     else {
         exec('mkdir -p dist', (dirError, dirStdout, dirStderr) => {
             if (dirError || dirStderr)
@@ -26,7 +24,7 @@ exec('npm i @vercel/ncc -g', (nccErr, nccStdout, nccStderr) => {
                     else {
                         console.log('Intermediate output in: dist/index.temp.js');
                 
-                        exec('ncc build dist/index.temp.js -o dist', (error, stdout, stderr) => {
+                        exec('webpack-cli b ./dist/index.temp.js -o ./dist', (error, stdout, stderr) => {
                             if (error)
                                 console.error(error.message);
                             else if (stderr)
