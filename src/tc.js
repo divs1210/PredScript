@@ -207,10 +207,10 @@ function tcCallExpression(node, env) {
 
     // if it is a Fn, find its correct implementation
     // and return its return type
-    if(isFnObject(existingBinding)) {
+    if(isFnObject(calleeType)) {
         // convert Fns in argTypes to isFn
         let actualArgTypes = argTypes.map(argType =>
-            isFnObject(existingBinding)? builtins.isFn : argType);
+            isFnObject(argType)? builtins.isFn : argType);
         let actualImpl = val(calleeType).implementationFor(actualArgTypes);
         if(!actualImpl) {
             let argTypesStr = '[' + argTypes.map(t => val(t).mName).join(", ") + ']';
