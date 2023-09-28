@@ -256,7 +256,11 @@ function tcLetStmt(node, env) {
     let actualType   = tcAST(node.varVal,  env);
     let expectedType = tcAST(node.varType, env);
 
-    check(expectedType, actualType, node.loc);
+    check(
+        expectedType,
+        actualType, 
+        node.loc
+    );
 
     env[varName] = actualType;
     
@@ -306,12 +310,16 @@ function tcMultiFn(node, env) {
         builtins.List(argTypes.map(argType =>
             isFnObject(argType)? builtins.isFn : argType)),
         // convert to isMultiFn if multi
-        fReturnType,
+        isFnObject(fReturnType)? builtins.isFn: fReturnType,
         // no f
         null
     );
 
-    check(fReturnType, fBodyReturnType, node.loc);
+    check(
+        fReturnType,
+        fBodyReturnType,
+        node.loc
+    );
 
     return isNull;
 }
