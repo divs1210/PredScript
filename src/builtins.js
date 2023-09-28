@@ -588,12 +588,14 @@ function _apply(f, args) {
 }
 
 const apply = MultiFn('apply');
-Implement(
-    apply,
-    List([isFn, isList]),
-    isAny,
-    _apply
-);
+apply.get('val').defaultImpl.f = _apply;
+// apply is generic, can't do the following:
+// Implement(
+//     apply,
+//     List([isFn, isList]),
+//     isAny,
+//     _apply
+// );
 
 
 // IO
