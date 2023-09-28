@@ -574,6 +574,13 @@ Implement(
     _ => TRUE
 );
 
+Implement(
+    str,
+    List([isFn]),
+    isString,
+    f => String(val(f).mName)
+);
+
 function Fn(f) {
     return Obj(f, isFn);
 }
@@ -630,6 +637,7 @@ const derive = Fn(Derive);
 
 // higher order types
 // ==================
+// union
 function _union(predA, predB) {
     let set = Set([predA, predB]);
     let mName = set
@@ -661,8 +669,57 @@ _union.implementationFor = () => {
         f: _union
     };
 };
-
 const union = Fn(_union);
+
+
+// generic AS
+const _gen_AS = (pred) => {
+    let _f = obj => _AS(pred, obj);
+    _f.mName = `AS[${val(pred).mName}]`;
+    _f.implementationFor = () => {
+        return {
+            argTypes: _List([isAny]),
+            retType: pred,
+            f: _f
+        };
+    };
+    
+    return Fn(_f);
+}
+_gen_AS.mName = "genAS";
+_gen_AS.implementationFor = () => {
+    return {
+        argTypes: _List([isPred]),
+        retType: isFn,
+        f: _gen_AS
+    };
+};
+const genAS = Fn(_gen_AS);
+
+
+// generic as
+const _gen_as = (pred) => {
+    let _f = obj => _as(pred, obj);
+    _f.mName = `as[${val(pred).mName}]`;
+    _f.implementationFor = () => {
+        return {
+            argTypes: _List([isAny]),
+            retType: pred,
+            f: _f
+        };
+    };
+    
+    return Fn(_f);
+}
+_gen_as.mName = "genAs";
+_gen_as.implementationFor = () => {
+    return {
+        argTypes: _List([isPred]),
+        retType: isFn,
+        f: _gen_as
+    };
+};
+const genAs = Fn(_gen_as);
 
 
 module.exports = {
@@ -711,6 +768,8 @@ module.exports = {
     _type,
     __AS__,
     AS,
+    genAS,
+    genAs,
     as,
     derive,
     union

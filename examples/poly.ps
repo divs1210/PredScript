@@ -5,13 +5,16 @@ function isEven(x: isInt): isBool {
     x % 2 == 0
 }
 
+derive(isInt, isEven);
+let ASIsEven: isFn = genAS(isEven);
+
+
 function isOdd(x: isInt): isBool {
     !isEven(x)
 }
 
-// isEven and isOdd derive from isInt
-derive(isInt, isEven);
 derive(isInt, isOdd);
+let ASIsOdd: isFn = genAS(isOdd);
 
 
 // ==================================
@@ -26,21 +29,23 @@ function inc(x: isInt): isInt {
 
 function inc(x: isEven): isOdd {
     // integer addition
-    x + 1
+    // hard casted to isOdd
+    ASIsOdd(x + 1)
 }
 
 function inc(x: isOdd): isEven {
     // integer addition
-    x + 1
+    // hard casted to isEven
+    ASIsEven(x + 1)
 }
 
 let incInt: isInt = inc(1);
-println("incInt: " + type(incInt) + " " + incInt);
+println("inc isInt  1: " + type(incInt) + " " + incInt);
 
-let even: isEven = as(isEven, 2);
+let even: isEven = ASIsEven(2);
 let incEven: isOdd = inc(even);
-println("incEven: " + type(incEven) + " " + incEven);
+println("inc isEven 2: " + type(incEven) + " " + incEven);
 
-let odd: isOdd = as(isOdd, 3);
+let odd: isOdd = ASIsOdd(3);
 let incOdd: isEven = inc(odd);
-println("incOdd: " + type(incOdd) + " " + incOdd);
+println("inc isOdd  3: " + type(incOdd) + " " + incOdd);
