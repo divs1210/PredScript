@@ -92,6 +92,18 @@ function envFetch(env, name, loc, dontThrow) {
 // Unify
 // =====
 function check(expectedType, actualType, loc) {
+    // // if expected type is not a predicate,
+    // // check if actualtype and expected type
+    // // are the same object in mem
+    // if (isFnObject(expectedType)) {
+    //     if (expectedType === actualType)
+    //         return actualType;
+    //     throw new Error(
+    //         `Type Error on line: ${loc.start.line}, col: ${loc.start.column}`
+    //         + `\nexpected: ${val(expectedType).mName}`
+    //         + `\n  actual: ${val(actualType).mName}`
+    //     );
+    // } else 
     if (!isA(expectedType, actualType))
         throw new Error(
             `Type Error on line: ${loc.start.line}, col: ${loc.start.column}`
@@ -245,7 +257,7 @@ function tcBlockExpression(node, env) {
         default: {
             return node
             .value
-            .map(expr => check(isAny, tcAST(expr, env)))
+            .map(expr => check(isAny, tcAST(expr, env), node.loc))
             .pop();
         }
     }
