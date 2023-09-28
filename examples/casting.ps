@@ -5,10 +5,10 @@ function isLessThan5(x: isInt): isBool {
 let two: isInt = 2;
 println("two: " + type(two));
 
-// `let` soft-casts 
+// `as` soft-casts 
 // the expression on the right
 // to the type on the left
-let softCastedTwo: isLessThan5 = two;
+let softCastedTwo: isLessThan5 = as(isLessThan5, two);
 println("softCastedTwo: " + type(softCastedTwo));
 
 // soft-casts complain at runtime
