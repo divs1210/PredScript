@@ -2,14 +2,31 @@
 
 # PredScript
 
-Predicates as Types.
+## What
 
-Statically and dynamically checked.
-
-Compiled to JS.
+PredScript is a statically typed functional programming language
+that uses predicates as types, and looks like JavaScript.
 
 **!! BEWARE: WIP !!**
 
+## Why
+
+No matter how awesome your static type checker is -
+whether you use [TypeScript](https://www.typescriptlang.org/),
+or meticulously prove each line with [Agda](https://agda.github.io/agda/),
+chances are that you are going to have to
+[validate some data](https://blog.logrocket.com/dynamic-type-validation-in-typescript/) that originates from outside your process.
+
+At that point, static type checkers are not available,
+and there has to be some different validation strategy -
+leading to a dynamic type checker, and a different type system
+for describing dynamic types. (`EmailString`, `PastDateString`)
+
+What if a language's static type system was built around
+validators that could be checked at compile time,
+as well as efficiently at runtime?
+
+That's the question PredScript wants to answer.
 
 ## Use Case
 
@@ -52,6 +69,7 @@ fetchUserById(5).await(this);
   - runtime can be directed to skip arbitrary checks (for optimization)
 - Polymorphic
 - Compile to JS
+- Interop with JS
 - Look and feel similar to JS
 
 ## Usage

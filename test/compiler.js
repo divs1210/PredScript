@@ -31,44 +31,44 @@ assert(is(
 // Infix ops
 // =========
 assert(is(
-    '_apply(times, List([a, b]))',
-    compileExpr('a * b')
+    '_apply(times, List([Int(1), Int(2)]))',
+    compileExpr('1 * 2')
 ));
 
 assert(is(
-    '_apply(add, List([a, _apply(times, List([b, c]))]))',
-    compileExpr('a + b * c')
+    '_apply(add, List([Int(1), _apply(times, List([Int(2), Int(3)]))]))',
+    compileExpr('1 + 2 * 3')
 ));
 
 assert(is(
-    '_apply(isLessThanEq, List([a, b]))',
-    compileExpr('a <= b')
+    '_apply(isLessThanEq, List([Int(1), Int(2)]))',
+    compileExpr('1 <= 2')
 ));
 
 
 // function calls
 // ==============
 assert(is(
-    '_apply(apply, List([f, List([a, b])]))',
-    compileExpr('f(a, b)')
+    '_apply(apply, List([add, List([Int(1), Int(2)])]))',
+    compileExpr('add(1, 2)')
 ));
 
 
 // Complex expressions
 // ===================
 assert(is(
-    '_apply(times, List([n, _apply(apply, List([fact, List([_apply(minus, List([n, Int(1)]))])]))]))',
-    compileExpr('n * fact(n - 1)')
+    '_apply(times, List([Int(5), _apply(apply, List([minus, List([Int(5), Int(1)])]))]))',
+    compileExpr('5 * minus(5, 1)')
 ));
 
 
 // Block expressions
 // =================
 assert(is(
-    '((() => { _apply(apply, List([a, List([])])); return _apply(apply, List([b, List([])])); })())',
+    '((() => { Int(1); return Int(2); })())',
     compileExpr(`{
-        a();
-        b();
+        1;
+        2;
     }`)
 ));
 
@@ -76,21 +76,21 @@ assert(is(
 // if / else
 // =========
 assert(is(
-    '(_is(TRUE, (_apply(isLessThan, List([a, b]))))? (a): (null))',
-    compileExpr('if (a < b) a')
+    '(_is(TRUE, (_apply(isLessThan, List([Int(1), Int(2)]))))? (Int(1)): (null))',
+    compileExpr('if (1 < 2) 1')
 ));
 
 assert(is(
-    '(_is(TRUE, (_apply(isLessThan, List([a, b]))))? (a): (b))',
-    compileExpr('if (a < b) { a } else { b }')
+    '(_is(TRUE, (_apply(isLessThan, List([Int(1), Int(2)]))))? (Int(1)): (Int(2)))',
+    compileExpr('if (1 < 2) { 1 } else { 2 }')
 ));
 
 assert(is(
-    '(_is(TRUE, (_apply(isLessThan, List([a, b]))))? (a): ((_is(TRUE, (_apply(isLessThan, List([b, c]))))? (b): (c))))',
+    '(_is(TRUE, (_apply(isLessThan, List([Int(1), Int(2)]))))? (Int(1)): ((_is(TRUE, (_apply(isLessThan, List([Int(2), Int(3)]))))? (Int(2)): (Int(3)))))',
     compileExpr(`
-        if (a < b) a 
-        else if (b < c) b 
-        else c
+        if (1 < 2) 1 
+        else if (2 < 3) 2 
+        else 3
     `)
 ));
 

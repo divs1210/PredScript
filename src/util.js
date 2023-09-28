@@ -1,5 +1,3 @@
-const path = require('node:path'); 
-
 const NotFound = {};
 
 function isNull(x) {

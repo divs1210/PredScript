@@ -1,10 +1,13 @@
 function haba(x: isInt, y: isReal): isNull {
-    null
+    println("int, real")
 }
 
 function haba(x: isReal, y: isInt): isNull {
-    null
+    println("real, int")
 }
+
+// this should work
+haba(2, 3.1);
 
 // this should fail
 // with ambiguity error

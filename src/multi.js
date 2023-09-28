@@ -106,10 +106,6 @@ class MultiMethod extends Function {
         return self;
     }
 
-    setDefault(retType, f) {
-        this.defaultImpl = { retType, f };
-    }
-
     implementFor(argTypes, retType, f) {
         this.impls = this.impls.push({argTypes, retType, f});
     }
@@ -117,9 +113,13 @@ class MultiMethod extends Function {
     matchingImpls(argTypes) {
         let s = argTypes.size;
         return this.impls.filter(impl => {
+            if (!is(s, impl.argTypes.size))
+                return false;
+
             for (let i = 0; i < s; i++)
                 if (!isA(impl.argTypes.get(i), argTypes.get(i)))
                     return false;
+
             return true;
         });
     }
@@ -133,14 +133,14 @@ class MultiMethod extends Function {
         let matchingImpls = this.matchingImpls(argTypes);
 
         if(matchingImpls.isEmpty())
-            return this.defaultImpl;
+            return null;
 
         let sorted = matchingImpls.sortBy(impl => argTypesDistance(argTypes, impl.argTypes));
         let bestFit = sorted.get(0);
         let nextBestFit = sorted.get(1);
 
         if(isNull(bestFit))
-            return this.defaultImpl;
+            return null;
         else if (isNull(nextBestFit))
             return bestFit;
         else if (!is(
@@ -157,7 +157,8 @@ class MultiMethod extends Function {
     }
 
     __call__(...args) {
-        let impl = this.implementationFor(this.getArgTypes(args));
+        let impl = this.implementationFor(this.getArgTypes(args))
+                || this.defaultImpl;
         return impl.f(...args);
     }
 }

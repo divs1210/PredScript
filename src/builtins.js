@@ -1,6 +1,7 @@
-const { Map, is: _is, List: _List } = require('immutable');
+const { Map, is: _is, List: _List, Set } = require('immutable');
 const BigNumber = require('bignumber.js');
 const { MultiMethod, derive: _derive, isA } = require('./multi');
+const { val } = require('./util');
 
 // objects and types
 // =================
@@ -13,10 +14,6 @@ const Obj = (val, type) =>
           }
       });
 
-function val(obj) {
-    return obj.get('val');
-}
-
 
 // primitives
 // ==========
@@ -25,11 +22,10 @@ const TRUE  = Obj(true);
 const FALSE = Obj(false);
 
 const _isAny = _ => TRUE;
-_isAny.mName = 'isAny';
 const isAny = Obj(_isAny);
 
 function _type(obj) {
-    return obj.get('meta').type || isAny;
+    return obj.get('meta').type
 }
 
 function setType(obj, type) {
@@ -52,14 +48,45 @@ setType(isAny, isPred);
 // Booleans
 // ========
 const _isBool = (obj) => (obj === TRUE || obj === FALSE) ? TRUE : FALSE;
-_isBool.mName = 'isBool';
 const isBool = Obj(_isBool, isPred);
 setType(TRUE, isBool);
 setType(FALSE, isBool);
 _derive(isAny, isBool);
+_isBool.mName = 'isBool';
+_isBool.implementationFor = () => {
+    return {
+        argTypes: _List([isAny]),
+        retType: isBool,
+        f: _isBool
+    };
+};
 
 function Bool(b) {
     return b === true? TRUE : FALSE;
+}
+
+
+// can fully define isAny now
+// ==========================
+_isAny.mName = 'isAny';
+_isAny.implementationFor = () => {
+    return {
+        argTypes: _List([isAny]),
+        retType: isBool,
+        f: _isAny
+    };
+}
+
+// this has to be done for
+// all builtin fns
+// that are not multimethods
+_type.mName = "type";
+_type.implementationFor = () => {
+    return {
+        argTypes: _List([isAny]),
+        retType: isPred,
+        f: _type
+    };
 }
 
 
@@ -110,7 +137,19 @@ function List(jsArray) {
 
 // Casting
 // =======
-const ___AS__ = (type, obj) => setType(obj, type);
+const ___AS__ = (type, obj) => {
+    setType(obj, type);
+    return NULL;
+}
+___AS__.mName = '__AS__';
+___AS__.implementationFor = () => {
+    return {
+        argTypes: _List([isPred, isAny]),
+        retType: isNull,
+        f: ___AS__
+    };
+};
+
 
 const _AS = (type, obj) => {
     let meta = obj.get('meta');
@@ -120,6 +159,15 @@ const _AS = (type, obj) => {
     newMeta.type = type;
     return obj.set('meta', newMeta);
 };
+_AS.mName = 'AS';
+_AS.implementationFor = () => {
+    return {
+        argTypes: _List([isPred, isAny]),
+        retType: isAny,
+        f: _AS
+    };
+};
+
 
 const _as = (pred, obj) => {
     let t = _type(obj);
@@ -129,6 +177,14 @@ const _as = (pred, obj) => {
         return val(AS)(pred, obj);
     throw new Error(`Cannot cast ${val(t).mName} to ${val(pred).mName}!`);
 };
+_as.mName = 'as';
+_as.implementationFor = () => {
+    return {
+        argTypes: _List([isPred, isAny]),
+        retType: isAny,
+        f: _as
+    };
+};
 
 
 // MultiFns
@@ -136,11 +192,15 @@ const _as = (pred, obj) => {
 const _isMultiFn = new MultiMethod("isMultiFn", _type);
 const isMultiFn = Obj(_isMultiFn, isPred);
 
-_isMultiFn.setDefault(isBool, _ => FALSE);
+_isMultiFn.implementFor(
+    _List([isAny]),
+    isBool,
+    _ => FALSE
+);
 _isMultiFn.implementFor(
     _List([isMultiFn]),
     isBool,
-    (_) => TRUE
+    _ => TRUE
 );
 
 function MultiFn(name) {
@@ -160,11 +220,7 @@ function Implement(multi, argTypes, retType, f) {
     };
 
     jsMulti.implementFor(jsArgTypes, retType, checkedF);
-}
-
-function ImplementDefault(multi, retType, f) {
-    let jsMulti = val(multi);
-    jsMulti.setDefault(retType, f);
+    return NULL;
 }
 
 function Derive(parent, child) {
@@ -175,16 +231,32 @@ function Derive(parent, child) {
         isBool,
         _ => TRUE
     );
+    return NULL;
+};
+Derive.mName = 'derive';
+Derive.implementationFor = () => {
+    return {
+        argTypes: _List([isPred, isPred]),
+        retType: isNull,
+        f: Derive
+    };
 };
 
 
 // Null
 // ====
 const _isNull = (obj) => obj === NULL ? TRUE : FALSE;
-_isNull.mName = 'isNull';
 const isNull = Obj(_isNull, isPred);
 setType(NULL, isNull);
 _derive(isAny, isNull);
+_isNull.mName = 'isNull';
+_isNull.implementationFor = () => {
+    return {
+        argTypes: _List([isAny]),
+        retType: isBool,
+        f: _isNull
+    };
+};
 
 
 // Bool contd
@@ -272,18 +344,6 @@ function Int(n) {
         isInt
     );
 }
-
-
-// Apply
-// =====
-function _apply(f, args) {
-    let jsF = val(f);
-    let jsArgs = val(args);
-    return jsF(...jsArgs);
-}
-
-const apply = MultiFn('apply');
-ImplementDefault(apply, isAny, _apply);
 
 
 // Arithmetic
@@ -376,7 +436,12 @@ Implement(
 // Logic operators
 // ================
 const is = MultiFn('is');
-ImplementDefault(is, isBool, (x, y) => Bool(_is(x, y)));
+Implement(
+    is,
+    List([isAny, isAny]),
+    isBool,
+    (x, y) => Bool(_is(x, y))
+);
 Implement(
     is,
     List([isReal, isReal]),
@@ -445,8 +510,6 @@ function String(s) {
 
 // toString
 const str = MultiFn('str');
-
-// ImplementDefault(str, isString, (x) => String('' + val(x)));
 Implement(
     str,
     List([isAny]),
@@ -516,13 +579,40 @@ function Fn(f) {
 }
 
 
+// Apply
+// =====
+function _apply(f, args) {
+    let jsF = val(f);
+    let jsArgs = val(args);
+    return jsF(...jsArgs);
+}
+
+const apply = MultiFn('apply');
+apply.get('val').defaultImpl.f = _apply;
+// apply is generic, can't do the following:
+// Implement(
+//     apply,
+//     List([isFn, isList]),
+//     isAny,
+//     _apply
+// );
+
+
 // IO
 // ==
-function _println(...xs)  {
-    let strs = xs.map((x) => val(_apply(str, List([x]))));
-    console.log(strs.join(' '));
+function _println(x)  {
+    let jsString = val(str)(x).get('val');
+    console.log(jsString);
     return NULL;
 }
+_println.mName = 'println';
+_println.implementationFor = () => {
+    return {
+        argTypes: _List([isAny]),
+        retType: isNull,
+        f: _println
+    };
+};
 
 const println = Fn(_println);
 
@@ -538,10 +628,47 @@ const as = Fn(_as);
 const derive = Fn(Derive);
 
 
+// higher order types
+// ==================
+function _union(predA, predB) {
+    let set = Set([predA, predB]);
+    let mName = set
+        .map(pred => val(pred).mName)
+        .join(', ');
+    mName = 'union[' + mName + ']';
+    
+    const f = (obj) => set.has(_type(obj))? TRUE: FALSE;
+    f.mName = mName;
+    f.implementationFor = () => {
+        return {
+            argTypes: _List([isAny]),
+            retType: isBool,
+            f: f
+        };
+    }
+
+    let newPred = Fn(f);
+    setType(newPred, isPred);
+    // TODO: should derive from lowest common ancestor
+    _derive(isAny, newPred);
+    return newPred;
+}
+_union.mName = 'union';
+_union.implementationFor = () => {
+    return {
+        argTypes: _List([isPred, isPred]),
+        retType: isPred,
+        f: _union
+    };
+};
+
+const union = Fn(_union);
+
+
 module.exports = {
     MultiFn,
+    isMultiFn,
     Implement,
-    ImplementDefault,
     Obj,
     val,
     isAny,
@@ -585,5 +712,6 @@ module.exports = {
     __AS__,
     AS,
     as,
-    derive
+    derive,
+    union
 };
