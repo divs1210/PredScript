@@ -391,6 +391,9 @@ null;
 // let
 // let a: isInt = 5;
 
+// this should fail
+// let a: isInt = isInt;
+
 // block
 // let x: isInt = { "hello"; 1; };
 
