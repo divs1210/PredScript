@@ -5,13 +5,11 @@ const {
     isNull, isAny, isBool,
     isReal, isInt,
     isString,
-    isMultiFn, 
     _type, 
     apply, 
     union
 } = builtins;
 const { isA } = require("./multi");
-const { is } = require("immutable");
 
 
 // ENV
