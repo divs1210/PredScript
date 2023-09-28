@@ -207,10 +207,10 @@ function tcCallExpression(node, env) {
 
     // if it is a Fn, find its correct implementation
     // and return its return type
-    if(isA(builtins.isFn, calleeType)) {
+    if(isFnObject(existingBinding)) {
         // convert Fns in argTypes to isFn
         let actualArgTypes = argTypes.map(argType =>
-            isA(builtins.isFn, argType)? builtins.isFn : argType);
+            isFnObject(existingBinding)? builtins.isFn : argType);
         let actualImpl = val(calleeType).implementationFor(actualArgTypes);
         if(!actualImpl) {
             let argTypesStr = '[' + argTypes.map(t => val(t).mName).join(", ") + ']';
@@ -276,15 +276,15 @@ function tcMultiFn(node, env) {
     let existingFn;
     // binding doesn't exist
     if(!existingBinding) {
-        existingFn = builtins.MultiFn(fName);
+        existingBinding = builtins.MultiFn(fName);
         env[fName] = existingFn;
     } // existing binding is a type, ie not a Fn value
-    else if(val(builtins.isPred)(existingBinding)) {
+    else if(!isFnObject(existingBinding)) {
         throw new Error(
             `Error on line: ${node.loc.start.line}, col: ${node.loc.start.column}`
             + `\n${val(fName)} is already defined with type ${val(existingBinding).mName}.`
         );
-    } // else binding exists and is a multifn
+    } // binding exists and is a multifn
     existingFn = existingBinding;
     
     let argNames = node.args.map(arg => arg.argName.value);
@@ -304,7 +304,7 @@ function tcMultiFn(node, env) {
         existingFn,
         // convert multis in argtypes to isFn
         builtins.List(argTypes.map(argType =>
-            val(builtins.isPred)(argType)? argType: builtins.isFn)),
+            isFnObject(argType)? builtins.isFn : argType)),
         // convert to isMultiFn if multi
         fReturnType,
         // no f
@@ -356,8 +356,13 @@ function tcAST(ast, env) {
     }
 }
 
+
 // UTIL
 // ====
+function isFnObject(obj) {
+    let t = obj.get('meta').type;
+    return isA(builtins.isFn, t);
+}
 
 
 // TEST
