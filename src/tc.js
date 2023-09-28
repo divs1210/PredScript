@@ -293,7 +293,7 @@ function tcMultiFn(node, env) {
     // binding doesn't exist
     if(!existingBinding) {
         existingBinding = builtins.MultiFn(fName);
-        env[fName] = existingFn;
+        env[fName] = existingBinding;
     } // existing binding is a type, ie not a Fn value
     else if(!isFnObject(existingBinding)) {
         throw new Error(
