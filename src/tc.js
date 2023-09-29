@@ -414,7 +414,7 @@ null;
 // let sum: isReal = 1 + 2.4;
 
 // casting
-// let sum: isReal = AS(isReal, true);
+// let sum: isReal = AS(isReal)(true);
 `))).mName);
 
 
