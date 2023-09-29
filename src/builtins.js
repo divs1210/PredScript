@@ -686,7 +686,7 @@ _gen_AS.implementationFor = () => {
         f: _gen_AS
     };
 };
-const genAS = Fn(_gen_AS);
+const AS = Fn(_gen_AS);
 
 
 // generic as
@@ -711,7 +711,7 @@ _gen_as.implementationFor = () => {
         f: _gen_as
     };
 };
-const genAs = Fn(_gen_as);
+const as = Fn(_gen_as);
 
 
 module.exports = {
@@ -759,8 +759,8 @@ module.exports = {
     type,
     _type,
     __AS__,
-    genAS,
-    genAs,
+    AS,
+    as,
     derive,
     union
 };

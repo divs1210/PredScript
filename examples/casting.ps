@@ -8,7 +8,7 @@ println("two: " + type(two));
 // `as` soft-casts 
 // the expression on the right
 // to the type on the left
-let softCastedTwo: isLessThan5 = genAs(isLessThan5)(two);
+let softCastedTwo: isLessThan5 = as(isLessThan5)(two);
 println("softCastedTwo: " + type(softCastedTwo));
 
 // soft-casts complain at runtime
@@ -19,7 +19,7 @@ println("two: " + type(two));
 
 let ten: isInt = 10;
 // `AS` hard-casts a value
-let hardCastedTen: isLessThan5 = genAS(isLessThan5)(ten);
+let hardCastedTen: isLessThan5 = AS(isLessThan5)(ten);
 println("hardCastedTen: " + type(hardCastedTen));
 
 // hard-casts done using `AS`
