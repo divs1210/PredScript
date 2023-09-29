@@ -57,9 +57,9 @@
     function fnCallArgsNode(args) {
         if(!args || args.length === 0)
             return [];
-        else if(args.slice(1)[0].length > 0)
-            return [args[0]].concat(restArgs.map(arg => arg[0]));
-        else
+        else if(args.slice(1)[0].length > 0) {
+            return [args[0]].concat(args.slice(1).map(arg => arg[0][3]));
+        } else
             return [args[0]];
     }
 
