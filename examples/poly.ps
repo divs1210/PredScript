@@ -4,17 +4,13 @@
 function isEven(x: isInt): isBool {
     x % 2 == 0
 }
-
 derive(isInt, isEven);
-let ASIsEven: isFn = genAS(isEven);
 
 
 function isOdd(x: isInt): isBool {
     !isEven(x)
 }
-
 derive(isInt, isOdd);
-let ASIsOdd: isFn = genAS(isOdd);
 
 
 // ==================================
@@ -30,22 +26,26 @@ function inc(x: isInt): isInt {
 function inc(x: isEven): isOdd {
     // integer addition
     // hard casted to isOdd
-    ASIsOdd(x + 1)
+    // hard casts don't check
+    // before casting
+    genAS(isOdd)(x + 1)
 }
 
 function inc(x: isOdd): isEven {
     // integer addition
     // hard casted to isEven
-    ASIsEven(x + 1)
+    // hard casts don't check
+    // before casting
+    genAS(isEven)(x + 1)
 }
 
 let incInt: isInt = inc(1);
 println("inc isInt  1: " + type(incInt) + " " + incInt);
 
-let even: isEven = ASIsEven(2);
+let even: isEven = genAS(isEven)(2);
 let incEven: isOdd = inc(even);
 println("inc isEven 2: " + type(incEven) + " " + incEven);
 
-let odd: isOdd = ASIsOdd(3);
+let odd: isOdd = genAS(isOdd)(3);
 let incOdd: isEven = inc(odd);
 println("inc isOdd  3: " + type(incOdd) + " " + incOdd);

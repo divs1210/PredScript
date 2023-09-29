@@ -7,9 +7,7 @@ function isEven(x: isInt): isBool {
 derive(isInt, isEven);
 
 let i: isInt  = 1;
-
-let asIsEven: isFn = genAs(isEven);
-let e: isEven = asIsEven(4);
+let e: isEven = genAs(isEven)(4);
 
 // + defined for [isInt, isInt] -> isInt
 // called for [isInt, isEven]
