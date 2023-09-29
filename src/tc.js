@@ -209,23 +209,18 @@ function tcIfExpression(node, env) {
     return val(union)(thenType, elseType);
 }
 
-// TODO:
-// special case as, AS and __AS__
 function tcCallExpression(node, env) {
     let calleeType = tcAST(node.f, env);
     let argTypes = builtins._List(node.args).map(arg => tcAST(arg, env));
 
-    // special case casting ops
-    if (isCastingOperator(calleeType)) {
-        throw new Error('Not implemented!');
-    } else if(isFnObject(calleeType)) {
+    if(isFnObject(calleeType)) {
         // if it is a Fn, find its correct implementation
         // and return its return type
     
         // convert Fns in argTypes to isFn
-        let actualArgTypes = argTypes.map(argType =>
-            isFnObject(argType)? builtins.isFn : argType);
-        let actualImpl = val(calleeType).implementationFor(actualArgTypes);
+        // let actualArgTypes = argTypes.map(argType =>
+        //     isNotPredicate(argType)? builtins.isFn : argType);
+        let actualImpl = val(calleeType).implementationFor(argTypes);
         if(!actualImpl) {
             let argTypesStr = '[' + argTypes.map(t => val(t).mName).join(", ") + ']';
             throw new Error(
