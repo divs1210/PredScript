@@ -3,6 +3,9 @@ const BigNumber = require('bignumber.js');
 const { MultiMethod, derive: _derive, isA } = require('./multi');
 const { val } = require('./util');
 
+// TODO:
+// Fns should better mimic MultiFns, or atually be MultiFns.
+
 // objects and types
 // =================
 const Obj = (val, type) =>
@@ -221,7 +224,7 @@ function Derive(parent, child) {
     _derive(parent, child);
     Implement(
         parent,
-        _List([child]),
+        List([child]),
         isBool,
         _ => TRUE
     );
