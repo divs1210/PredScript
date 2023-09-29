@@ -1,12 +1,16 @@
 #!/usr/bin/env node
 
 const fs = require('fs');
+const path = require('path');
 const { compile } = require('./src/compiler');
 const { exec } = require("child_process");
 
 let [_, __, fileName] = process.argv;
 let code = fs.readFileSync(fileName, 'utf8');
 let compiledCode = compile(code);
+
+let wpConfigFile = path.join(__dirname, './webpack.config.js')
+
 
 exec('npm i webpack webpack-cli -g', (wpErr, wpStdout, wpStderr) => {
     if (wpErr)
@@ -24,7 +28,7 @@ exec('npm i webpack webpack-cli -g', (wpErr, wpStdout, wpStderr) => {
                     else {
                         console.log('Intermediate output in: dist/index.temp.js');
                 
-                        exec('webpack-cli b ./dist/index.temp.js', (error, stdout, stderr) => {
+                        exec(`webpack-cli b ./dist/index.temp.js -c ${wpConfigFile} -o ./dist`, (error, stdout, stderr) => {
                             if (error)
                                 console.error(error.message);
                             else if (stderr)

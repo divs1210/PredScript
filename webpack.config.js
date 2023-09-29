@@ -7,14 +7,6 @@ module.exports = {
     path: path.resolve(__dirname, './dist'),
 
   },
-  resolve: {
-    fallback: {
-      path: require.resolve('path-browserify'),
-    },
-  },  
-  node: {
-    __dirname:false
-  },
   module: {
     rules: [
       {
@@ -27,5 +19,10 @@ module.exports = {
       }
     ]
   },
+  // TODO: remove hardcoded path to global node modules
+  resolve: {
+    modules: [path.resolve(__dirname, './node_modules'), '/usr/local/lib/node_modules'],
+  },
+  
 
 };
