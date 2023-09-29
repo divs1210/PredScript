@@ -226,6 +226,7 @@ function tcCallExpression(node, env) {
             throw new Error(
                 `Type Error on line: ${node.loc.start.line}, col: ${node.loc.start.column}`
                 + `\nNo matching implementation of ${val(calleeType).mName} found for args: ${argTypesStr}`
+                + `\nFound implementations: ${val(calleeType).impls.map(impl => '[' + impl.argTypes.map(t => val(t).mName).join(", ") + ']').join(', ')}`
             );
         }
         return actualImpl.retType;
@@ -282,7 +283,7 @@ function tcProgram(node, env) {
 
 function tcMultiFn(node, env) {
     let fName = node.name.value;
-    let fReturnType = tcAST(node.retType, env);
+    let fRetType = tcAST(node.retType, env);
 
     // define dummy multimethod if not already defined
     let existingBinding = envFetch(env, fName, node.loc, true);
@@ -316,16 +317,18 @@ function tcMultiFn(node, env) {
     builtins.Implement(
         existingFn,
         // convert multis in argtypes to isFn
-        builtins.List(argTypes.map(argType =>
-            isFnObject(argType)? builtins.isFn : argType)),
+        // builtins.List(argTypes.map(argType =>
+        //     isFnObject(argType)? builtins.isFn : argType)),
+        builtins.List(argTypes),
         // convert to isMultiFn if multi
-        isFnObject(fReturnType)? builtins.isFn: fReturnType,
+        // isFnObject(fReturnType)? builtins.isFn: fReturnType,
+        fRetType,
         // no f
         null
     );
 
     check(
-        fReturnType,
+        fRetType,
         fBodyReturnType,
         node.loc
     );
@@ -398,8 +401,9 @@ null;
 
 // function
 // function haba(x: isInt): isString {
-//    "hello";
+//     "hello";
 // }
+// haba(1);
 
 // fn calls
 // let t: isPred = type(1);
