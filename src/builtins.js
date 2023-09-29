@@ -213,13 +213,7 @@ function MultiFn(name) {
 function Implement(multi, argTypes, retType, f) {
     let jsMulti = val(multi);
     let jsArgTypes = val(argTypes);
-
-    let checkedF = (...args) => {
-        let res = f(...args);
-        return _as(retType, res);
-    };
-
-    jsMulti.implementFor(jsArgTypes, retType, checkedF);
+    jsMulti.implementFor(jsArgTypes, retType, f);
     return NULL;
 }
 
@@ -629,8 +623,6 @@ const println = Fn(_println);
 const type = Fn(_type);
 
 const __AS__ = Fn(___AS__);
-const AS = Fn(_AS);
-const as = Fn(_as);
 
 const derive = Fn(Derive);
 
@@ -767,10 +759,8 @@ module.exports = {
     type,
     _type,
     __AS__,
-    AS,
     genAS,
     genAs,
-    as,
     derive,
     union
 };
