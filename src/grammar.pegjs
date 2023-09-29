@@ -189,7 +189,7 @@ fnCall     = f:primary _ '(' _ args:((expression (_ ',' _ expression)*)?) _ ')' 
 
 primary    = REAL / INTEGER / STRING / BOOL / NULL / SYMBOL / block / grouping
 grouping   = '(' _ e:expression _ ')'                                                { return groupingNode(e);           }
-block      = '{' _ b:((_ exprStatement / letStatement _)*) _ '}'                     { return blockNode(b);              }
+block      = '{' _ b:((_ statement _)*) _ '}'                     { return blockNode(b);              }
 
 INTEGER     = i:([0-9]+)                                       { return intNode(i);    }
 REAL        = n:([0-9]+ '.' [0-9]+)                            { return realNode(n);   }

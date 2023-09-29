@@ -1,0 +1,10 @@
+function makeAdder(x: isInt): isFn {
+    function adder(y: isInt): isInt {
+        x + y
+    }
+
+    adder
+}
+
+let add5: isFn = makeAdder(5);
+println(add5(6));
