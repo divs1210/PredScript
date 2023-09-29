@@ -53,13 +53,28 @@
         };
     }
 
-    function fnCallNode(f, args) {
-        return {
-            type: 'call-exp', 
-            f:    f,
-            args: (args == null || args.length === 0) ? [] : [args[0]].concat(args[1].map(arg => arg[3])),
-            loc: location()
-        };
+    // internal node
+    function fnCallArgsNode(args) {
+        if(!args || args.length === 0)
+            return [];
+        else if(args.slice(1)[0].length > 0) {
+            return [args[0]].concat(args.slice(1).map(arg => arg[0][3]));
+        } else
+            return [args[0]];
+    }
+
+    function fnCallNode(f, argLists) {
+        if (argLists.length === 1)
+            return {
+                type: 'call-exp', 
+                f:    f,
+                args: argLists[0],
+                loc: location()
+            };
+        return fnCallNode(
+            fnCallNode(f, [argLists[0]]),
+            argLists.slice(1)
+        );
     }
 
     function ifNode(cond, then, _else) {
@@ -185,11 +200,12 @@ unary      = op:( '!' / '-' ) _ x:unary                                 { return
 
 ifExpr     = 'if' _ '(' _ cond:expression _ ')' _ then:expression _else:((_ 'else' _ expression)?)
                                                                                      { return ifNode(cond, then, _else); }
-fnCall     = f:primary _ '(' _ args:((expression (_ ',' _ expression)*)?) _ ')'      { return fnCallNode(f, args);       }
+fnCall     = f:primary _ argLists:(fnCallArgs+)                                      { return fnCallNode(f, argLists);   }
+fnCallArgs = '(' _ args:((expression (_ ',' _ expression)*)?) _ ')'                  { return fnCallArgsNode(args);      }
 
 primary    = REAL / INTEGER / STRING / BOOL / NULL / SYMBOL / block / grouping
 grouping   = '(' _ e:expression _ ')'                                                { return groupingNode(e);           }
-block      = '{' _ b:((_ exprStatement / letStatement _)*) _ '}'                     { return blockNode(b);              }
+block      = '{' _ b:((_ statement _)*) _ '}'                                        { return blockNode(b);              }
 
 INTEGER     = i:([0-9]+)                                       { return intNode(i);    }
 REAL        = n:([0-9]+ '.' [0-9]+)                            { return realNode(n);   }
