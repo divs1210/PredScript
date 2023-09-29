@@ -223,10 +223,12 @@ function tcCallExpression(node, env) {
         let actualImpl = val(calleeType).implementationFor(argTypes);
         if(!actualImpl) {
             let argTypesStr = '[' + argTypes.map(t => val(t).mName).join(", ") + ']';
+            let foundArgTypesStr = val(calleeType).impls.map(impl => 
+                    '[' + impl.argTypes.map(t => val(t).mName).join(", ") + ']').join('\n\t')
             throw new Error(
                 `Type Error on line: ${node.loc.start.line}, col: ${node.loc.start.column}`
                 + `\nNo matching implementation of ${val(calleeType).mName} found for args: ${argTypesStr}`
-                + `\nFound implementations: ${val(calleeType).impls.map(impl => '[' + impl.argTypes.map(t => val(t).mName).join(", ") + ']').join(', ')}`
+                + `\nFound implementations for:\n\t${foundArgTypesStr}`
             );
         }
         return actualImpl.retType;
