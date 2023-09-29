@@ -174,7 +174,7 @@ const _as = (pred, obj) => {
     if(isA(pred, t))
         return obj;
     else if (val(pred)(obj) === TRUE)
-        return val(AS)(pred, obj);
+        return _AS(pred, obj);
     throw new Error(`Cannot cast ${val(t).mName} to ${val(pred).mName}!`);
 };
 _as.mName = 'as';
