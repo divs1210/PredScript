@@ -4,9 +4,10 @@
     "description": "Predicates as Types. Compiles to JS.",
     "private": true,
     "exports": {
-        "./builtins": "./src/builtins.js"
+        "./builtins": "./src/builtins.js",
+        "./util": "./src/util.js",
+        "./multi": "./src/multi.js"
     },
-    "main":  "./src/builtins.js",
     "scripts": {
         "test": "node --test"
     },
