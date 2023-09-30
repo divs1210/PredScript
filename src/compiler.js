@@ -1,8 +1,7 @@
 const { is } = require("immutable");
 const { parse, parseExpr } = require("./parser");
-// const { tcAST } = require("./tc");
 const { isNull, prettify } = require("./util");
-const builtins = require('./builtins');
+const builtins = require("./builtins");
 
 function compileLiteral(node) {
     let val = node.value;
@@ -35,7 +34,7 @@ function compileUnaryExpression(node) {
 
     if (!isNull(fn)) {
         let compiledValue  = compileAST(value);
-        return `_apply(${fn}, List([${compiledValue}]))`;   
+        return `_apply(${fn}, List(${compiledValue}))`;   
     } else {
         console.error(`Unhandled unary expression: ${prettify(node)} at ${prettify(node.loc)}`);
         return '????';
@@ -64,7 +63,7 @@ function compileBinaryExpression(node) {
     if (!isNull(fn)) {
         let compiledLeft  = compileAST(left);
         let compiledRight = compileAST(right);    
-        return `_apply(${fn}, List([${compiledLeft}, ${compiledRight}]))`;   
+        return `_apply(${fn}, List(${compiledLeft}, ${compiledRight}))`;
     } else {
         console.error(`Unhandled binary expression: ${prettify(node)} at ${prettify(node.loc)}`);
         return '????';
@@ -80,7 +79,7 @@ function compileIfExpression(expr) {
 function compileCallExpression(node) {
     let f = compileAST(node.f);
     let args = node.args.map(compileAST).join(', ');
-    return `_apply(apply, List([${f}, List([${args}])]))`;
+    return `_apply(apply, List(${f}, List(${args})))`;
 }
 
 function compileBlockExpression(node) {
@@ -100,12 +99,12 @@ function compileLetStmt(node) {
     let varName = compileAST(node.varName);
     let varVal  = compileAST(node.varVal);
     let retType = compileAST(node.varType);
-    return `let ${varName} = _apply(as, List([${retType}, ${varVal}]));`;
+    return `let ${varName} = _apply(as, List(${retType}, ${varVal}));`;
 }
 
 function compileProgram(node) {
     let allBuiltins = Object.keys(builtins).join(', ');
-    let requireBuiltins = `const {${ allBuiltins }} = require('predscript/builtins');\n\n`;
+    let requireBuiltins = `var {${ allBuiltins }} = require('predscript/builtins');\n\n`;
 
     let countExprs = node.value.length;
     if (is(0, countExprs))
@@ -122,18 +121,15 @@ function compileMultiFn(node) {
     let fBody = compileAST(node.body);
     let argNames = node.args.map((arg) => compileAST(arg.argName)).join(', ');
     let argTypes = node.args.map((arg) => compileAST(arg.argType)).join(', ');
-    let isPred = (node.args.length === 1) && (fReturnType === 'isBool');
-    let castString = isPred? `_apply(__AS__, List([isPred, ${fName}]));` : '';
 
     return `
 var ${fName} = ${fName} || MultiFn("${fName}");
 Implement(
     ${fName},
-    List([${argTypes}]),
+    List(${argTypes}),
     ${fReturnType},
     (${argNames}) => ${fBody}
 );
-${castString}
     `.trim();
 }
 
@@ -181,8 +177,6 @@ function compile(codeString) {
     let ast = parse(codeString);
     // console.log(`AST:\n${prettify(ast)}\n`);
 
-    // tcAST(ast);
-
     let jsCodeString = compileAST(ast);
     // console.log(`Compiled:\n${jsCodeString}\n`);
 
@@ -194,8 +188,6 @@ function compileExpr(codeString) {
 
     let ast = parseExpr(codeString);
     // console.log(`AST:\n${prettify(ast)}\n`);
-
-    // tcAST(ast);
 
     let jsCodeString = compileAST(ast);
     // console.log(`Compiled:\n${jsCodeString}\n`);

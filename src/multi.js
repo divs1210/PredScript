@@ -99,8 +99,13 @@ class MultiMethod extends Function {
         self.impls = List();
         self.defaultImpl = {};
         self.defaultImpl.f = (...args) => {
-            throw new Error(`MultiMethod ${mName} not defined for arg types:` 
-                + `${argTypesToString(self.getArgTypes(args))}`);
+            let implsString = self.impls
+                .map(impl => argTypesToString(impl.argTypes))
+                .join(', ');
+
+            throw new Error(`MultiMethod '${mName}' not defined for arg types: ` 
+                + `${argTypesToString(self.getArgTypes(args))}`)
+                + `\nFound implementations for: ${implsString}`;
         }
 
         return self;

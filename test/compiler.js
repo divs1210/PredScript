@@ -31,17 +31,17 @@ assert(is(
 // Infix ops
 // =========
 assert(is(
-    '_apply(times, List([Int(1), Int(2)]))',
+    '_apply(times, List(Int(1), Int(2)))',
     compileExpr('1 * 2')
 ));
 
 assert(is(
-    '_apply(add, List([Int(1), _apply(times, List([Int(2), Int(3)]))]))',
+    '_apply(add, List(Int(1), _apply(times, List(Int(2), Int(3)))))',
     compileExpr('1 + 2 * 3')
 ));
 
 assert(is(
-    '_apply(isLessThanEq, List([Int(1), Int(2)]))',
+    '_apply(isLessThanEq, List(Int(1), Int(2)))',
     compileExpr('1 <= 2')
 ));
 
@@ -49,7 +49,7 @@ assert(is(
 // function calls
 // ==============
 assert(is(
-    '_apply(apply, List([add, List([Int(1), Int(2)])]))',
+    '_apply(apply, List(add, List(Int(1), Int(2))))',
     compileExpr('add(1, 2)')
 ));
 
@@ -57,7 +57,7 @@ assert(is(
 // Complex expressions
 // ===================
 assert(is(
-    '_apply(times, List([Int(5), _apply(apply, List([minus, List([Int(5), Int(1)])]))]))',
+    '_apply(times, List(Int(5), _apply(apply, List(minus, List(Int(5), Int(1))))))',
     compileExpr('5 * minus(5, 1)')
 ));
 
@@ -76,17 +76,17 @@ assert(is(
 // if / else
 // =========
 assert(is(
-    '(_is(TRUE, (_apply(isLessThan, List([Int(1), Int(2)]))))? (Int(1)): (null))',
+    '(_is(TRUE, (_apply(isLessThan, List(Int(1), Int(2)))))? (Int(1)): (null))',
     compileExpr('if (1 < 2) 1')
 ));
 
 assert(is(
-    '(_is(TRUE, (_apply(isLessThan, List([Int(1), Int(2)]))))? (Int(1)): (Int(2)))',
+    '(_is(TRUE, (_apply(isLessThan, List(Int(1), Int(2)))))? (Int(1)): (Int(2)))',
     compileExpr('if (1 < 2) { 1 } else { 2 }')
 ));
 
 assert(is(
-    '(_is(TRUE, (_apply(isLessThan, List([Int(1), Int(2)]))))? (Int(1)): ((_is(TRUE, (_apply(isLessThan, List([Int(2), Int(3)]))))? (Int(2)): (Int(3)))))',
+    '(_is(TRUE, (_apply(isLessThan, List(Int(1), Int(2)))))? (Int(1)): ((_is(TRUE, (_apply(isLessThan, List(Int(2), Int(3)))))? (Int(2)): (Int(3)))))',
     compileExpr(`
         if (1 < 2) 1 
         else if (2 < 3) 2 
@@ -102,9 +102,9 @@ assert(is(
 var inc = inc || MultiFn("inc");
 Implement(
     inc,
-    List([isInt]),
+    List(isInt),
     isInt,
-    (x) => _apply(add, List([x, Int(1)]))
+    (x) => _apply(add, List(x, Int(1)))
 );
     `.trim(),
     compileExpr(`
@@ -118,6 +118,6 @@ function inc(x: isInt): isInt {
 // Let stmt
 // ========
 assert(is(
-    `let a = _apply(as, List([isReal, Real(1.2)]));`,
+    `let a = _apply(as, List(isReal, Real(1.2)));`,
     compileExpr('let a: isReal = 1.2;')
 ));
