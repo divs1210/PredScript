@@ -765,8 +765,8 @@ Implement(
 Implement(
     set,
     List(isMap, isAny, isAny),
-    isAny,
-    (m, key, value) => Obj()
+    isMap,
+    (m, k, v) => Obj(val(m).set(k, v), isMap)
 );
 
 
