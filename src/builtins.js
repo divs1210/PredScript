@@ -635,6 +635,21 @@ Implement(
 
 // Collections
 // ===========
+const size = MultiFn('size');
+Implement(
+    size,
+    List(isList),
+    isInt,
+    (l) => Int(val(l).size)
+);
+Implement(
+    size,
+    List(isString),
+    isInt,
+    // correctly handles unicode
+    (s) => Int([...val(s)].length)
+);
+
 const get = MultiFn('get');
 Implement(
     get,
@@ -646,9 +661,32 @@ Implement(
     get,
     List(isString, isInt),
     isChar,
+    // correctly handles unicode
     (s, idx) => {
         let jsCodePoint = val(s).codePointAt(val(idx).toNumber());
         return CharFromCodePoint(jsCodePoint);
+    }
+);
+
+const set = MultiFn('set');
+Implement(
+    set,
+    List(isList, isInt, isAny),
+    isList,
+    (l, idx, newVal) => Obj(val(l).set(val(idx).toNumber(), newVal), isList)
+);
+Implement(
+    set,
+    List(isString, isInt, isChar),
+    isString,
+    (s, idx, ch) => {
+        let jsString = val(s);
+        let unicodeChars = [...jsString];
+        let jsIdx = val(idx).toNumber();
+        let jsChar = val(val(str)(ch));
+        unicodeChars[jsIdx] = jsChar;
+        let psString = unicodeChars.join('');
+        return String(psString);
     }
 );
 
@@ -673,6 +711,15 @@ Implement(
 // IO
 // ==
 const println = MultiFn("println");
+Implement(
+    println,
+    List(),
+    isNull,
+    (x) => {
+        console.log();
+        return NULL;
+    }
+);
 Implement(
     println,
     List(isAny),
@@ -717,7 +764,9 @@ module.exports = {
     isList,
     List,
     _List,
+    size,
     get,
+    set,
     apply,
     _apply,
     add,
