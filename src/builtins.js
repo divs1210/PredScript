@@ -1,4 +1,5 @@
-const { Map: _Map, is: _is, List: _List } = require('immutable');
+const immutable = require('immutable');
+const { Map: _Map, is: _is, List: _List } = immutable;
 const BigNumber = require('bignumber.js');
 const { MultiMethod, derive: _derive, isA, ancestorsOf } = require('./multi');
 const { val } = require('./util');
@@ -10,24 +11,21 @@ const _String = globalThis.String;
 
 // objects and types
 // =================
-const Obj = (val, type) =>
-      _Map({
-          val:  val,
-          meta: { // mutable meta
-            type: type
-          }
-      });
+const Obj = (val, type) => {
+    let m = _Map({ val });
+    m.__psType__ = type;
+    return m;
+}
 
 
 // types util
 // ==========
 function getType(obj) {
-    return obj.get('meta').type;
+    return obj.__psType__;
 }
 
 function setType(obj, type) {
-    if (getType(obj) !== type)
-        obj.get('meta').type = type;
+    obj.__psType__ = type;
 }
 
 
@@ -167,14 +165,9 @@ _AS.implementFor(
     _List([isPred, isAny]),
     isAny,
     (type, obj) => {
-        let meta = obj.get('meta');
-        let newMeta = {};
-
-        for(key in meta)
-            newMeta[key] = meta[key];
-
-        newMeta.type = type;
-        return obj.set('meta', newMeta);
+        let newObj = Object.create(obj);
+        newObj.__psType__ = type;
+        return newObj;
     }
 );
 
@@ -453,7 +446,7 @@ Implement(
 
 
 // Logic operators
-// ================
+// ===============
 const is = MultiFn('is');
 Implement(
     is,
@@ -467,6 +460,9 @@ Implement(
     isBool,
     (x, y) => Bool(x.get('val').eq(y.get('val')))
 );
+// TODO: implement is for other types:
+// List, Map
+
 
 const isLessThan = MultiFn('isLessThan');
 Implement(
@@ -476,6 +472,7 @@ Implement(
     (x, y) => Bool(x.get('val').lt(y.get('val')))
 );
 
+
 const isLessThanEq = MultiFn('isLessThanEq');
 Implement(
     isLessThanEq,
@@ -484,6 +481,7 @@ Implement(
     (x, y) => Bool(x.get('val').lte(y.get('val')))
 );
 
+
 const isGreaterThan = MultiFn('isGreaterThan');
 Implement(
     isGreaterThan,
@@ -491,6 +489,7 @@ Implement(
     isBool,
     (x, y) => Bool(x.get('val').gt(y.get('val')))
 );
+
 
 const isGreaterThanEq = MultiFn('isGreaterThanEq');
 Implement(
@@ -644,7 +643,7 @@ Implement(
     isString,
     m => String(
         '{'
-        + val(m).entrySeq().map(([k, v]) => 
+        + val(m).entrySeq().map(([k, v]) =>
             val(val(str)(k))
             + ": "
             + val(val(str)(v))
@@ -689,6 +688,12 @@ Implement(
     isBool,
     (l) => val(l).length === 0 ? TRUE : FALSE
 );
+Implement(
+    isEmpty,
+    List(isMap),
+    isBool,
+    (m) => val(m).size === 0 ? TRUE : FALSE
+);
 
 const size = MultiFn('size');
 Implement(
@@ -703,6 +708,12 @@ Implement(
     isInt,
     // correctly handles unicode
     (s) => Int([...val(s)].length)
+);
+Implement(
+    size,
+    List(isMap),
+    isInt,
+    (m) => Int(val(m).size)
 );
 
 const get = MultiFn('get');
@@ -722,6 +733,13 @@ Implement(
         return CharFromCodePoint(jsCodePoint);
     }
 );
+Implement(
+    get,
+    List(isMap, isAny),
+    isAny,
+    (m, k) => val(m).get(k)
+);
+
 
 const set = MultiFn('set');
 Implement(
@@ -743,6 +761,12 @@ Implement(
         let psString = unicodeChars.join('');
         return String(psString);
     }
+);
+Implement(
+    set,
+    List(isMap, isAny, isAny),
+    isAny,
+    (m, key, value) => Obj()
 );
 
 
