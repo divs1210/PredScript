@@ -79,6 +79,10 @@ function compileIfExpression(expr) {
 function compileCallExpression(node) {
     let f = compileAST(node.f);
     let args = node.args.map(compileAST).join(', ');
+
+    if (f === 'List')
+        return `List(${args})`;
+
     return `_apply(apply, List(${f}, List(${args})))`;
 }
 

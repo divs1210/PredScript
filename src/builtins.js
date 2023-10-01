@@ -548,6 +548,16 @@ Implement(
     isString,
     p => String(val(p).mName)
 );
+Implement(
+    str,
+    List(isList),
+    isString,
+    l => String(
+        '['
+        + val(l).map(x => val(val(str)(x))).join(', ')
+        + ']'
+    )
+);
 
 // strcat
 Implement(
