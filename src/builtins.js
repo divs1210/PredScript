@@ -519,6 +519,32 @@ function Char(s) {
 }
 
 
+// toInt
+// =====
+const int = MultiFn('int');
+Implement(
+    int,
+    List(isBool),
+    isInt,
+    b => b === TRUE? Int(1): Int(0)
+);
+Implement(
+    int,
+    List(isChar),
+    isInt,
+    ch => _AS(isInt, ch)
+);
+Implement(
+    int,
+    List(isReal),
+    isInt,
+    r => {
+        let n = val(r).integerValue(BigNumber.ROUND_HALF_CEIL);
+        return Obj(n, isInt);
+    }
+);
+
+
 // Strings
 // =======
 const isString = MultiFn("isString");
@@ -685,6 +711,7 @@ module.exports = {
     Real,
     isInt,
     Int,
+    int,
     isChar,
     Char,
     isList,
