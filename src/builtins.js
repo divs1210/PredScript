@@ -3,6 +3,11 @@ const BigNumber = require('bignumber.js');
 const { MultiMethod, derive: _derive, isA, ancestorsOf } = require('./multi');
 const { val } = require('./util');
 
+// reify JS
+// ========
+const _String = globalThis.String;
+
+
 // objects and types
 // =================
 const Obj = (val, type) =>
@@ -496,6 +501,24 @@ Implement(
 );
 
 
+// Chars
+// =====
+const isChar = MultiFn("isChar");
+setType(isChar, isPred);
+_derive(isInt, isChar);
+
+function CharFromCodePoint(jsCodePoint) {
+    return Obj(
+        (new BigNumber(jsCodePoint)).integerValue(),
+        isChar
+    );
+}
+
+function Char(s) {
+    return CharFromCodePoint(s.codePointAt(0));
+}
+
+
 // Strings
 // =======
 const isString = MultiFn("isString");
@@ -518,9 +541,7 @@ Implement(
     _ => TRUE
 );
 
-function String(s) {
-    return Obj(s, isString);
-}
+const String = (s) => Obj(s, isString);
 
 // toString
 const str = MultiFn('str');
@@ -535,6 +556,12 @@ Implement(
     List(isInt),
     isString,
     i => String(val(i).toFixed(0))
+);
+Implement(
+    str,
+    List(isChar),
+    isString,
+    ch => String(_String.fromCodePoint(val(ch).toNumber()))
 );
 Implement(
     str,
@@ -592,8 +619,11 @@ Implement(
 Implement(
     get,
     List(isString, isInt),
-    isAny,
-    (s, idx) => String(val(s)[val(idx).toNumber()])
+    isChar,
+    (s, idx) => {
+        let jsCodePoint = val(s).codePointAt(val(idx).toNumber());
+        return CharFromCodePoint(jsCodePoint);
+    }
 );
 
 
@@ -655,6 +685,8 @@ module.exports = {
     Real,
     isInt,
     Int,
+    isChar,
+    Char,
     isList,
     List,
     _List,
