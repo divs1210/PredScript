@@ -635,6 +635,20 @@ Implement(
 
 // Collections
 // ===========
+const isEmpty = MultiFn('isEmpty');
+Implement(
+    isEmpty,
+    List(isList),
+    isBool,
+    (l) => val(l).isEmpty() ? TRUE : FALSE
+);
+Implement(
+    isEmpty,
+    List(isString),
+    isBool,
+    (l) => val(l).length === 0 ? TRUE : FALSE
+);
+
 const size = MultiFn('size');
 Implement(
     size,
@@ -767,6 +781,7 @@ module.exports = {
     size,
     get,
     set,
+    isEmpty,
     apply,
     _apply,
     add,
