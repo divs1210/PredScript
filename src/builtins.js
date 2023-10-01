@@ -1,4 +1,4 @@
-const { Map, is: _is, List: _List } = require('immutable');
+const { Map: _Map, is: _is, List: _List } = require('immutable');
 const BigNumber = require('bignumber.js');
 const { MultiMethod, derive: _derive, isA, ancestorsOf } = require('./multi');
 const { val } = require('./util');
@@ -11,7 +11,7 @@ const _String = globalThis.String;
 // objects and types
 // =================
 const Obj = (val, type) =>
-      Map({
+      _Map({
           val:  val,
           meta: { // mutable meta
             type: type
@@ -545,6 +545,33 @@ Implement(
 );
 
 
+// Map
+// ===
+const isMap = MultiFn("isMap");
+setType(isMap, isPred);
+_derive(isAny, isMap);
+
+Implement(
+    isMap,
+    List(isAny), 
+    isBool,
+    _ => FALSE
+);
+Implement(
+    isMap,
+    List(isMap), 
+    isBool,
+    _ => TRUE
+);
+
+function Map(...jsArray) {
+    return Obj(
+        _Map.of(...jsArray),
+        isMap
+    );
+}
+
+
 // Strings
 // =======
 const isString = MultiFn("isString");
@@ -609,6 +636,20 @@ Implement(
         '['
         + val(l).map(x => val(val(str)(x))).join(', ')
         + ']'
+    )
+);
+Implement(
+    str,
+    List(isMap),
+    isString,
+    m => String(
+        '{'
+        + val(m).entrySeq().map(([k, v]) => 
+            val(val(str)(k))
+            + ": "
+            + val(val(str)(v))
+        ).join(', ')
+        + '}'
     )
 );
 
@@ -778,6 +819,8 @@ module.exports = {
     isList,
     List,
     _List,
+    isMap,
+    Map,
     size,
     get,
     set,

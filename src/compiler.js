@@ -84,6 +84,8 @@ function compileCallExpression(node) {
 
     if (f === 'List')
         return `List(${args})`;
+    else if (f === 'Map')
+        return `Map(${args})`;
 
     return `_apply(apply, List(${f}, List(${args})))`;
 }
