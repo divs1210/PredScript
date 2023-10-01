@@ -695,6 +695,7 @@ Implement(
     (m) => val(m).size === 0 ? TRUE : FALSE
 );
 
+
 const size = MultiFn('size');
 Implement(
     size,
@@ -767,6 +768,15 @@ Implement(
     List(isMap, isAny, isAny),
     isMap,
     (m, k, v) => Obj(val(m).set(k, v), isMap)
+);
+
+
+const slice = MultiFn('slice');
+Implement(
+    slice,
+    List(isList, isInt),
+    isList,
+    (l, start) => Obj(val(l).slice(val(start).toNumber()), isList)
 );
 
 
@@ -849,6 +859,7 @@ module.exports = {
     get,
     set,
     isEmpty,
+    slice,
     apply,
     _apply,
     add,
