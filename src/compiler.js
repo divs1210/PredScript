@@ -12,6 +12,8 @@ function compileLiteral(node) {
             return `Real(${val})`;
         case 'bool':
             return `Bool(${val})`;
+        case 'char':
+            return `Char('${val}')`;
         case 'string':
             return `String("${val}")`;
         case 'null':
@@ -145,6 +147,7 @@ function compileAST(ast) {
         case 'int':
         case 'real':
         case 'bool':
+        case 'char':
         case 'string':
         case 'null':
             return compileLiteral(ast);

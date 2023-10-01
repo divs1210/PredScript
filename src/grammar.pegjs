@@ -29,6 +29,14 @@
         };
     }
 
+    function charNode(parsed) {
+        return {
+            type: 'char', 
+            value: parsed[1][1],
+            loc: location()
+        };
+    }
+
     function stringNode(parsed) {
         return {
             type: 'string', 
@@ -203,14 +211,15 @@ ifExpr     = 'if' _ '(' _ cond:expression _ ')' _ then:expression _else:((_ 'els
 fnCall     = f:primary _ argLists:(fnCallArgs+)                                      { return fnCallNode(f, argLists);   }
 fnCallArgs = '(' _ args:((expression (_ ',' _ expression)*)?) _ ')'                  { return fnCallArgsNode(args);      }
 
-primary    = REAL / INTEGER / STRING / BOOL / NULL / SYMBOL / block / grouping
+primary    = REAL / INTEGER / CHAR / STRING / BOOL / NULL / SYMBOL / block / grouping
 grouping   = '(' _ e:expression _ ')'                                                { return groupingNode(e);           }
 block      = '{' _ b:((_ statement _)*) _ '}'                                        { return blockNode(b);              }
 
+NULL        = 'null'                                           { return nullNode;      }
 INTEGER     = i:([0-9]+)                                       { return intNode(i);    }
 REAL        = n:([0-9]+ '.' [0-9]+)                            { return realNode(n);   }
 BOOL        = b:('true' / 'false')                             { return boolNode(b);   } 
-NULL        = 'null'                                           { return nullNode;      }
+CHAR        = c:("'" (!"'" .) "'")                             { return charNode(c);   }
 STRING      = s:('"' (!'"' .)* '"')                            { return stringNode(s); }
 SYMBOL      = s:(SYMBOLSTART (SYMBOLSTART / [0-9])*)           { return symbolNode(s); }
 SYMBOLSTART = [a-zA-Z] / '$' / '_'
