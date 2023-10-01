@@ -496,17 +496,6 @@ Implement(
 );
 
 
-// Collections
-// ===========
-const get = MultiFn('get');
-Implement(
-    get,
-    List(isList, isInt),
-    isAny,
-    (l, idx) => val(l).get(val(idx).toNumber())
-);
-
-
 // Strings
 // =======
 const isString = MultiFn("isString");
@@ -588,6 +577,23 @@ Implement(
     List(isAny, isString),
     isString,
     (x, y) => String(val(str)(x).get('val') + val(y))
+);
+
+
+// Collections
+// ===========
+const get = MultiFn('get');
+Implement(
+    get,
+    List(isList, isInt),
+    isAny,
+    (l, idx) => val(l).get(val(idx).toNumber())
+);
+Implement(
+    get,
+    List(isString, isInt),
+    isAny,
+    (s, idx) => String(val(s)[val(idx).toNumber()])
 );
 
 
