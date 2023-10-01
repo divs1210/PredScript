@@ -100,7 +100,7 @@
             type:  'unary-exp', 
             op:    op,
             value: x,
-            loc: location()
+            loc:   location()
         };
     }
 
@@ -115,7 +115,7 @@
                 op:    op,
                 left:  x,
                 right: p0,
-                loc: location()
+                loc:   location()
             },
             pairs.slice(1)
         );
@@ -125,6 +125,15 @@
         obj.type = 'multifn-arg';
         obj.loc = location();
         return obj;
+    }
+
+    function getExprNode(symbol, expr) {
+        return {
+            type: 'get-exp',
+            fromExp: symbol,
+            keyExp: expr,
+            loc: location()
+        };
     }
 
     // intermediate node
@@ -204,12 +213,15 @@ factor     = x:unary  _ pairs:(( ( '/' / '*' / '%' ) _ unary)*)         { return
 unary      = op:( '!' / '-' ) _ x:unary                                 { return unaryNode(op, x);      }
              / ifExpr
              / fnCall
+             / getExpr
              / primary
 
 ifExpr     = 'if' _ '(' _ cond:expression _ ')' _ then:expression _else:((_ 'else' _ expression)?)
                                                                                      { return ifNode(cond, then, _else); }
 fnCall     = f:primary _ argLists:(fnCallArgs+)                                      { return fnCallNode(f, argLists);   }
 fnCallArgs = '(' _ args:((expression (_ ',' _ expression)*)?) _ ')'                  { return fnCallArgsNode(args);      }
+
+getExpr    = s:SYMBOL _ '[' _ e:(expression) _ ']'                                   { return getExprNode(s, e)}
 
 primary    = REAL / INTEGER / CHAR / STRING / BOOL / NULL / SYMBOL / block / grouping
 grouping   = '(' _ e:expression _ ')'                                                { return groupingNode(e);           }

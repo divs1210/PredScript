@@ -88,6 +88,12 @@ function compileCallExpression(node) {
     return `_apply(apply, List(${f}, List(${args})))`;
 }
 
+function getExpression(node) {
+    let from = compileAST(node.fromExp);
+    let key = compileAST(node.keyExp);
+    return `_apply(get, List(${from}, ${key}))`;
+}
+
 function compileBlockExpression(node) {
     let countExprs = node.value.length;
     if (is(0, countExprs))
@@ -161,6 +167,8 @@ function compileAST(ast) {
             return compileIfExpression(ast);
         case 'call-exp':
             return compileCallExpression(ast);
+        case 'get-exp':
+            return getExpression(ast);
         case 'block-stmt':
             return compileBlockExpression(ast);
         case 'expr-stmt':
