@@ -496,6 +496,17 @@ Implement(
 );
 
 
+// Collections
+// ===========
+const get = MultiFn('get');
+Implement(
+    get,
+    List(isList, isInt),
+    isAny,
+    (l, idx) => val(l).get(val(idx).toNumber())
+);
+
+
 // Strings
 // =======
 const isString = MultiFn("isString");
@@ -641,6 +652,7 @@ module.exports = {
     isList,
     List,
     _List,
+    get,
     apply,
     _apply,
     add,
