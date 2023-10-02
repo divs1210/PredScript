@@ -28,7 +28,7 @@ function inc(x: isEven): isOdd {
     // hard casted to isOdd
     // hard casts don't check
     // before casting
-    genAS(isOdd)(x + 1)
+    AS(isOdd, x + 1)
 }
 
 function inc(x: isOdd): isEven {
@@ -36,16 +36,16 @@ function inc(x: isOdd): isEven {
     // hard casted to isEven
     // hard casts don't check
     // before casting
-    genAS(isEven)(x + 1)
+    AS(isEven, x + 1)
 }
 
 let incInt: isInt = inc(1);
 println("inc isInt  1: " + type(incInt) + " " + incInt);
 
-let even: isEven = genAS(isEven)(2);
+let even: isEven = AS(isEven, 2);
 let incEven: isOdd = inc(even);
 println("inc isEven 2: " + type(incEven) + " " + incEven);
 
-let odd: isOdd = genAS(isOdd)(3);
+let odd: isOdd = AS(isOdd, 3);
 let incOdd: isEven = inc(odd);
 println("inc isOdd  3: " + type(incOdd) + " " + incOdd);

@@ -33,15 +33,15 @@ assert(_is(isList, _type(List([1]))));
 // =====
 assert(_is(
     3,
-    _apply(add, List([
+    _apply(add, List(
         Real(1),
         Real(2)
-    ])).get('val').toNumber()
+    )).get('val').toNumber()
 ));
 
 Implement(
     apply,
-    List([isList, isReal]),
+    List(isList, isReal),
     isReal,
     (xs, idx) => {
         let jsXs  = val(xs);
@@ -54,14 +54,14 @@ assert(_is(
     12,
     _apply(
         apply, 
-        List([
-            List([
+        List(
+            List(
                 Real(10),
                 Real(11),
                 Real(12)
-            ]),
+            ),
             Real(2)
-        ])
+        )
     ).get('val').toNumber()
 ));
 
@@ -71,16 +71,16 @@ assert(_is(
 let inc = MultiFn('inc');
 Implement(
     inc,
-    List([isReal]),
+    List(isReal),
     isReal,
     (x) => _apply(
         add,
-        List([x, Real(1)])
+        List(x, Real(1))
     )
 );
 assert(_is(
     2,
-    _apply(inc, List([Real(1)])).get('val').toNumber()
+    _apply(inc, List(Real(1))).get('val').toNumber()
 ));
 
 
@@ -88,17 +88,17 @@ assert(_is(
 // ==========
 assert(_is(
     3,
-    _apply(add, List([Real(1), Real(2)])).get('val').toNumber()
+    _apply(add, List(Real(1), Real(2))).get('val').toNumber()
 ));
 
 assert(_is(
     -1,
-    _apply(minus, List([Real(1), Real(2)])).get('val').toNumber()
+    _apply(minus, List(Real(1), Real(2))).get('val').toNumber()
 ));
 
 assert(_is(
     6,
-    _apply(times, List([Real(2), Real(3)])).get('val').toNumber()
+    _apply(times, List(Real(2), Real(3))).get('val').toNumber()
 ));
 
 
@@ -115,25 +115,25 @@ assert(_is(
 // =====
 assert(_is(
     TRUE,
-    _apply(is, List([Real(1), Real(1)]))
+    _apply(is, List(Real(1), Real(1)))
 ));
 
 assert(_is(
     FALSE,
-    _apply(is, List([Real(1), Real(2)]))
+    _apply(is, List(Real(1), Real(2)))
 ));
 
 assert(_is(
     TRUE,
-    _apply(isLessThanEq, List([Real(1), Real(2)]))
+    _apply(isLessThanEq, List(Real(1), Real(2)))
 ));
 
 assert(_is(
     TRUE,
-    _apply(isLessThanEq, List([Real(1), Real(1)]))
+    _apply(isLessThanEq, List(Real(1), Real(1)))
 ));
 
 assert(_is(
     FALSE,
-    _apply(isLessThanEq, List([Real(2), Real(1)]))
+    _apply(isLessThanEq, List(Real(2), Real(1)))
 ));

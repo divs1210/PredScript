@@ -29,6 +29,14 @@
         };
     }
 
+    function charNode(parsed) {
+        return {
+            type: 'char', 
+            value: parsed[1][1],
+            loc: location()
+        };
+    }
+
     function stringNode(parsed) {
         return {
             type: 'string', 
@@ -57,10 +65,10 @@
     function fnCallArgsNode(args) {
         if(!args || args.length === 0)
             return [];
-        else if(args.slice(1)[0].length > 0) {
-            return [args[0]].concat(args.slice(1).map(arg => arg[0][3]));
-        } else
+        else if (args.length === 1)
             return [args[0]];
+        else 
+            return [args[0]].concat(args[1].map(arg => arg[3]));
     }
 
     function fnCallNode(f, argLists) {
@@ -92,7 +100,7 @@
             type:  'unary-exp', 
             op:    op,
             value: x,
-            loc: location()
+            loc:   location()
         };
     }
 
@@ -107,7 +115,7 @@
                 op:    op,
                 left:  x,
                 right: p0,
-                loc: location()
+                loc:   location()
             },
             pairs.slice(1)
         );
@@ -117,6 +125,23 @@
         obj.type = 'multifn-arg';
         obj.loc = location();
         return obj;
+    }
+
+    function getExprNode(from, keys) {
+        if(keys.length === 1)
+            return {
+                type: 'get-exp',
+                fromExp: from,
+                keyExp: keys[0][2],
+                loc: location()
+            };
+        return getExprNode(
+            getExprNode(
+                from,
+                [keys[0]]
+            ),
+            keys.slice(1)
+        );
     }
 
     // intermediate node
@@ -195,6 +220,7 @@ term       = x:factor _ pairs:(( ( '-' / '+' ) _ factor)*)              { return
 factor     = x:unary  _ pairs:(( ( '/' / '*' / '%' ) _ unary)*)         { return binaryNode(x, pairs);  }
 unary      = op:( '!' / '-' ) _ x:unary                                 { return unaryNode(op, x);      }
              / ifExpr
+             / getExpr
              / fnCall
              / primary
 
@@ -203,14 +229,19 @@ ifExpr     = 'if' _ '(' _ cond:expression _ ')' _ then:expression _else:((_ 'els
 fnCall     = f:primary _ argLists:(fnCallArgs+)                                      { return fnCallNode(f, argLists);   }
 fnCallArgs = '(' _ args:((expression (_ ',' _ expression)*)?) _ ')'                  { return fnCallArgsNode(args);      }
 
-primary    = REAL / INTEGER / STRING / BOOL / NULL / SYMBOL / block / grouping
+getExpr    = f:fromExpr _ ks:(keyExpr+)                                              { return getExprNode(f, ks);         }
+fromExpr   = fnCall / SYMBOL
+keyExpr    = '[' _ expression _ ']'
+
+primary    = REAL / INTEGER / CHAR / STRING / BOOL / NULL / SYMBOL / block / grouping
 grouping   = '(' _ e:expression _ ')'                                                { return groupingNode(e);           }
 block      = '{' _ b:((_ statement _)*) _ '}'                                        { return blockNode(b);              }
 
+NULL        = 'null'                                           { return nullNode;      }
 INTEGER     = i:([0-9]+)                                       { return intNode(i);    }
 REAL        = n:([0-9]+ '.' [0-9]+)                            { return realNode(n);   }
 BOOL        = b:('true' / 'false')                             { return boolNode(b);   } 
-NULL        = 'null'                                           { return nullNode;      }
+CHAR        = c:("'" (!"'" .) "'")                             { return charNode(c);   }
 STRING      = s:('"' (!'"' .)* '"')                            { return stringNode(s); }
 SYMBOL      = s:(SYMBOLSTART (SYMBOLSTART / [0-9])*)           { return symbolNode(s); }
 SYMBOLSTART = [a-zA-Z] / '$' / '_'

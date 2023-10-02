@@ -1,104 +1,94 @@
-const { Map, is: _is, List: _List, Set } = require('immutable');
+const immutable = require('immutable');
+const { Map: _Map, is: _is, List: _List } = immutable;
 const BigNumber = require('bignumber.js');
-const { MultiMethod, derive: _derive, isA } = require('./multi');
+const { MultiMethod, derive: _derive, isA, ancestorsOf } = require('./multi');
 const { val } = require('./util');
+
+// reify JS
+// ========
+const _String = globalThis.String;
+
 
 // objects and types
 // =================
-const Obj = (val, type) =>
-      Map({
-          val:  val,
-          // mutable meta
-          meta: {
-            type: type || null
-          }
-      });
+const Obj = (val, type) => {
+    let m = _Map({ val });
+    m.__psType__ = type;
+    return m;
+}
 
 
-// primitives
+// types util
 // ==========
-const NULL  = Obj(null);
-const TRUE  = Obj(true);
-const FALSE = Obj(false);
-
-const _isAny = _ => TRUE;
-const isAny = Obj(_isAny);
-
-function _type(obj) {
-    return obj.get('meta').type
+function getType(obj) {
+    return obj.__psType__;
 }
 
 function setType(obj, type) {
-    obj.get('meta').type = type;
+    obj.__psType__ = type;
+}
+
+function _check(type, obj) {
+    let t = getType(obj);
+    if (isA(type, t))
+        return obj;
+    throw new Error(`Type Error: Expected ${val(type).mName}, but got ${val(t).mName}!`);
 }
 
 
 // Predicates
 // ==========
-const _isPred = new MultiMethod('isPred', _type);
+const _isPred = new MultiMethod('isPred', getType);
 const isPred = Obj(_isPred);
 setType(isPred, isPred);
 
 
-// Any
-// ===
-setType(isAny, isPred);
+// isAny
+// =====
+const _isAny  = new MultiMethod('isAny', getType);
+const isAny = Obj(_isAny, isPred);
 
 
 // Booleans
 // ========
-const _isBool = (obj) => (obj === TRUE || obj === FALSE) ? TRUE : FALSE;
+const _isBool = new MultiMethod('isBool', getType);
 const isBool = Obj(_isBool, isPred);
-setType(TRUE, isBool);
-setType(FALSE, isBool);
 _derive(isAny, isBool);
-_isBool.mName = 'isBool';
-_isBool.implementationFor = () => {
-    return {
-        argTypes: _List([isAny]),
-        retType: isBool,
-        f: _isBool
-    };
-};
+
+const TRUE  = Obj(true,  isBool);
+const FALSE = Obj(false, isBool);
+
+_isBool.implementFor(
+    _List([isAny]),
+    isBool,
+    _ => FALSE
+);
+_isBool.implementFor(
+    _List([isBool]),
+    isBool,
+    _ => TRUE
+); 
 
 function Bool(b) {
     return b === true? TRUE : FALSE;
 }
 
 
-// can fully define isAny now
-// ==========================
-_isAny.mName = 'isAny';
-_isAny.implementationFor = () => {
-    return {
-        argTypes: _List([isAny]),
-        retType: isBool,
-        f: _isAny
-    };
-}
-
-// this has to be done for
-// all builtin fns
-// that are not multimethods
-_type.mName = "type";
-_type.implementationFor = () => {
-    return {
-        argTypes: _List([isAny]),
-        retType: isPred,
-        f: _type
-    };
-}
+// can implement isAny now
+// =======================
+_isAny.implementFor(
+    _List([isAny]),
+    isBool,
+    _ => TRUE
+);
 
 
 // Predicates continued
 // ====================
-// TODO: the following 2
-// should happen automatically
-// for predicates
 _isPred.implementFor(
     _List([isAny]),
     isBool,
-    _ => False
+    _ => FALSE
 );
 _isPred.implementFor(
     _List([isPred]),
@@ -107,15 +97,32 @@ _isPred.implementFor(
 );
 
 
+// Null
+// ====
+const _isNull = new MultiMethod('isNull', getType);
+const isNull = Obj(_isNull, isPred);
+_derive(isAny, isNull);
+
+const NULL  = Obj(null, isNull);
+
+_isNull.implementFor(
+    _List([isNull]),
+    isBool,
+    _ => TRUE
+);
+_isNull.implementFor(
+    _List([isAny]),
+    isBool,
+    _ => FALSE
+);
+
+
 // List
 // ====
-const _isList = new MultiMethod("isList", _type);
+const _isList = new MultiMethod("isList", getType);
 const isList = Obj(_isList, isPred);
 _derive(isAny, isList);
 
-// TODO: the following 2
-// should happen automatically
-// for predicates
 _isList.implementFor(
     _List([isAny]),
     isBool,
@@ -127,7 +134,7 @@ _isList.implementFor(
     _ => TRUE
 );
 
-function List(jsArray) {
+function List(...jsArray) {
     return Obj(
         _List(jsArray),
         isList
@@ -137,76 +144,69 @@ function List(jsArray) {
 
 // Casting
 // =======
-const ___AS__ = (type, obj) => {
-    setType(obj, type);
-    return NULL;
-}
-___AS__.mName = '__AS__';
-___AS__.implementationFor = () => {
-    return {
-        argTypes: _List([isPred, isAny]),
-        retType: isNull,
-        f: ___AS__
-    };
-};
+const ___AS__ = new MultiMethod("__AS__", getType);
+___AS__.implementFor(
+    _List([isPred, isAny]),
+    isAny,
+    (type, obj) => {
+        setType(obj, type);
+        return NULL;
+    }
+);
 
+const _AS = new MultiMethod("AS", getType);
+_AS.implementFor(
+    _List([isPred, isAny]),
+    isAny,
+    (type, obj) => {
+        let newObj = Object.create(obj);
+        newObj.__psType__ = type;
+        return newObj;
+    }
+);
 
-const _AS = (type, obj) => {
-    let meta = obj.get('meta');
-    let newMeta = {};
-    for(key in meta)
-        newMeta[key] = meta[key];
-    newMeta.type = type;
-    return obj.set('meta', newMeta);
-};
-_AS.mName = 'AS';
-_AS.implementationFor = () => {
-    return {
-        argTypes: _List([isPred, isAny]),
-        retType: isAny,
-        f: _AS
-    };
-};
-
-
-const _as = (pred, obj) => {
-    let t = _type(obj);
-    if(isA(pred, t))
-        return obj;
-    else if (val(pred)(obj) === TRUE)
-        return val(AS)(pred, obj);
-    throw new Error(`Cannot cast ${val(t).mName} to ${val(pred).mName}!`);
-};
-_as.mName = 'as';
-_as.implementationFor = () => {
-    return {
-        argTypes: _List([isPred, isAny]),
-        retType: isAny,
-        f: _as
-    };
-};
+const _as = new MultiMethod("as", getType);
+_as.implementFor(
+    _List([isPred, isAny]),
+    isAny,
+    (pred, obj) => {
+        let t = getType(obj);
+        if(isA(pred, t))
+            return obj;
+        else if (val(pred)(obj) === TRUE)
+            return val(AS)(pred, obj);
+        throw new Error(`Cannot cast ${val(t).mName} to ${val(pred).mName}!`)
+    }
+);
 
 
 // MultiFns
 // ========
-const _isMultiFn = new MultiMethod("isMultiFn", _type);
-const isMultiFn = Obj(_isMultiFn, isPred);
+const _isFn = new MultiMethod("isFn", getType);
+const isFn = Obj(_isFn, isPred);
+_derive(isAny, isFn);
+_derive(isFn, isPred);
 
-_isMultiFn.implementFor(
+_isFn.implementFor(
     _List([isAny]),
     isBool,
     _ => FALSE
 );
-_isMultiFn.implementFor(
-    _List([isMultiFn]),
+_isFn.implementFor(
+    _List([isFn]),
+    isBool,
+    _ => TRUE
+);
+_isFn.implementFor(
+    _List([isPred]),
     isBool,
     _ => TRUE
 );
 
 function MultiFn(name) {
     return Obj(
-        new MultiMethod(name, _type),
-        isMultiFn
+        new MultiMethod(name, getType),
+        isFn
     );
 }
 
@@ -216,47 +216,63 @@ function Implement(multi, argTypes, retType, f) {
 
     let checkedF = (...args) => {
         let res = f(...args);
-        return _as(retType, res);
+        return _check(retType, res);
     };
 
     jsMulti.implementFor(jsArgTypes, retType, checkedF);
+
+    if(jsArgTypes.size === 1 && retType === isBool)
+        setType(multi, isPred);
+
     return NULL;
 }
 
-function Derive(parent, child) {
-    _derive(parent, child);
-    Implement(
-        parent,
-        _List([child]),
-        isBool,
-        _ => TRUE
-    );
-    return NULL;
-};
-Derive.mName = 'derive';
-Derive.implementationFor = () => {
-    return {
-        argTypes: _List([isPred, isPred]),
-        retType: isNull,
-        f: Derive
-    };
-};
+
+// derive
+// ======
+const derive = MultiFn('derive');
+const Derive = val(derive);
+
+Implement(
+    derive,
+    List(isPred, isPred),
+    isNull,
+    (isParent, isChild) => {
+        _derive(isParent, isChild);
+        Implement(
+            isChild,
+            List(isAny),
+            isBool, 
+            _ => FALSE
+        );
+        Implement(
+            isChild,
+            List(isChild),
+            isBool, 
+            _ => TRUE
+        );
+        Implement(
+            isParent,
+            List(isChild),
+            isBool, 
+            _ => TRUE
+        );
+        return NULL;
+    }
+);
 
 
-// Null
+// type
 // ====
-const _isNull = (obj) => obj === NULL ? TRUE : FALSE;
-const isNull = Obj(_isNull, isPred);
-setType(NULL, isNull);
-_derive(isAny, isNull);
-_isNull.mName = 'isNull';
-_isNull.implementationFor = () => {
-    return {
-        argTypes: _List([isAny]),
-        retType: isBool,
-        f: _isNull
-    };
-};
+const type = MultiFn('type');
+const _type = val(type);
+
+Implement(
+    type,
+    List(isAny),
+    isPred,
+    getType
+);
 
 
 // Bool contd
@@ -265,7 +281,7 @@ const neg = MultiFn("neg");
 
 Implement(
     neg,
-    List([isBool]),
+    List(isBool),
     isBool,
     b => Bool(!val(b))
 );
@@ -275,23 +291,7 @@ Implement(
 // ============
 const isReal = MultiFn("isReal");
 setType(isReal, isPred);
-_derive(isAny, isReal);
-
-// TODO: the following 2
-// should happen automatically
-// for predicates
-Implement(
-    isReal,
-    List([isAny]),
-    isBool, 
-    _ => FALSE
-);
-Implement(
-    isReal,
-    List([isReal]),
-    isBool, 
-    _ => TRUE
-);
+Derive(isAny, isReal);
 
 function Real(n) {
     return Obj(
@@ -303,7 +303,7 @@ function Real(n) {
 const BigNumberZERO = new BigNumber(0);
 Implement(
     neg,
-    List([isReal]),
+    List(isReal),
     isReal,
     r => Real(BigNumberZERO.minus(val(r)))
 );
@@ -315,25 +315,9 @@ const isInt = MultiFn("isInt");
 setType(isInt, isPred);
 Derive(isReal, isInt);
 
-// TODO: the following 2
-// should happen automatically
-// for predicates
 Implement(
     isInt,
-    List([isAny]),
-    isBool, 
-    _ => FALSE
-);
-Implement(
-    isInt,
-    List([isInt]),
-    isBool, 
-    _ => TRUE
-);
-
-Implement(
-    isInt,
-    List([isReal]),
+    List(isReal),
     isBool, 
     r => val(r).integerValue().eq(val(r)) ? TRUE : FALSE
 );
@@ -351,13 +335,13 @@ function Int(n) {
 const add = MultiFn('add');
 Implement(
     add,
-    List([isInt, isInt]),
+    List(isInt, isInt),
     isInt,
     (x, y) => Int(x.get('val').plus(y.get('val')))
 );
 Implement(
     add,
-    List([isReal, isReal]),
+    List(isReal, isReal),
     isReal,
     (x, y) => Real(x.get('val').plus(y.get('val')))
 );
@@ -365,13 +349,13 @@ Implement(
 const minus = MultiFn('sub');
 Implement(
     minus,
-    List([isInt, isInt]),
+    List(isInt, isInt),
     isInt,
     (x, y) => Int(x.get('val').minus(y.get('val')))
 );
 Implement(
     minus,
-    List([isReal, isReal]),
+    List(isReal, isReal),
     isReal,
     (x, y) => Real(x.get('val').minus(y.get('val')))
 );
@@ -379,13 +363,13 @@ Implement(
 const times = MultiFn('times');
 Implement(
     times,
-    List([isInt, isInt]),
+    List(isInt, isInt),
     isInt,
     (x, y) => Int(x.get('val').times(y.get('val')))
 );
 Implement(
     times,
-    List([isReal, isReal]),
+    List(isReal, isReal),
     isReal,
     (x, y) => Real(x.get('val').times(y.get('val')))
 );
@@ -393,13 +377,13 @@ Implement(
 const divide = MultiFn('divide');
 Implement(
     divide,
-    List([isInt, isInt]),
+    List(isInt, isInt),
     isInt,
     (x, y) => Int(x.get('val').div(y.get('val')))
 );
 Implement(
     divide,
-    List([isReal, isReal]),
+    List(isReal, isReal),
     isReal,
     (x, y) => Real(x.get('val').div(y.get('val')))
 );
@@ -407,13 +391,13 @@ Implement(
 const mod = MultiFn('mod');
 Implement(
     mod,
-    List([isInt, isInt]),
+    List(isInt, isInt),
     isInt,
     (x, y) => Int(x.get('val').mod(y.get('val')))
 );
 Implement(
     mod,
-    List([isReal, isReal]),
+    List(isReal, isReal),
     isReal,
     (x, y) => Real(x.get('val').mod(y.get('val')))
 );
@@ -421,169 +405,320 @@ Implement(
 const pow = MultiFn('pow');
 Implement(
     pow,
-    List([isInt, isInt]),
+    List(isInt, isInt),
     isInt,
     (x, y) => Int(x.get('val').pow(y.get('val')))
 );
 Implement(
     pow,
-    List([isReal, isReal]),
+    List(isReal, isReal),
     isReal,
     (x, y) => Real(x.get('val').pow(y.get('val')))
 );
 
 
 // Logic operators
-// ================
+// ===============
 const is = MultiFn('is');
 Implement(
     is,
-    List([isAny, isAny]),
+    List(isAny, isAny),
     isBool,
     (x, y) => Bool(_is(x, y))
 );
 Implement(
     is,
-    List([isReal, isReal]),
+    List(isReal, isReal),
     isBool,
     (x, y) => Bool(x.get('val').eq(y.get('val')))
 );
 
+
 const isLessThan = MultiFn('isLessThan');
 Implement(
     isLessThan,
-    List([isReal, isReal]),
+    List(isReal, isReal),
     isBool,
     (x, y) => Bool(x.get('val').lt(y.get('val')))
 );
 
+
 const isLessThanEq = MultiFn('isLessThanEq');
 Implement(
     isLessThanEq,
-    List([isReal, isReal]),
+    List(isReal, isReal),
     isBool,
     (x, y) => Bool(x.get('val').lte(y.get('val')))
 );
 
+
 const isGreaterThan = MultiFn('isGreaterThan');
 Implement(
     isGreaterThan,
-    List([isReal, isReal]),
+    List(isReal, isReal),
     isBool,
     (x, y) => Bool(x.get('val').gt(y.get('val')))
 );
 
+
 const isGreaterThanEq = MultiFn('isGreaterThanEq');
 Implement(
     isGreaterThanEq,
-    List([isReal, isReal]),
+    List(isReal, isReal),
     isBool,
     (x, y) => Bool(x.get('val').gte(y.get('val')))
 );
+
+
+// Chars
+// =====
+const isChar = MultiFn("isChar");
+setType(isChar, isPred);
+Derive(isInt, isChar);
+
+function CharFromCodePoint(jsCodePoint) {
+    return Obj(
+        (new BigNumber(jsCodePoint)).integerValue(),
+        isChar
+    );
+}
+
+function Char(s) {
+    return CharFromCodePoint(s.codePointAt(0));
+}
+
+
+// toInt
+// =====
+const int = MultiFn('int');
+Implement(
+    int,
+    List(isBool),
+    isInt,
+    b => b === TRUE? Int(1): Int(0)
+);
+Implement(
+    int,
+    List(isChar),
+    isInt,
+    ch => _AS(isInt, ch)
+);
+Implement(
+    int,
+    List(isReal),
+    isInt,
+    r => {
+        let n = val(r).integerValue(BigNumber.ROUND_HALF_CEIL);
+        return Obj(n, isInt);
+    }
+);
+
+
+// Map
+// ===
+const isMap = MultiFn("isMap");
+setType(isMap, isPred);
+Derive(isAny, isMap);
+
+function Map(...jsArray) {
+    return Obj(
+        _Map.of(...jsArray),
+        isMap
+    );
+}
 
 
 // Strings
 // =======
 const isString = MultiFn("isString");
 setType(isString, isPred);
-_derive(isAny, isString);
+Derive(isAny, isString);
 
-// TODO: the following 2
-// should happen automatically
-// for predicates
-Implement(
-    isString,
-    List([isAny]), 
-    isBool,
-    _ => FALSE
-);
-Implement(
-    isString,
-    List([isString]), 
-    isBool,
-    _ => TRUE
-);
-
-function String(s) {
-    return Obj(s, isString);
-}
+const String = (s) => Obj(s, isString);
 
 // toString
 const str = MultiFn('str');
 Implement(
     str,
-    List([isAny]),
+    List(isAny),
     isString,
     i => String('' + val(i))
 );
 Implement(
     str,
-    List([isInt]),
+    List(isInt),
     isString,
     i => String(val(i).toFixed(0))
 );
 Implement(
     str,
-    List([isPred]),
+    List(isChar),
+    isString,
+    ch => String(_String.fromCodePoint(val(ch).toNumber()))
+);
+Implement(
+    str,
+    List(isFn),
+    isString,
+    f => String(val(f).mName)
+);
+Implement(
+    str,
+    List(isPred),
     isString,
     p => String(val(p).mName)
 );
+Implement(
+    str,
+    List(isList),
+    isString,
+    l => String(
+        '['
+        + val(l).map(x => val(val(str)(x))).join(', ')
+        + ']'
+    )
+);
+Implement(
+    str,
+    List(isMap),
+    isString,
+    m => String(
+        '{'
+        + val(m).entrySeq().map(([k, v]) =>
+            val(val(str)(k))
+            + ": "
+            + val(val(str)(v))
+        ).join(', ')
+        + '}'
+    )
+);
 
-// concat
+// strcat
 Implement(
     add,
-    List([isString, isString]),
+    List(isString, isString),
     isString,
     (x, y) => String(val(x) + val(y))
 );
 Implement(
     add,
-    List([isString, isAny]),
+    List(isString, isAny),
     isString,
     (x, y) => String(val(x) + val(str)(y).get('val'))
 );
 Implement(
     add,
-    List([isAny, isString]),
+    List(isAny, isString),
     isString,
     (x, y) => String(val(str)(x).get('val') + val(y))
 );
 
 
-// Fns
-// ===
-const isFn = MultiFn('isFn');
-setType(isFn, isPred);
-_derive(isAny, isFn);
-Derive(isFn, isMultiFn);
-Derive(isFn, isPred);
-
-// TODO: the following 2
-// should happen automatically
-// for predicates
+// Collections
+// ===========
+const isEmpty = MultiFn('isEmpty');
 Implement(
-    isFn,
-    List([isAny]), 
+    isEmpty,
+    List(isList),
     isBool,
-    _ => FALSE
+    (l) => val(l).isEmpty() ? TRUE : FALSE
 );
 Implement(
-    isFn,
-    List([isFn]),
+    isEmpty,
+    List(isString),
     isBool,
-    _ => TRUE
+    (l) => val(l).length === 0 ? TRUE : FALSE
+);
+Implement(
+    isEmpty,
+    List(isMap),
+    isBool,
+    (m) => val(m).size === 0 ? TRUE : FALSE
 );
 
+
+const size = MultiFn('size');
 Implement(
-    str,
-    List([isFn]),
+    size,
+    List(isList),
+    isInt,
+    (l) => Int(val(l).size)
+);
+Implement(
+    size,
+    List(isString),
+    isInt,
+    // correctly handles unicode
+    (s) => Int([...val(s)].length)
+);
+Implement(
+    size,
+    List(isMap),
+    isInt,
+    (m) => Int(val(m).size)
+);
+
+const get = MultiFn('get');
+Implement(
+    get,
+    List(isList, isInt),
+    isAny,
+    (l, idx) => val(l).get(val(idx).toNumber())
+);
+Implement(
+    get,
+    List(isString, isInt),
+    isChar,
+    // correctly handles unicode
+    (s, idx) => {
+        let jsCodePoint = val(s).codePointAt(val(idx).toNumber());
+        return CharFromCodePoint(jsCodePoint);
+    }
+);
+Implement(
+    get,
+    List(isMap, isAny),
+    isAny,
+    (m, k) => val(m).get(k)
+);
+
+
+const set = MultiFn('set');
+Implement(
+    set,
+    List(isList, isInt, isAny),
+    isList,
+    (l, idx, newVal) => Obj(val(l).set(val(idx).toNumber(), newVal), isList)
+);
+Implement(
+    set,
+    List(isString, isInt, isChar),
     isString,
-    f => String(val(f).mName)
+    (s, idx, ch) => {
+        let jsString = val(s);
+        let unicodeChars = [...jsString];
+        let jsIdx = val(idx).toNumber();
+        let jsChar = val(val(str)(ch));
+        unicodeChars[jsIdx] = jsChar;
+        let psString = unicodeChars.join('');
+        return String(psString);
+    }
+);
+Implement(
+    set,
+    List(isMap, isAny, isAny),
+    isMap,
+    (m, k, v) => Obj(val(m).set(k, v), isMap)
 );
 
-function Fn(f) {
-    return Obj(f, isFn);
-}
+
+const slice = MultiFn('slice');
+Implement(
+    slice,
+    List(isList, isInt),
+    isList,
+    (l, start) => Obj(val(l).slice(val(start).toNumber()), isList)
+);
 
 
 // Apply
@@ -595,137 +730,50 @@ function _apply(f, args) {
 }
 
 const apply = MultiFn('apply');
-apply.get('val').defaultImpl.f = _apply;
-// apply is generic, can't do the following:
-// Implement(
-//     apply,
-//     List([isFn, isList]),
-//     isAny,
-//     _apply
-// );
+Implement(
+    apply,
+    List(isFn, isList),
+    isAny,
+    _apply
+);
 
 
 // IO
 // ==
-function _println(x)  {
-    let jsString = val(str)(x).get('val');
-    console.log(jsString);
-    return NULL;
-}
-_println.mName = 'println';
-_println.implementationFor = () => {
-    return {
-        argTypes: _List([isAny]),
-        retType: isNull,
-        f: _println
-    };
-};
-
-const println = Fn(_println);
+const println = MultiFn("println");
+Implement(
+    println,
+    List(),
+    isNull,
+    (x) => {
+        console.log();
+        return NULL;
+    }
+);
+Implement(
+    println,
+    List(isAny),
+    isNull,
+    (x) => {
+        let jsString = val(str)(x).get('val');
+        console.log(jsString);
+        return NULL;
+    }
+);
 
 
 // more fns
 // ========
-const type = Fn(_type);
-
-const __AS__ = Fn(___AS__);
-const AS = Fn(_AS);
-const as = Fn(_as);
-
-const derive = Fn(Derive);
-
-
-// higher order types
-// ==================
-// union
-function _union(predA, predB) {
-    let set = Set([predA, predB]);
-    let mName = set
-        .map(pred => val(pred).mName)
-        .join(', ');
-    mName = 'union[' + mName + ']';
-    
-    const f = (obj) => set.has(_type(obj))? TRUE: FALSE;
-    f.mName = mName;
-    f.implementationFor = () => {
-        return {
-            argTypes: _List([isAny]),
-            retType: isBool,
-            f: f
-        };
-    }
-
-    let newPred = Fn(f);
-    setType(newPred, isPred);
-    // TODO: should derive from lowest common ancestor
-    _derive(isAny, newPred);
-    return newPred;
-}
-_union.mName = 'union';
-_union.implementationFor = () => {
-    return {
-        argTypes: _List([isPred, isPred]),
-        retType: isPred,
-        f: _union
-    };
-};
-const union = Fn(_union);
-
-
-// generic AS
-const _gen_AS = (pred) => {
-    let _f = obj => _AS(pred, obj);
-    _f.mName = `AS[${val(pred).mName}]`;
-    _f.implementationFor = () => {
-        return {
-            argTypes: _List([isAny]),
-            retType: pred,
-            f: _f
-        };
-    };
-    
-    return Fn(_f);
-}
-_gen_AS.mName = "genAS";
-_gen_AS.implementationFor = () => {
-    return {
-        argTypes: _List([isPred]),
-        retType: isFn,
-        f: _gen_AS
-    };
-};
-const genAS = Fn(_gen_AS);
-
-
-// generic as
-const _gen_as = (pred) => {
-    let _f = obj => _as(pred, obj);
-    _f.mName = `as[${val(pred).mName}]`;
-    _f.implementationFor = () => {
-        return {
-            argTypes: _List([isAny]),
-            retType: pred,
-            f: _f
-        };
-    };
-    
-    return Fn(_f);
-}
-_gen_as.mName = "genAs";
-_gen_as.implementationFor = () => {
-    return {
-        argTypes: _List([isPred]),
-        retType: isFn,
-        f: _gen_as
-    };
-};
-const genAs = Fn(_gen_as);
+const __AS__ = Obj(___AS__, isFn);
+const   AS   = Obj(  _AS,   isFn);
+const   as   = Obj(  _as,   isFn);
 
 
 module.exports = {
     MultiFn,
-    isMultiFn,
+    isFn,
     Implement,
+    derive,
     Obj,
     val,
     isAny,
@@ -741,9 +789,19 @@ module.exports = {
     Real,
     isInt,
     Int,
+    int,
+    isChar,
+    Char,
     isList,
     List,
     _List,
+    isMap,
+    Map,
+    size,
+    get,
+    set,
+    isEmpty,
+    slice,
     apply,
     _apply,
     add,
@@ -761,16 +819,11 @@ module.exports = {
     String,
     isString,
     str,
-    isFn,
-    Fn,
     println,
     type,
     _type,
+    _check,
     __AS__,
     AS,
-    genAS,
-    genAs,
-    as,
-    derive,
-    union
+    as
 };
