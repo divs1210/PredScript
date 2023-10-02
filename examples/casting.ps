@@ -2,6 +2,8 @@ function isLessThan5(x: isInt): isBool {
     x < 5
 }
 
+derive(isInt, isLessThan5);
+
 let two: isInt = 2;
 println("two: " + type(two));
 
