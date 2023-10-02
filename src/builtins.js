@@ -28,6 +28,13 @@ function setType(obj, type) {
     obj.__psType__ = type;
 }
 
+function _check(type, obj) {
+    let t = getType(obj);
+    if (isA(type, t))
+        return obj;
+    throw new Error(`Type Error: Expected ${val(type).mName}, but got ${val(t).mName}!`);
+}
+
 
 // Predicates
 // ==========
@@ -209,7 +216,7 @@ function Implement(multi, argTypes, retType, f) {
 
     let checkedF = (...args) => {
         let res = f(...args);
-        return _as(retType, res);
+        return _check(retType, res);
     };
 
     jsMulti.implementFor(jsArgTypes, retType, checkedF);
@@ -815,6 +822,7 @@ module.exports = {
     println,
     type,
     _type,
+    _check,
     __AS__,
     AS,
     as

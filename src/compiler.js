@@ -113,7 +113,7 @@ function compileLetStmt(node) {
     let varName = compileAST(node.varName);
     let varVal  = compileAST(node.varVal);
     let retType = compileAST(node.varType);
-    return `let ${varName} = _apply(as, List(${retType}, ${varVal}));`;
+    return `let ${varName} = _check(${retType}, ${varVal});`;
 }
 
 function compileProgram(node) {
