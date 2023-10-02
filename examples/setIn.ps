@@ -6,10 +6,6 @@ let m: isMap = Map(
     )
 );
 
-// function isSettable(obj: isAny): isBool {
-//    !isNull(getImpl(set, List(type(obj), isAny, isAny)))
-// }
-
 function setIn(settable: isAny, ks: isList, v: isAny): isAny {
     if (isEmpty(ks))
         settable
