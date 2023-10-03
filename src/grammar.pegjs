@@ -157,7 +157,7 @@
         return {
             type: 'multifn-stmt',
             name: obj.fname,
-            args: obj.args[2].args,
+            args: obj.args[2]?.args || [],
             body: obj.body,
             retType: obj.retType,
             loc: location()
