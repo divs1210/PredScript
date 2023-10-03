@@ -230,6 +230,9 @@
     function multiFnNode(obj) {
         return {
             type: 'multifn-stmt',
+            modifiers: {
+                memoized: obj.memo? true: false
+            },
             name: obj.fname,
             args: obj.args[2]?.args || [],
             body: obj.body,
@@ -282,8 +285,10 @@ program   = p:((_ statement _)*)                                                
 statement        = s:(letStatement / multiFnStatement / exprStatement)                      // { return statementNode(s);                               }
 exprStatement    = e:expression (_ ';')?                                                       { return exprStatementNode(e);                           }
 letStatement     = 'let' __ name:SYMBOL _ ':' _ type:SYMBOL _ '=' _ val:expression (_ ';')?    { return letNode({ name, type, val });                   }                   
-multiFnStatement = 'function' __ fname:SYMBOL _ args:('(' _ multiFnArgs? _ ')') _ ':' _ retType:SYMBOL _ body:block
-                                                                                               { return multiFnNode({ fname, args, retType, body});     }
+
+multiFnStatement = memo:('memoized'?) _ 'function' __ fname:SYMBOL _ args:('(' _ multiFnArgs? _ ')') _ ':' _ retType:SYMBOL _ body:block
+                                                                                               { return multiFnNode({ memo, fname, args, retType, body });  }
+
 multiFnArgs      = x:multiFnArg xs:((_ ',' _ multiFnArg)*)                                     { return multiFnArgsNode({ x, xs });                     }
 multiFnArg       = argName:SYMBOL _ ':' _ argType:SYMBOL                                       { return multiFnArgNode({ argName, argType });           }
 

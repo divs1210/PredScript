@@ -81,7 +81,7 @@ assert(is(
 ));
 
 assert(is(
-    '(_is(TRUE, (_apply(isLessThan, List(Int(1), Int(2)))))? (Int(1)): (Int(2)))',
+    '(_is(TRUE, (_apply(isLessThan, List(Int(1), Int(2)))))? (((() => { ; return Int(1); })())): (((() => { ; return Int(2); })())))',
     compileExpr('if (1 < 2) { 1 } else { 2 }')
 ));
 
@@ -97,14 +97,13 @@ assert(is(
 
 // MultiFns
 // ========
-assert(is(
-    `
+assert(is(`
 var inc = inc || MultiFn("inc");
 Implement(
     inc,
     List(isInt),
     isInt,
-    (x) => _apply(add, List(x, Int(1)))
+    (x) => ((() => { ; return _apply(add, List(x, Int(1))); })())
 );
     `.trim(),
     compileExpr(`
@@ -117,7 +116,13 @@ function inc(x: isInt): isInt {
 
 // Let stmt
 // ========
-assert(is(
-    `let a = _check(isReal, Real(1.2));`,
-    compileExpr('let a: isReal = 1.2;')
+assert(is(`
+((() => { 
+                ;
+                return ((function (a) {
+                    return null;
+                })(_check(isReal, Real(1.2))));
+            })())
+    `.trim(),
+    compileExpr('{ let a: isReal = 1.2; }')
 ));

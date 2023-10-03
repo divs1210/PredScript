@@ -100,9 +100,6 @@ function compileBlockExpression(node) {
     let countExprs = node.value.length;
     if (is(0, countExprs))
         return 'null';
-    else if (is(1, countExprs))
-        // TODO: complain if not expression
-        return compileAST(node.value[0]);
     else {
         let firstLetIdx = node.value.findIndex(subNode => subNode.type === 'let-stmt');
 
