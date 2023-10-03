@@ -4,8 +4,9 @@ const BigNumber = require('bignumber.js');
 const { MultiMethod, derive: _derive, isA: _isA, ancestorsOf } = require('./multi');
 const { val } = require('./util');
 
-// TODO expose fns: [every, map, zip]?
-// TODO: rename str to toString, int to toInt, etc.
+// TODO: expose: [every, map, zip]?
+// TODO: rename str to toString, int to toInt, etc. and make toList so that mapping over Maps becomes possible
+// TODO: ffi: fromJS and toJS
 
 // reify JS
 // ========
