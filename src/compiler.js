@@ -101,19 +101,36 @@ function compileBlockExpression(node) {
     if (is(0, countExprs))
         return 'null';
     else if (is(1, countExprs))
+        // TODO: complain if not expression
         return compileAST(node.value[0]);
     else {
-        let compiledExprs = node.value.map(compileAST);
-        let lastExpr = compiledExprs.pop();
-        return `((() => { ${compiledExprs.join('; ')}; return ${lastExpr}; })())`;
-    }
-}
+        let firstLetIdx = node.value.findIndex(subNode => subNode.type === 'let-stmt');
 
-function compileLetStmt(node) {
-    let varName = compileAST(node.varName);
-    let varVal  = compileAST(node.varVal);
-    let retType = compileAST(node.varType);
-    return `let ${varName} = _check(${retType}, ${varVal});`;
+        if (firstLetIdx === -1) {
+            let compiledExprs = node.value.map(compileAST);
+            let lastExpr = compiledExprs.pop();
+            return `((() => { ${compiledExprs.join('; ')}; return ${lastExpr}; })())`;
+        } else {
+            let compiledBeforeStatements = node.value.slice(0, firstLetIdx).map(compileAST);
+            let afterStatements  = node.value.slice(firstLetIdx + 1);
+            let compiledInternalBlock = compileBlockExpression({
+                type: 'block-exp',
+                value: afterStatements
+            });
+            
+            let letNode = node.value[firstLetIdx];
+            let varName = compileAST(letNode.varName);
+            let varVal  = compileAST(letNode.varVal);
+            let varType = compileAST(letNode.varType);
+            
+            return `((() => { 
+                ${compiledBeforeStatements.join('; ')};
+                return ((function (${varName}) {
+                    return ${compiledInternalBlock};
+                })(_check(${varType}, ${varVal})));
+            })())`
+        }
+    }
 }
 
 function compileProgram(node) {
@@ -171,8 +188,6 @@ function compileAST(ast) {
             return compileAST(ast.value);
         case 'multifn-stmt':
             return compileMultiFn(ast);
-        case 'let-stmt':
-            return compileLetStmt(ast);
         case 'program':
             return compileProgram(ast);
         default: {
