@@ -120,13 +120,7 @@ function compileProgram(node) {
     let allBuiltins = Object.keys(builtins).join(', ');
     let requireBuiltins = `var {${ allBuiltins }} = require('predscript/builtins');\n\n`;
 
-    let countExprs = node.value.length;
-    if (is(0, countExprs))
-        return 'null';
-    else if (is(1, countExprs))
-        return requireBuiltins + compileAST(node.value[0]);
-    else
-        return requireBuiltins + node.value.map(compileAST).join("; ") + ";";
+    return requireBuiltins + compileBlockExpression(node);
 }
 
 function compileMultiFn(node) {
