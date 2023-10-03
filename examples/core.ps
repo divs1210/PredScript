@@ -32,8 +32,9 @@ memoized function gen_issTuple(preds: isListOfPreds): isPred {
         .map(this, type)
         .zip(this, preds)
         .map(this, (pair) => {
-            let [actual: isPred, expected: isPred] = pair;
-            isA(expected, actual)
+            let isActual: isPred   = pair[0];
+            let isExpected: isPred = pair[1];
+            isA(isExpected, isActual);
         })
         .every(this, isTrue)
     }
