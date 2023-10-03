@@ -147,7 +147,7 @@
     // intermediate node
     function dotNotation(startNode, rightNodes) {
         rightNodes = (rightNodes || []).map(node => node[3]);
-
+        
         let transformedStartNode =  {
             type: 'let-stmt',
             varName: {
@@ -165,6 +165,23 @@
         };
 
         let transformedRightNodes = rightNodes.map(node => {
+            if (node.type === 'symbol')
+                node = {
+                    type: 'call-exp',
+                    f: {
+                        "type": "symbol",
+                        "value": node.value,
+                        "loc": location()
+                    },
+                    args: [ 
+                        {
+                            type: 'symbol', 
+                            value: '$this',
+                            loc: location()
+                        }],
+                    loc: location()
+                };
+
             return {
                 type: 'let-stmt',
                 varName: {
