@@ -1,8 +1,11 @@
 const immutable = require('immutable');
 const { Map: _Map, is: _is, List: _List } = immutable;
 const BigNumber = require('bignumber.js');
-const { MultiMethod, derive: _derive, isA, ancestorsOf } = require('./multi');
+const { MultiMethod, derive: _derive, isA: _isA, ancestorsOf } = require('./multi');
 const { val } = require('./util');
+
+// TODO expose fns: [every, map, zip]?
+// TODO: rename str to toString, int to toInt, etc.
 
 // reify JS
 // ========
@@ -30,7 +33,7 @@ function setType(obj, type) {
 
 function _check(type, obj) {
     let t = getType(obj);
-    if (isA(type, t))
+    if (_isA(type, t))
         return obj;
     throw new Error(`Type Error: Expected ${val(type).mName}, but got ${val(t).mName}!`);
 }
@@ -171,7 +174,7 @@ _as.implementFor(
     isAny,
     (pred, obj) => {
         let t = getType(obj);
-        if(isA(pred, t))
+        if(_isA(pred, t))
             return obj;
         else if (val(pred)(obj) === TRUE)
             return val(AS)(pred, obj);
@@ -769,6 +772,17 @@ const   AS   = Obj(  _AS,   isFn);
 const   as   = Obj(  _as,   isFn);
 
 
+// hierarchy related
+// =================
+const isA = MultiFn("isA");
+Implement(
+    isA,
+    List(isPred, isPred),
+    isBool,
+    (ancestor, descendent) => Bool(_isA(ancestor, descendent))
+);
+
+
 module.exports = {
     MultiFn,
     isFn,
@@ -825,5 +839,6 @@ module.exports = {
     _check,
     __AS__,
     AS,
-    as
+    as,
+    isA
 };
