@@ -1,0 +1,58 @@
+// generic lists
+memoized function gen_isListOf(t: isPred): isPred {
+    function isListOf(obj: isList): isBool {
+        obj.every(this, (x) => isA(t, type(x)))
+    }
+    derive(isList, isListOf)
+
+    isListOf
+}
+
+
+// vectors are lists of fixed size
+memoized function gen_isVector(elementType: isPred, size: isInt): isPred {
+    let isParentType: isPred = isListOf(elementType);
+
+    function isVector(obj: isParentType): isBool {
+        obj.size == size
+    }
+    derive(isParentType, isVector)
+
+    isVector
+}
+
+let isListOfPreds: isPred = gen_isListOf(isPred);
+
+// tuples are vectors of mixed types
+memoized function gen_issTuple(preds: isListOfPreds): isPred {
+    let isParentType: isPred = gen_isVector(isAny, size(preds));
+
+    function isTuple(obj: isParentType): isBool {
+        obj
+        .map(this, type)
+        .zip(this, preds)
+        .map(this, (pair) => {
+            let [actual: isPred, expected: isPred] = pair;
+            isA(expected, actual)
+        })
+        .every(this, isTrue)
+    }
+    derive(isParentType, isTuple);
+
+    isTuple
+}
+
+
+// complex numbers test
+let isComplexNumber: isPred = gen_isTuple(List(isReal, isReal));
+
+function add(x: isComplexNumber, y: isComplexNumber): isComplexNumber {
+    List(
+        x[0] + y[0],
+        x[1] + y[1]
+    ).AS(isComplexNumber, this)
+}
+
+let c1: isComplexNumber = as(isComplexNumber, List(1, 2));
+let c2: isComplexNumber = as(isComplexNumber, List(5, 8));
+let c3: isComplexNumber = c1 + c2;
