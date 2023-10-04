@@ -1,5 +1,5 @@
 {
-    // TODO syntax: memoized, lambda
+    // TODO syntax: lambda
 
     const nullNode = {
         type: 'null', 

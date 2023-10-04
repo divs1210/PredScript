@@ -1,5 +1,7 @@
-memoized function f(x: isInt): isInt {
-    x + 1
+memoized function f(x: isInt): isNull {
+    println("f called with: " + x);
 }
 
-println(f(5));
+f(5);
+f(5);
+f(6);

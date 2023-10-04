@@ -784,6 +784,22 @@ Implement(
 );
 
 
+// misc
+// ====
+function _memoize(f) {
+    let cache = _Map();
+    return function (...argsArray) {
+        let argsList = _List(argsArray);
+        if(!cache.has(argsList)) {
+            let res = f(...argsArray);
+            cache = cache.set(argsList, res);
+            return res;
+        } else
+            return cache.get(argsList);
+    }
+} 
+
+
 module.exports = {
     MultiFn,
     isFn,
@@ -838,6 +854,7 @@ module.exports = {
     type,
     _type,
     _check,
+    _memoize,
     __AS__,
     AS,
     as,
