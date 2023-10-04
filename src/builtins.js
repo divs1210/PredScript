@@ -1,8 +1,12 @@
 const immutable = require('immutable');
 const { Map: _Map, is: _is, List: _List } = immutable;
 const BigNumber = require('bignumber.js');
-const { MultiMethod, derive: _derive, isA, ancestorsOf } = require('./multi');
+const { MultiMethod, derive: _derive, isA: _isA, ancestorsOf } = require('./multi');
 const { val } = require('./util');
+
+// TODO: expose: [every, map, zip]?
+// TODO: rename str to toString, int to toInt, etc. and make toList so that mapping over Maps becomes possible
+// TODO: ffi: fromJS and toJS
 
 // reify JS
 // ========
@@ -30,7 +34,7 @@ function setType(obj, type) {
 
 function _check(type, obj) {
     let t = getType(obj);
-    if (isA(type, t))
+    if (_isA(type, t))
         return obj;
     throw new Error(`Type Error: Expected ${val(type).mName}, but got ${val(t).mName}!`);
 }
@@ -171,7 +175,7 @@ _as.implementFor(
     isAny,
     (pred, obj) => {
         let t = getType(obj);
-        if(isA(pred, t))
+        if(_isA(pred, t))
             return obj;
         else if (val(pred)(obj) === TRUE)
             return val(AS)(pred, obj);
@@ -769,6 +773,39 @@ const   AS   = Obj(  _AS,   isFn);
 const   as   = Obj(  _as,   isFn);
 
 
+// hierarchy related
+// =================
+const isA = MultiFn("isA");
+Implement(
+    isA,
+    List(isPred, isPred),
+    isBool,
+    (ancestor, descendent) => Bool(_isA(ancestor, descendent))
+);
+
+
+// misc
+// ====
+function _memoize(f) {
+    let cache = _Map();
+    return function (...argsArray) {
+        let argsList = _List(argsArray);
+        if(!cache.has(argsList)) {
+            let res = f(...argsArray);
+            cache = cache.set(argsList, res);
+            return res;
+        } else
+            return cache.get(argsList);
+    }
+}
+
+
+function _Lambda(f) {
+    f.mName = 'lambda';
+    return Obj(f, isFn);
+}
+
+
 module.exports = {
     MultiFn,
     isFn,
@@ -823,7 +860,10 @@ module.exports = {
     type,
     _type,
     _check,
+    _memoize,
     __AS__,
     AS,
-    as
+    as,
+    isA,
+    _Lambda
 };

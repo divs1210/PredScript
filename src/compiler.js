@@ -72,6 +72,12 @@ function compileBinaryExpression(node) {
     }
 }
 
+function compileLambdaExpression({ args, body }) {
+    let argsStr = args.map(compileAST).join(', ');
+    let compiledBody = compileAST(body);
+    return `_Lambda((${argsStr}) => { return (${compiledBody}); })`;
+}
+
 function compileIfExpression(expr) {
     let { condExp, thenExp, elseExp } = expr;
     let [cond, then, alt] = [condExp, thenExp, elseExp].map(compileAST);
@@ -100,33 +106,41 @@ function compileBlockExpression(node) {
     let countExprs = node.value.length;
     if (is(0, countExprs))
         return 'null';
-    else if (is(1, countExprs))
-        return compileAST(node.value[0]);
     else {
-        let compiledExprs = node.value.map(compileAST);
-        let lastExpr = compiledExprs.pop();
-        return `((() => { ${compiledExprs.join('; ')}; return ${lastExpr}; })())`;
-    }
-}
+        let firstLetIdx = node.value.findIndex(subNode => subNode.type === 'let-stmt');
 
-function compileLetStmt(node) {
-    let varName = compileAST(node.varName);
-    let varVal  = compileAST(node.varVal);
-    let retType = compileAST(node.varType);
-    return `let ${varName} = _check(${retType}, ${varVal});`;
+        if (firstLetIdx === -1) {
+            let compiledExprs = node.value.map(compileAST);
+            let lastExpr = compiledExprs.pop();
+            return `((() => { ${compiledExprs.join('; ')}; return ${lastExpr}; })())`;
+        } else {
+            let compiledBeforeStatements = node.value.slice(0, firstLetIdx).map(compileAST);
+            let afterStatements  = node.value.slice(firstLetIdx + 1);
+            let compiledInternalBlock = compileBlockExpression({
+                type: 'block-exp',
+                value: afterStatements
+            });
+            
+            let letNode = node.value[firstLetIdx];
+            let varName = compileAST(letNode.varName);
+            let varVal  = compileAST(letNode.varVal);
+            let varType = compileAST(letNode.varType);
+            
+            return `((() => { 
+                ${compiledBeforeStatements.join('; ')};
+                return ((function (${varName}) {
+                    return ${compiledInternalBlock};
+                })(_check(${varType}, ${varVal})));
+            })())`
+        }
+    }
 }
 
 function compileProgram(node) {
     let allBuiltins = Object.keys(builtins).join(', ');
     let requireBuiltins = `var {${ allBuiltins }} = require('predscript/builtins');\n\n`;
 
-    let countExprs = node.value.length;
-    if (is(0, countExprs))
-        return 'null';
-    else if (is(1, countExprs))
-        return requireBuiltins + compileAST(node.value[0]);
-    else
-        return requireBuiltins + node.value.map(compileAST).join("; ") + ";";
+    return requireBuiltins + compileBlockExpression(node);
 }
 
 function compileMultiFn(node) {
@@ -137,14 +151,17 @@ function compileMultiFn(node) {
     let argTypes = node.args.map((arg) => compileAST(arg.argType)).join(', ');
 
     return `
-var ${fName} = ${fName} || MultiFn("${fName}");
 Implement(
     ${fName},
     List(${argTypes}),
     ${fReturnType},
-    (${argNames}) => ${fBody}
+    ${!node.modifiers.memoized? `((${argNames}) => ${fBody})` : `_memoize((${argNames}) => ${fBody})`}
 );
     `.trim();
+}
+
+function compileInterface(node) {
+    return `const ${node.value} = MultiFn("${node.value}")`;
 }
 
 function compileAST(ast) {
@@ -165,20 +182,24 @@ function compileAST(ast) {
             return compileUnaryExpression(ast);
         case 'binary-exp':
             return compileBinaryExpression(ast);
+        case 'lambda-exp':
+            return compileLambdaExpression(ast);
         case 'if-exp':
             return compileIfExpression(ast);
         case 'call-exp':
             return compileCallExpression(ast);
         case 'get-exp':
             return getExpression(ast);
+        case 'let-stmt':
+            throw new Error(`let outside block at:\n ${prettify(ast.loc)}`);
         case 'block-stmt':
             return compileBlockExpression(ast);
         case 'expr-stmt':
             return compileAST(ast.value);
         case 'multifn-stmt':
             return compileMultiFn(ast);
-        case 'let-stmt':
-            return compileLetStmt(ast);
+        case 'interface-stmt':
+            return compileInterface(ast);
         case 'program':
             return compileProgram(ast);
         default: {
