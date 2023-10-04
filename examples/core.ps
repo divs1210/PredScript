@@ -55,9 +55,11 @@ function every(xs: isList, f: isPred): isBool {
 // generic lists
 memoized function gen_isListOf(t: isPred): isPred {
     interface isListOf;
+
     function isListOf(obj: isList): isBool {
         obj.every($this, AS(isPred, (x) => isA(t, type(x))))
     }
+    
     derive(isList, isListOf)
 
     isListOf
