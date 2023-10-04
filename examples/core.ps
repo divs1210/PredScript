@@ -54,7 +54,7 @@ function every(xs: isList, f: isPred): isBool {
 
 // generic lists
 memoized function gen_isListOf(t: isPred): isPred {
-    interface isListOf;
+    interface isListOf<t>;
 
     function isListOf(obj: isList): isBool {
         obj.every($this, AS(isPred, (x) => isA(t, type(x))))
@@ -70,7 +70,7 @@ memoized function gen_isListOf(t: isPred): isPred {
 memoized function gen_isVector(elementType: isPred, vSize: isInt): isPred {
     let isParentType: isPred = gen_isListOf(elementType);
 
-    interface isVector;
+    interface isVector<elementType, vSize>;
 
     function isVector(obj: isList): isBool {
         isVector(as(isParentType, obj))
@@ -93,7 +93,7 @@ let isListOfPreds: isPred = gen_isListOf(isPred);
 memoized function gen_isTuple(preds: isListOfPreds): isPred {
     let isParentType: isPred = gen_isVector(isAny, size(preds));
 
-    interface isTuple;
+    interface isTuple<preds>;
 
     function isTuple(obj: isList): isBool {
         isTuple(as(isParentType, obj));
@@ -135,7 +135,7 @@ function str(x: isComplexNumber): isString {
     "(" + x[0] + sym + abs(im) + "i)"
 }
 
-let c1: isComplexNumber = as(isComplexNumber, List(1, 2));
+let c1: isComplexNumber = as(isComplexNumber, List(1, ""));
 let c2: isComplexNumber = as(isComplexNumber, List(1, -5));
 let c3: isComplexNumber = c1 + c2;
 
