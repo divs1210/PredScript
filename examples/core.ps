@@ -48,7 +48,7 @@ function every(xs: isList, f: isPred): isBool {
 memoized function gen_isListOf(t: isPred): isPred {
     interface isListOf;
     function isListOf(obj: isList): isBool {
-        obj.every(this, (x) => isA(t, type(x)))
+        obj.every($this, (x) => isA(t, type(x)))
     }
     derive(isList, isListOf)
 
@@ -58,7 +58,7 @@ memoized function gen_isListOf(t: isPred): isPred {
 
 // vectors are lists of fixed size
 memoized function gen_isVector(elementType: isPred, size: isInt): isPred {
-    let isParentType: isPred = isListOf(elementType);
+    let isParentType: isPred = gen_isListOf(elementType);
 
     interface isVector;
     function isVector(obj: isParentType): isBool {
@@ -78,14 +78,14 @@ memoized function gen_isTuple(preds: isListOfPreds): isPred {
     interface isTuple;
     function isTuple(obj: isParentType): isBool {
         obj
-        .map(this, type)
-        .zip(this, preds)
-        .map(this, (pair) => {
+        .map($this, type)
+        .zip($this, preds)
+        .map($this, (pair) => {
             let isActual: isPred   = pair[0];
             let isExpected: isPred = pair[1];
             isA(isExpected, isActual);
         })
-        .every(this, isTrue)
+        .every($this, isTrue)
     }
     derive(isParentType, isTuple);
 
@@ -94,15 +94,21 @@ memoized function gen_isTuple(preds: isListOfPreds): isPred {
 
 
 // complex numbers test
-let isComplexNumber: isPred = gen_isTuple(List(isReal, isReal));
+let isComplexNumber: isPred = 
+    gen_isTuple(AS(isListOfPreds, List(isReal, isReal)));
 
 function add(x: isComplexNumber, y: isComplexNumber): isComplexNumber {
-    List(
-        x[0] + y[0],
-        x[1] + y[1]
-    ).AS(isComplexNumber, this)
+    AS(
+        isComplexNumber,
+        List(
+            x[0] + y[0],
+            x[1] + y[1]
+        )
+    )
 }
 
-let c1: isComplexNumber = as(isComplexNumber, List(1, 2));
-let c2: isComplexNumber = as(isComplexNumber, List(5, 8));
-let c3: isComplexNumber = c1 + c2;
+// let c1: isComplexNumber = as(isComplexNumber, List(1, 2));
+// let c2: isComplexNumber = as(isComplexNumber, List(5, 8));
+// let c3: isComplexNumber = c1 + c2;
+
+println(isComplexNumber(List(1, 2)));
