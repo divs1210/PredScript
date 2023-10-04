@@ -724,6 +724,23 @@ Implement(
     (l, start) => Obj(val(l).slice(val(start).toNumber()), isList)
 );
 
+const unshift = MultiFn('unshift');
+Implement(
+    unshift,
+    List(isList, isAny),
+    isList,
+    (l, x) => Obj(val(l).unshift(x), isList)
+);
+
+
+const push = MultiFn('push');
+Implement(
+    push,
+    List(isList, isAny),
+    isList,
+    (l, x) => Obj(val(l).push(x), isList)
+);
+
 
 // Apply
 // =====
@@ -839,6 +856,8 @@ module.exports = {
     set,
     isEmpty,
     slice,
+    unshift,
+    push,
     apply,
     _apply,
     add,

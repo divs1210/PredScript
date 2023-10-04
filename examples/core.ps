@@ -1,5 +1,52 @@
+interface map;
+interface zip;
+interface every;
+
+interface gen_isListOf;
+interface gen_isVector;
+interface gen_isTuple;
+
+
+// stack overflow, we need loops / lazy seqs / stackless impl
+function map(xs: isList, f: isFn): isList {
+    if (isEmpty(xs))
+        List()
+    else
+        xs
+        .slice($this, 1)
+        .map($this, f)
+        .unshift($this, f(xs[0]))
+}
+
+
+// we don't have and / or yet 🤦🏽‍♂️
+// assuming both are of equal length
+function zip(xs: isList, ys: isList): isList {
+    if (isEmpty(xs))
+        List()
+    else
+        xs
+        .slice($this, 1)
+        .zip($this, slice(ys, 1))
+        .unshift(List(xs[0], ys[0]))
+}
+
+
+function every(xs: isList, f: isPred): isBool {
+    if (isEmpty(xs))
+        true
+    else if (f(x[0]))
+        xs
+        .slice($this, 1)
+        .every($this, f)
+    else
+        false
+}
+
+
 // generic lists
 memoized function gen_isListOf(t: isPred): isPred {
+    interface isListOf;
     function isListOf(obj: isList): isBool {
         obj.every(this, (x) => isA(t, type(x)))
     }
@@ -13,6 +60,7 @@ memoized function gen_isListOf(t: isPred): isPred {
 memoized function gen_isVector(elementType: isPred, size: isInt): isPred {
     let isParentType: isPred = isListOf(elementType);
 
+    interface isVector;
     function isVector(obj: isParentType): isBool {
         obj.size == size
     }
@@ -24,9 +72,10 @@ memoized function gen_isVector(elementType: isPred, size: isInt): isPred {
 let isListOfPreds: isPred = gen_isListOf(isPred);
 
 // tuples are vectors of mixed types
-memoized function gen_issTuple(preds: isListOfPreds): isPred {
+memoized function gen_isTuple(preds: isListOfPreds): isPred {
     let isParentType: isPred = gen_isVector(isAny, size(preds));
 
+    interface isTuple;
     function isTuple(obj: isParentType): isBool {
         obj
         .map(this, type)
