@@ -98,19 +98,20 @@ assert(is(
 // MultiFns
 // ========
 assert(is(`
-inc = inc || MultiFn("inc");
-Implement(
+((() => { const inc = MultiFn("inc"); return Implement(
     inc,
     List(isInt),
     isInt,
-    (x) => ((() => { ; return _apply(add, List(x, Int(1))); })())
-);
+    ((x) => ((() => { ; return _apply(add, List(x, Int(1))); })()))
+);; })())
     `.trim(),
     compileExpr(`
-function inc(x: isInt): isInt {
-    x + 1;
-}
-    `)
+{
+    interface inc;
+    function inc(x: isInt): isInt {
+        x + 1;
+    }
+}    `)
 ));
 
 

@@ -278,13 +278,22 @@
             loc: location()
         };
     }
+    
+    function interfaceNode(name) {
+        return {
+            type: 'interface-stmt',
+            value: name.value
+        }
+    }
 }
 
 program   = p:((_ statement _)*)                                                               { return programNode(p);                                 }
 
-statement        = s:(letStatement / multiFnStatement / exprStatement)                      // { return statementNode(s);                               }
+statement        = s:(interfaceStatement / letStatement / multiFnStatement / exprStatement) // { return statementNode(s);                               }
 exprStatement    = e:expression (_ ';')?                                                       { return exprStatementNode(e);                           }
-letStatement     = 'let' __ name:SYMBOL _ ':' _ type:SYMBOL _ '=' _ val:expression (_ ';')?    { return letNode({ name, type, val });                   }                   
+letStatement     = 'let' __ name:SYMBOL _ ':' _ type:SYMBOL _ '=' _ val:expression (_ ';')?    { return letNode({ name, type, val });                   }
+
+interfaceStatement = 'interface' __ name:SYMBOL (_ ';')?                                       { return interfaceNode(name);                            }
 
 multiFnStatement = memo:('memoized'?) _ 'function' __ fname:SYMBOL _ args:('(' _ multiFnArgs? _ ')') _ ':' _ retType:SYMBOL _ body:block
                                                                                                { return multiFnNode({ memo, fname, args, retType, body });  }

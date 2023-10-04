@@ -145,7 +145,6 @@ function compileMultiFn(node) {
     let argTypes = node.args.map((arg) => compileAST(arg.argType)).join(', ');
 
     return `
-${fName} = ${fName} || MultiFn("${fName}");
 Implement(
     ${fName},
     List(${argTypes}),
@@ -153,6 +152,10 @@ Implement(
     ${!node.modifiers.memoized? `((${argNames}) => ${fBody})` : `_memoize((${argNames}) => ${fBody})`}
 );
     `.trim();
+}
+
+function compileInterface(node) {
+    return `const ${node.value} = MultiFn("${node.value}")`;
 }
 
 function compileAST(ast) {
@@ -185,6 +188,8 @@ function compileAST(ast) {
             return compileAST(ast.value);
         case 'multifn-stmt':
             return compileMultiFn(ast);
+        case 'interface-stmt':
+            return compileInterface(ast);
         case 'program':
             return compileProgram(ast);
         default: {
