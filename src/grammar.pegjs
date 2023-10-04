@@ -1,6 +1,4 @@
 {
-    // TODO syntax: lambda
-
     const nullNode = {
         type: 'null', 
         value: null,
