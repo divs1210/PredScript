@@ -97,6 +97,31 @@
         };
     }
 
+    function lambdaNode(args, body) {
+        if (!args || args.length === 0)
+            return {
+                type: 'lambda-exp',
+                args: [],
+                body: body
+            };
+        else {
+            let restArgs = args[1];
+
+            if (!restArgs || restArgs.length === 0)
+                return {
+                    type: 'lambda-exp',
+                    args: [args[0]],
+                    body: body
+                };
+            else
+                return {
+                    type: 'lambda-exp',
+                    args: [args[0], ...restArgs.map(arg => arg[3])],
+                    body: body
+                };
+        }
+    }
+
     function unaryNode(op, x) {
         return {
             type:  'unary-exp', 
@@ -307,6 +332,7 @@ comparison = x:term   _ pairs:(( ( '>=' / '>' / '<=' / '<' ) _ term)*)  { return
 term       = x:factor _ pairs:(( ( '-' / '+' ) _ factor)*)              { return binaryNode(x, pairs);  }
 factor     = x:unary  _ pairs:(( ( '/' / '*' / '%' ) _ unary)*)         { return binaryNode(x, pairs);  }
 unary      = op:( '!' / '-' ) _ x:unary                                 { return unaryNode(op, x);      }
+             / lambdaExpr
              / ifExpr
              / getExpr
              / fnCall
@@ -315,6 +341,8 @@ unary      = op:( '!' / '-' ) _ x:unary                                 { return
 
 ifExpr     = 'if' _ '(' _ cond:expression _ ')' _ then:expression _else:((_ 'else' _ expression)?)
                                                                                      { return ifNode(cond, then, _else); }
+
+lambdaExpr = '(' _ args:((SYMBOL (_ ',' _ SYMBOL)*)?) _ ')' _ '=>' _ body:expression { return lambdaNode(args, body);     }
 
 getExpr    = f:fromExpr _ ks:(keyExpr+)                                              { return getExprNode(f, ks);         }
 fromExpr   = fnCall / SYMBOL / STRING

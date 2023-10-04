@@ -72,6 +72,12 @@ function compileBinaryExpression(node) {
     }
 }
 
+function compileLambdaExpression({ args, body }) {
+    let argsStr = args.map(compileAST).join(', ');
+    let compiledBody = compileAST(body);
+    return `_Lambda((${argsStr}) => { return (${compiledBody}); })`;
+}
+
 function compileIfExpression(expr) {
     let { condExp, thenExp, elseExp } = expr;
     let [cond, then, alt] = [condExp, thenExp, elseExp].map(compileAST);
@@ -176,12 +182,16 @@ function compileAST(ast) {
             return compileUnaryExpression(ast);
         case 'binary-exp':
             return compileBinaryExpression(ast);
+        case 'lambda-exp':
+            return compileLambdaExpression(ast);
         case 'if-exp':
             return compileIfExpression(ast);
         case 'call-exp':
             return compileCallExpression(ast);
         case 'get-exp':
             return getExpression(ast);
+        case 'let-stmt':
+            throw new Error(`let outside block at:\n ${prettify(ast.loc)}`);
         case 'block-stmt':
             return compileBlockExpression(ast);
         case 'expr-stmt':

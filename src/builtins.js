@@ -797,7 +797,13 @@ function _memoize(f) {
         } else
             return cache.get(argsList);
     }
-} 
+}
+
+
+function _Lambda(f) {
+    f.mName = 'lambda';
+    return Obj(f, isFn);
+}
 
 
 module.exports = {
@@ -858,5 +864,6 @@ module.exports = {
     __AS__,
     AS,
     as,
-    isA
+    isA,
+    _Lambda
 };
