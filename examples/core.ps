@@ -69,9 +69,15 @@ memoized function gen_isVector(elementType: isPred, vSize: isInt): isPred {
     let isParentType: isPred = gen_isListOf(elementType);
 
     interface isVector;
+
+    function isVector(obj: isList): isBool {
+        isVector(as(isParentType, obj))
+    }
+
     function isVector(obj: isParentType): isBool {
         obj.size == vSize
     }
+
     derive(isParentType, isVector)
 
     isVector
@@ -86,6 +92,11 @@ memoized function gen_isTuple(preds: isListOfPreds): isPred {
     let isParentType: isPred = gen_isVector(isAny, size(preds));
 
     interface isTuple;
+
+    function isTuple(obj: isList): isBool {
+        isTuple(as(isParentType, obj));
+    }
+
     function isTuple(obj: isParentType): isBool {
         obj
         .map($this, type)
@@ -96,6 +107,7 @@ memoized function gen_isTuple(preds: isListOfPreds): isPred {
             isA(isExpected, isActual);
         }))
     }
+
     derive(isParentType, isTuple);
 
     isTuple
@@ -114,18 +126,7 @@ function add(x: isComplexNumber, y: isComplexNumber): isComplexNumber {
     ).AS(isComplexNumber, $this)
 }
 
-let c1: isComplexNumber = AS(isComplexNumber, List(1, 2));
-let c2: isComplexNumber = AS(isComplexNumber, List(10, 20));
+let c1: isComplexNumber = as(isComplexNumber, List(1, 2));
+let c2: isComplexNumber = as(isComplexNumber, List(10, 20));
 
 println(c1 + c2);
-
-
-// this chaining should happen automatically
-let c3: isComplexNumber =
-    List(5, 6)
-    .as(gen_isListOf(isAny), $this)
-    .as(gen_isVector(isAny, 2), $this)
-    .as(gen_isTuple(AS(isListOfPreds, List(isReal, isReal))), $this)
-    .as(isComplexNumber, $this);
-
-println(c3);
