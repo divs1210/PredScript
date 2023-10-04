@@ -4,7 +4,8 @@
     "description": "Predicates as Types. Compiles to JS.",
     "private": true,
     "exports": {
-        "./builtins": "./src/builtins.js"
+        "./builtins": "./src/builtins.js",
+        "./parser": "./src/parser.js"
     },
     "scripts": {
         "test": "node --test"
