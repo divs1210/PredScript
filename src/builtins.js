@@ -420,6 +420,20 @@ Implement(
     (x, y) => Real(x.get('val').pow(y.get('val')))
 );
 
+const abs = MultiFn('abs');
+Implement(
+    abs,
+    List(isInt),
+    isInt,
+    (x) => Int(val(x).abs().integerValue())
+);
+Implement(
+    abs,
+    List(isReal),
+    isReal,
+    (x) => Real(val(x).abs())
+);
+
 
 // Logic operators
 // ===============
@@ -866,6 +880,7 @@ module.exports = {
     divide,
     mod,
     pow,
+    abs,
     is,
     _is,
     isLessThan,

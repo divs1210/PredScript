@@ -126,7 +126,18 @@ function add(x: isComplexNumber, y: isComplexNumber): isComplexNumber {
     ).AS(isComplexNumber, $this)
 }
 
-let c1: isComplexNumber = as(isComplexNumber, List(1, 2));
-let c2: isComplexNumber = as(isComplexNumber, List(10, 20));
+function str(x: isComplexNumber): isString {
+    let im: isReal = x[1];
 
-println(c1 + c2);
+    "(" 
+    + x[0] 
+    + (if (im < 0) " - " else " + ")
+    + abs(im) 
+    + "i)"
+}
+
+let c1: isComplexNumber = as(isComplexNumber, List(1, 2));
+let c2: isComplexNumber = as(isComplexNumber, List(1, -5));
+let c3: isComplexNumber = c1 + c2;
+
+println(c3);
