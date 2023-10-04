@@ -98,7 +98,7 @@ assert(is(
 // MultiFns
 // ========
 assert(is(`
-var inc = inc || MultiFn("inc");
+inc = inc || MultiFn("inc");
 Implement(
     inc,
     List(isInt),

@@ -138,6 +138,7 @@ function compileProgram(node) {
 }
 
 function compileMultiFn(node) {
+    // TODO: if node.modifiers.memoized, give a memoized function to the multi
     let fName = compileAST(node.name);
     let fReturnType = compileAST(node.retType);
     let fBody = compileAST(node.body);
@@ -145,7 +146,7 @@ function compileMultiFn(node) {
     let argTypes = node.args.map((arg) => compileAST(arg.argType)).join(', ');
 
     return `
-var ${fName} = ${fName} || MultiFn("${fName}");
+${fName} = ${fName} || MultiFn("${fName}");
 Implement(
     ${fName},
     List(${argTypes}),
