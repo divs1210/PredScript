@@ -114,13 +114,10 @@ let isComplexNumber: isPred =
     gen_isTuple(AS(isListOfPreds, List(isReal, isReal)));
 
 function add(x: isComplexNumber, y: isComplexNumber): isComplexNumber {
-    AS(
-        isComplexNumber,
-        List(
-            x[0] + y[0],
-            x[1] + y[1]
-        )
-    )
+    List(
+        x[0] + y[0],
+        x[1] + y[1]
+    ).AS(isComplexNumber, $this)
 }
 
 let c1: isComplexNumber = AS(isComplexNumber, List(1, 2));
@@ -128,10 +125,13 @@ let c2: isComplexNumber = AS(isComplexNumber, List(10, 20));
 
 println(c1 + c2);
 
-// let c3: isComplexNumber =
-//    1
-//    .List($this, 2)
-//    .as(gen_isListOf(isAny), $this)
-//    .as(gen_isVector(isAny, 2), $this)
-//    .as(gen_isTuple(AS(isListOfPreds, List(isReal, isReal))), $this)
-//    .as(isComplexNumber, $this);
+
+// this chaining should happen automatically
+let c3: isComplexNumber =
+    List(5, 6)
+    .as(gen_isListOf(isAny), $this)
+    .as(gen_isVector(isAny, 2), $this)
+    .as(gen_isTuple(AS(isListOfPreds, List(isReal, isReal))), $this)
+    .as(isComplexNumber, $this);
+
+println(c3);

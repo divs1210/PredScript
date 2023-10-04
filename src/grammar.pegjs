@@ -330,11 +330,11 @@ comparison = x:term   _ pairs:(( ( '>=' / '>' / '<=' / '<' ) _ term)*)  { return
 term       = x:factor _ pairs:(( ( '-' / '+' ) _ factor)*)              { return binaryNode(x, pairs);  }
 factor     = x:unary  _ pairs:(( ( '/' / '*' / '%' ) _ unary)*)         { return binaryNode(x, pairs);  }
 unary      = op:( '!' / '-' ) _ x:unary                                 { return unaryNode(op, x);      }
+             / dotNotation
              / lambdaExpr
              / ifExpr
              / getExpr
              / fnCall
-             / dotNotation
              / primary
 
 ifExpr     = 'if' _ '(' _ cond:expression _ ')' _ then:expression _else:((_ 'else' _ expression)?)
@@ -349,7 +349,7 @@ keyExpr    = '[' _ expression _ ']'
 fnCall     = f:primary _ argLists:(fnCallArgs+)                                      { return fnCallNode(f, argLists);   }
 fnCallArgs = '(' _ args:((expression (_ ',' _ expression)*)?) _ ')'                  { return fnCallArgsNode(args);      }
 
-dotNotation = x:primary y:(_ '.' _ (fnCall / grouping / SYMBOL))+                    { return dotNotation(x, y);         }
+dotNotation = x:(fnCall / primary) y:(_ '.' _ (fnCall / grouping / SYMBOL))+         { return dotNotation(x, y);         }
 
 primary    = REAL / INTEGER / CHAR / STRING / BOOL / NULL / SYMBOL / block / grouping
 grouping   = '(' _ e:expression _ ')'                                                { return groupingNode(e);           }
