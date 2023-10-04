@@ -1,3 +1,7 @@
+interface spy;
+
+interface isTrue;
+
 interface map;
 interface zip;
 interface every;
@@ -5,6 +9,17 @@ interface every;
 interface gen_isListOf;
 interface gen_isVector;
 interface gen_isTuple;
+
+
+function spy(x: isAny, tag: isString): isAny {
+    println(tag + ": " + x)
+    x
+}
+
+
+function isTrue(x: isAny): isBool {
+    x == true
+}
 
 
 // stack overflow, we need loops / lazy seqs / stackless impl
@@ -28,14 +43,14 @@ function zip(xs: isList, ys: isList): isList {
         xs
         .slice($this, 1)
         .zip($this, slice(ys, 1))
-        .unshift(List(xs[0], ys[0]))
+        .unshift($this, List(xs[0], ys[0]))
 }
 
 
 function every(xs: isList, f: isPred): isBool {
     if (isEmpty(xs))
         true
-    else if (f(x[0]))
+    else if (f(xs[0]))
         xs
         .slice($this, 1)
         .every($this, f)
@@ -48,7 +63,7 @@ function every(xs: isList, f: isPred): isBool {
 memoized function gen_isListOf(t: isPred): isPred {
     interface isListOf;
     function isListOf(obj: isList): isBool {
-        obj.every($this, (x) => isA(t, type(x)))
+        obj.every($this, AS(isPred, (x) => isA(t, type(x))))
     }
     derive(isList, isListOf)
 
@@ -57,12 +72,12 @@ memoized function gen_isListOf(t: isPred): isPred {
 
 
 // vectors are lists of fixed size
-memoized function gen_isVector(elementType: isPred, size: isInt): isPred {
+memoized function gen_isVector(elementType: isPred, vSize: isInt): isPred {
     let isParentType: isPred = gen_isListOf(elementType);
 
     interface isVector;
     function isVector(obj: isParentType): isBool {
-        obj.size == size
+        obj.size == vSize
     }
     derive(isParentType, isVector)
 
@@ -93,8 +108,9 @@ memoized function gen_isTuple(preds: isListOfPreds): isPred {
 }
 
 
-// complex numbers test
-let isComplexNumber: isPred = 
+// complex numbers (test)
+// ======================
+let isComplexNumber: isPred =
     gen_isTuple(AS(isListOfPreds, List(isReal, isReal)));
 
 function add(x: isComplexNumber, y: isComplexNumber): isComplexNumber {
@@ -107,8 +123,15 @@ function add(x: isComplexNumber, y: isComplexNumber): isComplexNumber {
     )
 }
 
-// let c1: isComplexNumber = as(isComplexNumber, List(1, 2));
-// let c2: isComplexNumber = as(isComplexNumber, List(5, 8));
-// let c3: isComplexNumber = c1 + c2;
+let c1: isComplexNumber = AS(isComplexNumber, List(1, 2));
+let c2: isComplexNumber = AS(isComplexNumber, List(10, 20));
 
-println(isComplexNumber(List(1, 2)));
+println(c1 + c2);
+
+// let c3: isComplexNumber =
+//    1
+//    .List($this, 2)
+//    .as(gen_isListOf(isAny), $this)
+//    .as(gen_isVector(isAny, 2), $this)
+//    .as(gen_isTuple(AS(isListOfPreds, List(isReal, isReal))), $this)
+//    .as(isComplexNumber, $this);
