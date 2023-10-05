@@ -133,7 +133,7 @@ function add(x: isComplexNumber, y: isComplexNumber): isComplexNumber {
 }
 
 function str(x: isComplexNumber): isString {
-    let im: isReal = x[1];
+    let im:  isReal   = x[1];
     let sym: isString = if (im < 0) " - " else " + ";
 
     "(" + x[0] + sym + abs(im) + "i)"
