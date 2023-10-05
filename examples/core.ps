@@ -60,7 +60,7 @@ memoized function gen_isListOf(t: isPred): isPred {
         obj.every($this, AS(isPred, (x) => isA(t, type(x))))
     }
     
-    derive(isList, isListOf)
+    derive(isList, isListOf);
 
     isListOf
 }
@@ -80,7 +80,7 @@ memoized function gen_isVector(elementType: isPred, vSize: isInt): isPred {
         obj.size == vSize
     }
 
-    derive(isParentType, isVector)
+    derive(isParentType, isVector);
 
     isVector
 }
