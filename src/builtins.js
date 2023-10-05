@@ -815,6 +815,31 @@ Implement(
 );
 
 
+const isImplementedFor = MultiFn('isImplementedFor');
+Implement(
+    isImplementedFor,
+    List(isFn, isList, isPred),
+    isBool,
+    (f, argTypes, retType) => {
+        let jsF = val(f);
+        let jsArgTypes = val(argTypes);
+        
+        // in case of lambda
+        if (!jsF.implementationFor)
+            return FALSE;
+
+        // in case of MultiFn
+        let impl = jsF.implementationFor(jsArgTypes, true);
+
+        // no matching implementation
+        if(!impl)
+            return FALSE;
+
+        return _isA(retType, impl.retType)? TRUE : FALSE;        
+    }
+);
+
+
 // misc
 // ====
 function _memoize(f) {
@@ -841,6 +866,7 @@ module.exports = {
     MultiFn,
     isFn,
     Implement,
+    isImplementedFor,
     derive,
     Obj,
     val,

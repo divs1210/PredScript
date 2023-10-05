@@ -4,6 +4,7 @@ interface map;
 interface zip;
 interface every;
 
+interface gen_isFnOf;
 interface gen_isListOf;
 interface gen_isVector;
 interface gen_isTuple;
@@ -14,7 +15,6 @@ function spy(x: isAny, tag: isString): isAny {
     println(tag + ": " + x)
     x
 }
-
 
 // stack overflow, we need loops / lazy seqs / stackless impl
 function map(xs: isList, f: isFn): isList {
@@ -121,6 +121,24 @@ memoized function gen_isTuple(preds: isListOfPreds): isPred {
 }
 
 
+// well-typed fns
+memoized function gen_isFnOf(argTypes: isList, retType: isPred): isPred {
+    gen_isFnOf(as(isListOfPreds, argTypes), retType);
+}
+
+memoized function gen_isFnOf(argTypes: isListOfPreds, retType: isPred): isPred {
+    interface isFnOf<argTypes, retType>;
+
+    function isFnOf(f: isFn): isBool {
+        isImplementedFor(f, argTypes, retType)
+    }
+
+    derive(isFn, isFnOf);
+
+    isFnOf
+}
+
+
 // complex numbers (test)
 // ======================
 let isComplexNumber: isPred = gen_isTuple(List(isReal, isReal));
@@ -144,3 +162,38 @@ let c2: isComplexNumber = as(isComplexNumber, List(1, -5));
 let c3: isComplexNumber = c1 + c2;
 
 println(c3);
+
+
+// typed map (test)
+// ================
+interface gen_map;
+
+memoized function gen_map(x: isPred, y: isPred): isFn {
+    let isListOfX:  isPred = gen_isListOf(x);
+    let isListOfY:  isPred = gen_isListOf(y);
+    let isFnOfXToY: isPred = gen_isFnOf(List(x), y);
+    let dyn_map:    isFn   = map;
+
+    interface map<x, y>;
+
+    function map(xs: isList, f: isFn): isList {
+        map(
+            as(isListOfX, xs),
+            as(isFnOfXToY, f)
+        )
+    }
+
+    function map(xs: isListOfX, f: isFnOfXToY): isListOfY {
+        dyn_map(xs, f)
+        .AS(isListOfY, $this)
+    }
+
+    map
+}
+
+
+let isListOfInts:      isPred = gen_isListOf(isInt);
+let isFnOfIntToString: isPred = gen_isFnOf(List(isInt), isString);
+let mapIntToString:    isFn   = gen_map(isInt, isString);
+
+println(mapIntToString(List(0, 1, 2, 3, 4), str));
