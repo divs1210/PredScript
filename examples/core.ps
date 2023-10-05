@@ -16,7 +16,10 @@ function spy(x: isAny, tag: isString): isAny {
     x
 }
 
-// stack overflow, we need loops / lazy seqs / stackless impl
+
+// not well-typed map
+// will stack overflow for large lists
+// we need loops / lazy seqs / stackless impl
 function map(xs: isList, f: isFn): isList {
     if (isEmpty(xs))
         List()
@@ -28,6 +31,7 @@ function map(xs: isList, f: isFn): isList {
 }
 
 
+// not well-typed zip
 // we don't have and / or yet 🤦🏽‍♂️
 // assuming both are of equal length
 function zip(xs: isList, ys: isList): isList {
@@ -41,6 +45,7 @@ function zip(xs: isList, ys: isList): isList {
 }
 
 
+// well typed every
 function every(xs: isList, f: isPred): isBool {
     if (isEmpty(xs))
         true
@@ -164,8 +169,8 @@ let c3: isComplexNumber = c1 + c2;
 println(c3);
 
 
-// typed map (test)
-// ================
+// well-typed map (test)
+// =====================
 interface gen_map;
 
 memoized function gen_map(x: isPred, y: isPred): isFn {
@@ -175,13 +180,6 @@ memoized function gen_map(x: isPred, y: isPred): isFn {
     let dyn_map:    isFn   = map;
 
     interface map<x, y>;
-
-    function map(xs: isList, f: isFn): isList {
-        map(
-            as(isListOfX, xs),
-            as(isFnOfXToY, f)
-        )
-    }
 
     function map(xs: isListOfX, f: isFnOfXToY): isListOfY {
         dyn_map(xs, f)
@@ -196,4 +194,7 @@ let isListOfInts:      isPred = gen_isListOf(isInt);
 let isFnOfIntToString: isPred = gen_isFnOf(List(isInt), isString);
 let mapIntToString:    isFn   = gen_map(isInt, isString);
 
-println(mapIntToString(List(0, 1, 2, 3, 4), str));
+let ints: isListOfInts = List(0, 1, 2, 3, 4).as(isListOfInts, $this);
+let intToString: isFnOfIntToString = as(isFnOfIntToString, str);
+
+println(mapIntToString(ints, intToString));
