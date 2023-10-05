@@ -1,10 +1,7 @@
-const fs = require('fs');
-const peg = require("pegjs");
-const path = require('node:path');
-
-let filePath = path.join(__dirname, 'grammar.pegjs');
-const grammar = fs.readFileSync(filePath, 'utf8');
-const _parse = peg.generate(grammar).parse;
+// run: $ pegjs src/grammar.pegjs
+// to generate  src/grammar.js
+const _parser = require('./grammar');
+const _parse = _parser.parse;
 
 const stripComments = (code) =>
     code
