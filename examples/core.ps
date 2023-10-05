@@ -9,6 +9,7 @@ interface gen_isVector;
 interface gen_isTuple;
 
 
+// useful for debugging
 function spy(x: isAny, tag: isString): isAny {
     println(tag + ": " + x)
     x
@@ -90,6 +91,10 @@ let isListOfPreds: isPred = gen_isListOf(isPred);
 
 
 // tuples are vectors of mixed types
+memoized function gen_isTuple(preds: isList): isPred {
+    gen_isTuple(as(isListOfPreds, preds))
+}
+
 memoized function gen_isTuple(preds: isListOfPreds): isPred {
     let isParentType: isPred = gen_isVector(isAny, size(preds));
 
@@ -118,8 +123,7 @@ memoized function gen_isTuple(preds: isListOfPreds): isPred {
 
 // complex numbers (test)
 // ======================
-let isComplexNumber: isPred =
-    gen_isTuple(AS(isListOfPreds, List(isReal, isReal)));
+let isComplexNumber: isPred = gen_isTuple(List(isReal, isReal));
 
 function add(x: isComplexNumber, y: isComplexNumber): isComplexNumber {
     List(
