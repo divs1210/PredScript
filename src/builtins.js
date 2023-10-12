@@ -225,9 +225,6 @@ function Implement(multi, argTypes, retType, f) {
 
     jsMulti.implementFor(jsArgTypes, retType, checkedF);
 
-    if(jsArgTypes.size === 1 && retType === isBool)
-        setType(multi, isPred);
-
     return NULL;
 }
 

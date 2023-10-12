@@ -65,7 +65,8 @@ memoized function gen_isListOf(t: isPred): isPred {
     function isListOf(obj: isList): isBool {
         obj.every($this, AS(isPred, (x) => isA(t, type(x))))
     }
-    
+
+    __AS__(isPred, isListOf);    
     derive(isList, isListOf);
 
     isListOf
@@ -86,6 +87,7 @@ memoized function gen_isVector(elementType: isPred, vSize: isInt): isPred {
         obj.size == vSize
     }
 
+    __AS__(isPred, isVector);
     derive(isParentType, isVector);
 
     isVector
@@ -120,6 +122,7 @@ memoized function gen_isTuple(preds: isListOfPreds): isPred {
         }))
     }
 
+    __AS__(isPred, isTuple);
     derive(isParentType, isTuple);
 
     isTuple
@@ -127,21 +130,22 @@ memoized function gen_isTuple(preds: isListOfPreds): isPred {
 
 
 // well-typed fns
-memoized function gen_isFnOf(argTypes: isList, retType: isPred): isPred {
-    gen_isFnOf(as(isListOfPreds, argTypes), retType);
-}
+// memoized function gen_isFnOf(argTypes: isList, retType: isPred): isPred {
+//     gen_isFnOf(as(isListOfPreds, argTypes), retType);
+// }
 
-memoized function gen_isFnOf(argTypes: isListOfPreds, retType: isPred): isPred {
-    interface isFnOf<argTypes, retType>;
+// memoized function gen_isFnOf(argTypes: isListOfPreds, retType: isPred): isPred {
+//     interface isFnOf<argTypes, retType>;
 
-    function isFnOf(f: isFn): isBool {
-        isImplementedFor(f, argTypes, retType)
-    }
+//     function isFnOf(f: isFn): isBool {
+//         isImplementedFor(f, argTypes, retType)
+//     }
 
-    derive(isFn, isFnOf);
+//     __AS__(isPred, isFnOf);
+//     derive(isFn, isFnOf);
 
-    isFnOf
-}
+//     isFnOf
+// }
 
 
 // complex numbers (test)
@@ -169,32 +173,50 @@ let c3: isComplexNumber = c1 + c2;
 println(c3);
 
 
-// well-typed map (test)
-// =====================
-interface gen_map;
+// // well-typed map (test)
+// // =====================
+// interface gen_map;
 
-memoized function gen_map(x: isPred, y: isPred): isFn {
-    let isListOfX:  isPred = gen_isListOf(x);
-    let isListOfY:  isPred = gen_isListOf(y);
-    let isFnOfXToY: isPred = gen_isFnOf(List(x), y);
-    let dyn_map:    isFn   = map;
+// // how do we make the return type better?
+// // ideally it should be: 
+// //   gen_isFnOf(List(gen_isListOf(X), gen_isFnOf(List(X), Y)), gen_isListOf(Y))
+// //   Fn<[List<X>, Fn<[X], Y>], List<Y>>
+// // also how do we define map for vectors?
+// memoized function gen_map(x: isPred, y: isPred): isFn {
+//     let isListOfX:  isPred = gen_isListOf(x);
+//     let isListOfY:  isPred = gen_isListOf(y);
+//     let isFnOfXToY: isPred = gen_isFnOf(List(x), y);
+//     let dyn_map:    isFn   = map;
 
-    interface map<x, y>;
+//     interface map<x, y>;
 
-    function map(xs: isListOfX, f: isFnOfXToY): isListOfY {
-        dyn_map(xs, f)
-        .AS(isListOfY, $this)
-    }
+//     function map(xs: isListOfX, f: isFnOfXToY): isListOfY {
+//         dyn_map(xs, f)
+//         .AS(isListOfY, $this)
+//     }
 
-    map
-}
+//     map
+// }
 
 
-let isListOfInts:      isPred = gen_isListOf(isInt);
-let isFnOfIntToString: isPred = gen_isFnOf(List(isInt), isString);
-let mapIntToString:    isFn   = gen_map(isInt, isString);
+// let isListOfInts:      isPred = gen_isListOf(isInt);
+// let isFnOfIntToString: isPred = gen_isFnOf(List(isInt), isString);
+// let mapIntToString:    isFn   = gen_map(isInt, isString);
 
-let ints: isListOfInts = List(0, 1, 2, 3, 4).as(isListOfInts, $this);
-let intToString: isFnOfIntToString = as(isFnOfIntToString, str);
+// let ints: isListOfInts = List(0, 1, 2, 3, 4).as(isListOfInts, $this);
+// let intToString: isFnOfIntToString = as(isFnOfIntToString, str);
 
-println(mapIntToString(ints, intToString));
+// println(mapIntToString(ints, intToString));
+
+
+
+// ideal
+// function<X: isPred, Y: isPred> map(xs: isList<X>, f: isFn<[X], Y>): isList<Y> {
+//     if (isEmpty(xs))
+//         List()
+//     else
+//         xs
+//         .slice($this, 1)
+//         .map($this, f)
+//         .unshift($this, f(xs[0]))
+// }
