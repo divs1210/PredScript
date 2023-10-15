@@ -3099,7 +3099,7 @@ function peg$parse(input, options) {
           let chars = [...str];
 
           if (chars.length > 1)
-              throw new Error(`Invalid character literal: '${str}' at ${location()}.`);
+              throw new Error(`Invalid character literal: '${str}' at ${JSON.stringify(location(), null, 2)}.`);
 
           return {
               type: 'char', 
