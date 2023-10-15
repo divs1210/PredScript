@@ -3,7 +3,9 @@ interface isLessThan5;
 function isLessThan5(x: isInt): isBool {
     x < 5
 }
-
+// `__AS__` is the rough-casting operator
+// it mutates the type metadata of the object
+__AS__(isPred, isLessThan5);
 derive(isInt, isLessThan5);
 
 let two: isInt = 2;
@@ -34,8 +36,3 @@ println("hardCastedTen: " + type(hardCastedTen));
 
 // `ten`'s type is still `isInt`
 println("ten: " + type(ten));
-
-// `__AS__` is the rough-casting operator
-// it mutates the type metadata of the object
-__AS__(isInt, hardCastedTen);
-println("rough-casted hardCastedTen: " + type(hardCastedTen))
