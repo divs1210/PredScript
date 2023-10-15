@@ -98,7 +98,7 @@ assert(is(
 // MultiFns
 // ========
 assert(is(`
-((() => { const inc = MultiFn("inc"); return Implement(
+((() => { const inc = MultiFn("inc" + \`\`);; return Implement(
     inc,
     List(isInt),
     isInt,

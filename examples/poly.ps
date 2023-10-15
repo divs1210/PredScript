@@ -7,12 +7,14 @@ interface isOdd;
 function isEven(x: isInt): isBool {
     x % 2 == 0
 }
+__AS__(isPred, isEven);
 derive(isInt, isEven);
 
 
 function isOdd(x: isInt): isBool {
     !isEven(x)
 }
+__AS__(isPred, isOdd);
 derive(isInt, isOdd);
 
 

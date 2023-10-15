@@ -4,7 +4,7 @@ interface isEven;
 function isEven(x: isInt): isBool {
     x % 2 == 0
 }
-
+__AS__(isPred, isEven);
 // all isEvens are valid isInts
 derive(isInt, isEven);
 

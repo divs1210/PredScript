@@ -225,9 +225,6 @@ function Implement(multi, argTypes, retType, f) {
 
     jsMulti.implementFor(jsArgTypes, retType, checkedF);
 
-    if(jsArgTypes.size === 1 && retType === isBool)
-        setType(multi, isPred);
-
     return NULL;
 }
 
@@ -418,6 +415,20 @@ Implement(
     List(isReal, isReal),
     isReal,
     (x, y) => Real(x.get('val').pow(y.get('val')))
+);
+
+const abs = MultiFn('abs');
+Implement(
+    abs,
+    List(isInt),
+    isInt,
+    (x) => Int(val(x).abs().integerValue())
+);
+Implement(
+    abs,
+    List(isReal),
+    isReal,
+    (x) => Real(val(x).abs())
 );
 
 
@@ -724,6 +735,23 @@ Implement(
     (l, start) => Obj(val(l).slice(val(start).toNumber()), isList)
 );
 
+const unshift = MultiFn('unshift');
+Implement(
+    unshift,
+    List(isList, isAny),
+    isList,
+    (l, x) => Obj(val(l).unshift(x), isList)
+);
+
+
+const push = MultiFn('push');
+Implement(
+    push,
+    List(isList, isAny),
+    isList,
+    (l, x) => Obj(val(l).push(x), isList)
+);
+
 
 // Apply
 // =====
@@ -784,6 +812,31 @@ Implement(
 );
 
 
+const isImplementedFor = MultiFn('isImplementedFor');
+Implement(
+    isImplementedFor,
+    List(isFn, isList, isPred),
+    isBool,
+    (f, argTypes, retType) => {
+        let jsF = val(f);
+        let jsArgTypes = val(argTypes);
+        
+        // in case of lambda
+        if (!jsF.implementationFor)
+            return FALSE;
+
+        // in case of MultiFn
+        let impl = jsF.implementationFor(jsArgTypes, true);
+
+        // no matching implementation
+        if(!impl)
+            return FALSE;
+
+        return _isA(retType, impl.retType)? TRUE : FALSE;        
+    }
+);
+
+
 // misc
 // ====
 function _memoize(f) {
@@ -810,6 +863,7 @@ module.exports = {
     MultiFn,
     isFn,
     Implement,
+    isImplementedFor,
     derive,
     Obj,
     val,
@@ -839,6 +893,8 @@ module.exports = {
     set,
     isEmpty,
     slice,
+    unshift,
+    push,
     apply,
     _apply,
     add,
@@ -847,6 +903,7 @@ module.exports = {
     divide,
     mod,
     pow,
+    abs,
     is,
     _is,
     isLessThan,

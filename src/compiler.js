@@ -161,7 +161,18 @@ Implement(
 }
 
 function compileInterface(node) {
-    return `const ${node.value} = MultiFn("${node.value}")`;
+    let mName = node.name;
+    let params = "";
+
+    if(node.args.length > 0)
+        params = 
+            '<' 
+            + node.args
+              .map(arg => "${(_apply(str, List(" + arg + "))).get('val')}")
+              .join(', ') 
+            + '>';
+
+    return `const ${node.name} = MultiFn("${mName}" + \`${params}\`);`;
 }
 
 function compileAST(ast) {

@@ -134,7 +134,7 @@ class MultiMethod extends Function {
     }
 
     // TODO: memoize
-    implementationFor(argTypes) {
+    implementationFor(argTypes, dontThrow) {
         let matchingImpls = this.matchingImpls(argTypes);
 
         if(matchingImpls.isEmpty())
@@ -154,10 +154,13 @@ class MultiMethod extends Function {
                 ))
             return bestFit;
         else {
-            throw new Error(`Ambiguous call to MultiMethod ${this.mName}:`
-                + `\nargs types: ${argTypesToString(argTypes)}`
-                + `\n  method 1: ${argTypesToString(bestFit.argTypes)}`
-                + `\n  method 2: ${argTypesToString(nextBestFit.argTypes)}`);
+            if (dontThrow)
+                return null;
+            else
+                throw new Error(`Ambiguous call to MultiMethod ${this.mName}:`
+                    + `\nargs types: ${argTypesToString(argTypes)}`
+                    + `\n  method 1: ${argTypesToString(bestFit.argTypes)}`
+                    + `\n  method 2: ${argTypesToString(nextBestFit.argTypes)}`);
         }
     }
 

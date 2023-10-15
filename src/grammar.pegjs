@@ -302,10 +302,19 @@
         };
     }
     
-    function interfaceNode(name) {
+    function interfaceNode(name, args) {
+        if (!args)
+            args = [];
+        else if (args[2][1].length === 0)
+            args = [args[2][0]];
+        else
+            args = [args[2][0]].concat(args[2][1].map(arg => arg[3]));
+
         return {
             type: 'interface-stmt',
-            value: name.value
+            name: name.value,
+            args: args.map(arg => arg.value),
+            loc: location()
         }
     }
 }
@@ -316,7 +325,8 @@ statement        = s:(interfaceStatement / letStatement / multiFnStatement / exp
 exprStatement    = e:expression (_ ';')?                                                       { return exprStatementNode(e);                           }
 letStatement     = 'let' __ name:SYMBOL _ ':' _ type:SYMBOL _ '=' _ val:expression (_ ';')?    { return letNode({ name, type, val });                   }
 
-interfaceStatement = 'interface' __ name:SYMBOL (_ ';')?                                       { return interfaceNode(name);                            }
+interfaceStatement = 'interface' __ name:SYMBOL args:(_ '<' ((SYMBOL (_ ',' _ SYMBOL)*)?) _ '>')? (_ ';')?                                       
+                                                                                               { return interfaceNode(name, args);                      }
 
 multiFnStatement = memo:('memoized'?) _ 'function' __ fname:SYMBOL _ args:('(' _ multiFnArgs? _ ')') _ ':' _ retType:SYMBOL _ body:block
                                                                                                { return multiFnNode({ memo, fname, args, retType, body });  }
@@ -330,11 +340,11 @@ comparison = x:term   _ pairs:(( ( '>=' / '>' / '<=' / '<' ) _ term)*)  { return
 term       = x:factor _ pairs:(( ( '-' / '+' ) _ factor)*)              { return binaryNode(x, pairs);  }
 factor     = x:unary  _ pairs:(( ( '/' / '*' / '%' ) _ unary)*)         { return binaryNode(x, pairs);  }
 unary      = op:( '!' / '-' ) _ x:unary                                 { return unaryNode(op, x);      }
+             / dotNotation
              / lambdaExpr
              / ifExpr
              / getExpr
              / fnCall
-             / dotNotation
              / primary
 
 ifExpr     = 'if' _ '(' _ cond:expression _ ')' _ then:expression _else:((_ 'else' _ expression)?)
@@ -349,7 +359,7 @@ keyExpr    = '[' _ expression _ ']'
 fnCall     = f:primary _ argLists:(fnCallArgs+)                                      { return fnCallNode(f, argLists);   }
 fnCallArgs = '(' _ args:((expression (_ ',' _ expression)*)?) _ ')'                  { return fnCallArgsNode(args);      }
 
-dotNotation = x:primary y:(_ '.' _ (fnCall / grouping / SYMBOL))+                    { return dotNotation(x, y);         }
+dotNotation = x:(fnCall / primary) y:(_ '.' _ (fnCall / grouping / SYMBOL))+         { return dotNotation(x, y);         }
 
 primary    = REAL / INTEGER / CHAR / STRING / BOOL / NULL / SYMBOL / block / grouping
 grouping   = '(' _ e:expression _ ')'                                                { return groupingNode(e);           }
