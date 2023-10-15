@@ -121,3 +121,24 @@ assert(is(
 assert.throws(() => {
     foo(intVar, intVar)
 }, 'ambiguous: (int, real) or (real, int)');
+
+
+// overwrite existing impl
+// =======================
+foo.implementFor(List(
+    [isReal, isReal]),
+    isReal,
+    () => {
+    return new Map({
+        val: 0,
+        meta: {
+            type: isReal, 
+            impl: 'new real, real'
+        }
+    });
+});
+
+assert(is(
+    'new real, real',
+    foo(realVar, realVar).get('meta').impl
+));

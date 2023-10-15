@@ -2695,7 +2695,7 @@ function peg$parse(input, options) {
   }
 
   function peg$parseCHAR() {
-    var s0, s1, s2, s3, s4, s5;
+    var s0, s1, s2, s3, s4, s5, s6;
 
     s0 = peg$currPos;
     s1 = peg$currPos;
@@ -2707,41 +2707,81 @@ function peg$parse(input, options) {
       if (peg$silentFails === 0) { peg$fail(peg$c90); }
     }
     if (s2 !== peg$FAILED) {
-      s3 = peg$currPos;
+      s3 = [];
       s4 = peg$currPos;
+      s5 = peg$currPos;
       peg$silentFails++;
       if (input.charCodeAt(peg$currPos) === 39) {
-        s5 = peg$c89;
+        s6 = peg$c89;
         peg$currPos++;
       } else {
-        s5 = peg$FAILED;
+        s6 = peg$FAILED;
         if (peg$silentFails === 0) { peg$fail(peg$c90); }
       }
       peg$silentFails--;
-      if (s5 === peg$FAILED) {
-        s4 = void 0;
+      if (s6 === peg$FAILED) {
+        s5 = void 0;
+      } else {
+        peg$currPos = s5;
+        s5 = peg$FAILED;
+      }
+      if (s5 !== peg$FAILED) {
+        if (input.length > peg$currPos) {
+          s6 = input.charAt(peg$currPos);
+          peg$currPos++;
+        } else {
+          s6 = peg$FAILED;
+          if (peg$silentFails === 0) { peg$fail(peg$c91); }
+        }
+        if (s6 !== peg$FAILED) {
+          s5 = [s5, s6];
+          s4 = s5;
+        } else {
+          peg$currPos = s4;
+          s4 = peg$FAILED;
+        }
       } else {
         peg$currPos = s4;
         s4 = peg$FAILED;
       }
-      if (s4 !== peg$FAILED) {
-        if (input.length > peg$currPos) {
-          s5 = input.charAt(peg$currPos);
+      while (s4 !== peg$FAILED) {
+        s3.push(s4);
+        s4 = peg$currPos;
+        s5 = peg$currPos;
+        peg$silentFails++;
+        if (input.charCodeAt(peg$currPos) === 39) {
+          s6 = peg$c89;
           peg$currPos++;
         } else {
+          s6 = peg$FAILED;
+          if (peg$silentFails === 0) { peg$fail(peg$c90); }
+        }
+        peg$silentFails--;
+        if (s6 === peg$FAILED) {
+          s5 = void 0;
+        } else {
+          peg$currPos = s5;
           s5 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c91); }
         }
         if (s5 !== peg$FAILED) {
-          s4 = [s4, s5];
-          s3 = s4;
+          if (input.length > peg$currPos) {
+            s6 = input.charAt(peg$currPos);
+            peg$currPos++;
+          } else {
+            s6 = peg$FAILED;
+            if (peg$silentFails === 0) { peg$fail(peg$c91); }
+          }
+          if (s6 !== peg$FAILED) {
+            s5 = [s5, s6];
+            s4 = s5;
+          } else {
+            peg$currPos = s4;
+            s4 = peg$FAILED;
+          }
         } else {
-          peg$currPos = s3;
-          s3 = peg$FAILED;
+          peg$currPos = s4;
+          s4 = peg$FAILED;
         }
-      } else {
-        peg$currPos = s3;
-        s3 = peg$FAILED;
       }
       if (s3 !== peg$FAILED) {
         if (input.charCodeAt(peg$currPos) === 39) {
@@ -3053,9 +3093,17 @@ function peg$parse(input, options) {
       }
 
       function charNode(parsed) {
+          let str = stringNode(parsed).value;
+
+          // correctly handle unicode
+          let chars = [...str];
+
+          if (chars.length > 1)
+              throw new Error(`Invalid character literal: '${str}' at ${JSON.stringify(location(), null, 2)}.`);
+
           return {
               type: 'char', 
-              value: parsed[1][1],
+              value: chars[0],
               loc: location()
           };
       }

@@ -30,9 +30,17 @@
     }
 
     function charNode(parsed) {
+        let str = stringNode(parsed).value;
+
+        // correctly handle unicode
+        let chars = [...str];
+
+        if (chars.length > 1)
+            throw new Error(`Invalid character literal: '${str}' at ${JSON.stringify(location(), null, 2)}.`);
+
         return {
             type: 'char', 
-            value: parsed[1][1],
+            value: chars[0],
             loc: location()
         };
     }
@@ -369,7 +377,7 @@ NULL        = 'null'                                           { return nullNode
 INTEGER     = i:([0-9]+)                                       { return intNode(i);    }
 REAL        = n:([0-9]+ '.' [0-9]+)                            { return realNode(n);   }
 BOOL        = b:('true' / 'false')                             { return boolNode(b);   } 
-CHAR        = c:("'" (!"'" .) "'")                             { return charNode(c);   }
+CHAR        = c:("'" (!"'" .)* "'")                            { return charNode(c);   }
 STRING      = s:('"' (!'"' .)* '"')                            { return stringNode(s); }
 SYMBOL      = s:(SYMBOLSTART (SYMBOLSTART / [0-9])*)           { return symbolNode(s); }
 SYMBOLSTART = [a-zA-Z] / '$' / '_'
