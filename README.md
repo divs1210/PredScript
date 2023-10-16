@@ -4,7 +4,7 @@
 
 ## What
 
-PredScript is a statically typed functional programming language
+PredScript is a strongly typed functional programming language
 that uses predicates as types, and looks like JavaScript.
 
 **!! BEWARE: WIP !!**
@@ -20,26 +20,18 @@ chances are that you are going to have to
 At that point, static type checkers are not available,
 and there has to be some different validation strategy -
 leading to a dynamic type checker, and a different type system
-for describing dynamic types. (`EmailString`, `PastDateString`)
+for describing dynamic types. (`EmailString`, `PosInt`)
 
-What if a language's static type system was built around
-validators that could be checked at compile time,
-as well as efficiently at runtime?
+What if a language's type system was built around
+validators that could be checked efficiently at runtime,
+and to some extent at compile time?
 
 That's the question PredScript wants to answer.
 
 ## Use Case
 
 ```typescript
-let isUser: isPred =
-    mapOf({
-        id:    isPosInt,
-        name:  isString,
-        email: isEmailString,
-        dob:   isPastDateString
-    })
-
-// this is type checked at compile time
+// this can be type checked at compile time
 async function fetchUserById(id: isInt): isUser {
     id
     .fetchUserByIdURLTemplate(this)
@@ -47,10 +39,10 @@ async function fetchUserById(id: isInt): isUser {
     .await(this)
     .get(this, "body")
     .parseJSON(this)
-    .as(isUser, this) // validate and cast at runtime 
+    // validate and cast at runtime 
+    .as(isUser, this)
 }
 
-// no validation library required!
 fetchUserById(5).await(this);
 // => { 
 //  id: 5,
@@ -63,7 +55,7 @@ fetchUserById(5).await(this);
 ## Design goals
 
 - Types can be arbitrary predicates (like `isEmailString` and `isPosInt`)
-- Statically type check as much as possible at compile time
+- Be amenable to static type checking / type linting
 - Dynamically type check at runtime
   - do it efficiently
   - runtime can be directed to skip arbitrary checks (for optimization)
