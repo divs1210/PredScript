@@ -1,0 +1,16 @@
+interface haba;
+
+function haba(x: isInt, y: isReal): isNull {
+    println("int, real")
+}
+
+function haba(x: isReal, y: isInt): isNull {
+    println("real, int")
+}
+
+// this should work
+haba(2, 3.1);
+
+// this should fail
+// with ambiguity error
+haba(1, 1);

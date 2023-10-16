@@ -1,0 +1,9 @@
+interface f;
+
+memoized function f(x: isInt): isNull {
+    println("f called with: " + x);
+}
+
+f(5);
+f(5); // this call will be skipped
+f(6);

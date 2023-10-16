@@ -1,0 +1,28 @@
+{
+    "name": "predscript",
+    "version": "0.0.1",
+    "description": "Predicates as Types. Compiles to JS.",
+    "exports": {
+        "./builtins": "./src/builtins.js"
+    },
+    "scripts": {
+        "test": "node --test"
+    },
+    "keywords": [
+        "PredScript",
+        "compiler",
+        "language",
+        "javascript"
+    ],
+    "bin": {
+        "psc": "./compile.js"
+    },
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "@vercel/ncc": "^0.38.0",
+        "bignumber.js": "^9.1.1",
+        "immutable": "^5.0.0-beta.4",
+        "pegjs": "^0.10.0"
+    }
+}

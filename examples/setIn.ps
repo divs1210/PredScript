@@ -1,0 +1,22 @@
+let m: isMap = Map(
+    0, Map(
+        1, Map(
+            2, "a"
+           )
+    )
+);
+
+interface setIn;
+
+function setIn(settable: isAny, ks: isList, v: isAny): isAny {
+    if (isEmpty(ks))
+        settable
+    else if (size(ks) == 1)
+        set(settable, ks[0], v)
+    else {
+        let k: isAny = ks[0]; 
+        set(settable, k, setIn(settable[k], slice(ks, 1), v))
+    }
+}
+
+println(setIn(m, List(0, 1, 2), "b"));
