@@ -113,7 +113,7 @@ class MultiMethod extends Function {
 
     implementFor(argTypes, retType, f) {
         // remove existing impl if it exists
-        let existingImpl = this.implementationFor(argTypes, true);
+        let existingImpl = this.impls.find(impl => is(impl.argTypes, argTypes));
         if(existingImpl)
             this.impls = this.impls.filter(impl => impl !== existingImpl);
 
