@@ -1,6 +1,6 @@
 {
     "name": "predscript",
-    "version": "1.0.0",
+    "version": "0.0.1",
     "description": "Predicates as Types. Compiles to JS.",
     "exports": {
         "./builtins": "./src/builtins.js"
