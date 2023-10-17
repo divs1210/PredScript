@@ -162,6 +162,7 @@
             '<' : 'isLessThan',
             '<=': 'isLessThanEq',
             '==': 'is',
+    //      '!=': 'isNot',
             '>' : 'isGreaterThan',
             '>=': 'isGreaterThanEq'
         };
@@ -177,6 +178,23 @@
                     loc: location()
                 },
                 args: [x, p0],
+                loc: location()
+            },
+            pairs.slice(1)
+        );
+    }
+
+    function logicNode(x, pairs) {
+        if (pairs.length === 0)
+            return x;
+
+        let [op, _, y] = pairs[0];
+        return logicNode(
+            {
+                type: 'if-exp',
+                condExp: x,
+                thenExp: op === '&&'? y : x,
+                elseExp: op === '&&'? x : y,
                 loc: location()
             },
             pairs.slice(1)
@@ -371,8 +389,9 @@ multiFnStatement = memo:('memoized'?) _ 'function' __ fname:SYMBOL _ args:('(' _
 multiFnArgs      = x:multiFnArg xs:((_ ',' _ multiFnArg)*)                                     { return multiFnArgsNode({ x, xs });                     }
 multiFnArg       = argName:SYMBOL _ ':' _ argType:SYMBOL                                       { return multiFnArgNode({ argName, argType });           }
 
-expression = equality
-equality   = x:comparison _ pairs:(( ( '!=' / '==' ) _ comparison)*)    { return binaryNode(x, pairs);  }
+expression = logic
+logic      = x:equality _ pairs:(( ( '&&' / '||' ) _ equality)*)        { return logicNode(x, pairs);   }
+equality   = x:comparison _ pairs:(( ( '==' ) _ comparison)*)           { return binaryNode(x, pairs);  }
 comparison = x:term   _ pairs:(( ( '>=' / '>' / '<=' / '<' ) _ term)*)  { return binaryNode(x, pairs);  }
 term       = x:factor _ pairs:(( ( '-' / '+' ) _ factor)*)              { return binaryNode(x, pairs);  }
 factor     = x:unary  _ pairs:(( ( '/' / '*' / '%' ) _ unary)*)         { return binaryNode(x, pairs);  }
