@@ -185,11 +185,20 @@
     }
 
     function logicNode(x, pairs) {
-        // TODO: && and ||
-        // x && y => if(x) y else x
-        // x || y => if(x) x else y
-        // x && y || z => x: x, pairs: [[&&, y], [||, z]]
-        return x;
+        if (pairs.length === 0)
+            return x;
+
+        let [op, _, y] = pairs[0];
+        return logicNode(
+            {
+                type: 'if-exp',
+                condExp: x,
+                thenExp: op === '&&'? y : x,
+                elseExp: op === '&&'? x : y,
+                loc: location()
+            },
+            pairs.slice(1)
+        );
     }
 
     function multiFnArgNode(obj) {

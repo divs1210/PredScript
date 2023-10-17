@@ -3337,8 +3337,20 @@ function peg$parse(input, options) {
       }
 
       function logicNode(x, pairs) {
-          // TODO: fix
-          return x;
+          if (pairs.length === 0)
+              return x;
+
+          let [op, _, y] = pairs[0];
+          return logicNode(
+              {
+                  type: 'if-exp',
+                  condExp: x,
+                  thenExp: op === '&&'? y : x,
+                  elseExp: op === '&&'? x : y,
+                  loc: location()
+              },
+              pairs.slice(1)
+          );
       }
 
       function multiFnArgNode(obj) {
