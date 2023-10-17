@@ -505,21 +505,21 @@ function Char(s) {
 
 // toInt
 // =====
-const int = MultiFn('int');
+const toInt = MultiFn('int');
 Implement(
-    int,
+    toInt,
     List(isBool),
     isInt,
     b => b === TRUE? Int(1): Int(0)
 );
 Implement(
-    int,
+    toInt,
     List(isChar),
     isInt,
     ch => _AS(isInt, ch)
 );
 Implement(
-    int,
+    toInt,
     List(isReal),
     isInt,
     r => {
@@ -552,57 +552,57 @@ Derive(isAny, isString);
 const String = (s) => Obj(s, isString);
 
 // toString
-const str = MultiFn('str');
+const toString = MultiFn('toString');
 Implement(
-    str,
+    toString,
     List(isAny),
     isString,
     i => String('' + val(i))
 );
 Implement(
-    str,
+    toString,
     List(isInt),
     isString,
     i => String(val(i).toFixed(0))
 );
 Implement(
-    str,
+    toString,
     List(isChar),
     isString,
     ch => String(_String.fromCodePoint(val(ch).toNumber()))
 );
 Implement(
-    str,
+    toString,
     List(isFn),
     isString,
     f => String(val(f).mName)
 );
 Implement(
-    str,
+    toString,
     List(isPred),
     isString,
     p => String(val(p).mName)
 );
 Implement(
-    str,
+    toString,
     List(isList),
     isString,
     l => String(
         '['
-        + val(l).map(x => val(val(str)(x))).join(', ')
+        + val(l).map(x => val(val(toString)(x))).join(', ')
         + ']'
     )
 );
 Implement(
-    str,
+    toString,
     List(isMap),
     isString,
     m => String(
         '{'
         + val(m).entrySeq().map(([k, v]) =>
-            val(val(str)(k))
+            val(val(toString)(k))
             + ": "
-            + val(val(str)(v))
+            + val(val(toString)(v))
         ).join(', ')
         + '}'
     )
@@ -619,13 +619,13 @@ Implement(
     add,
     List(isString, isAny),
     isString,
-    (x, y) => String(val(x) + val(str)(y).get('val'))
+    (x, y) => String(val(x) + val(toString)(y).get('val'))
 );
 Implement(
     add,
     List(isAny, isString),
     isString,
-    (x, y) => String(val(str)(x).get('val') + val(y))
+    (x, y) => String(val(toString)(x).get('val') + val(y))
 );
 
 
@@ -713,7 +713,7 @@ Implement(
         let jsString = val(s);
         let unicodeChars = [...jsString];
         let jsIdx = val(idx).toNumber();
-        let jsChar = val(val(str)(ch));
+        let jsChar = val(val(toString)(ch));
         unicodeChars[jsIdx] = jsChar;
         let psString = unicodeChars.join('');
         return String(psString);
@@ -787,7 +787,7 @@ Implement(
     List(isAny),
     isNull,
     (x) => {
-        let jsString = val(str)(x).get('val');
+        let jsString = val(toString)(x).get('val');
         console.log(jsString);
         return NULL;
     }
@@ -880,7 +880,7 @@ module.exports = {
     Real,
     isInt,
     Int,
-    int,
+    toInt,
     isChar,
     Char,
     isList,
@@ -912,7 +912,7 @@ module.exports = {
     isGreaterThanEq,
     String,
     isString,
-    str,
+    toString,
     println,
     type,
     _type,
