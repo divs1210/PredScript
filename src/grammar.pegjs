@@ -162,6 +162,7 @@
             '<' : 'isLessThan',
             '<=': 'isLessThanEq',
             '==': 'is',
+    //      '!=': 'isNot',
             '>' : 'isGreaterThan',
             '>=': 'isGreaterThanEq'
         };
@@ -372,7 +373,7 @@ multiFnArgs      = x:multiFnArg xs:((_ ',' _ multiFnArg)*)                      
 multiFnArg       = argName:SYMBOL _ ':' _ argType:SYMBOL                                       { return multiFnArgNode({ argName, argType });           }
 
 expression = equality
-equality   = x:comparison _ pairs:(( ( '!=' / '==' ) _ comparison)*)    { return binaryNode(x, pairs);  }
+equality   = x:comparison _ pairs:(( ( '==' ) _ comparison)*)    { return binaryNode(x, pairs);  }
 comparison = x:term   _ pairs:(( ( '>=' / '>' / '<=' / '<' ) _ term)*)  { return binaryNode(x, pairs);  }
 term       = x:factor _ pairs:(( ( '-' / '+' ) _ factor)*)              { return binaryNode(x, pairs);  }
 factor     = x:unary  _ pairs:(( ( '/' / '*' / '%' ) _ unary)*)         { return binaryNode(x, pairs);  }
