@@ -184,6 +184,14 @@
         );
     }
 
+    function logicNode(x, pairs) {
+        // TODO: && and ||
+        // x && y => if(x) y else x
+        // x || y => if(x) x else y
+        // x && y || z => x: x, pairs: [[&&, y], [||, z]]
+        return x;
+    }
+
     function multiFnArgNode(obj) {
         obj.type = 'multifn-arg';
         obj.loc = location();
@@ -372,8 +380,9 @@ multiFnStatement = memo:('memoized'?) _ 'function' __ fname:SYMBOL _ args:('(' _
 multiFnArgs      = x:multiFnArg xs:((_ ',' _ multiFnArg)*)                                     { return multiFnArgsNode({ x, xs });                     }
 multiFnArg       = argName:SYMBOL _ ':' _ argType:SYMBOL                                       { return multiFnArgNode({ argName, argType });           }
 
-expression = equality
-equality   = x:comparison _ pairs:(( ( '==' ) _ comparison)*)    { return binaryNode(x, pairs);  }
+expression = logic
+logic      = x:equality _ pairs:(( ( '&&' / '||' ) _ equality)*)        { return logicNode(x, pairs);   }
+equality   = x:comparison _ pairs:(( ( '==' ) _ comparison)*)           { return binaryNode(x, pairs);  }
 comparison = x:term   _ pairs:(( ( '>=' / '>' / '<=' / '<' ) _ term)*)  { return binaryNode(x, pairs);  }
 term       = x:factor _ pairs:(( ( '-' / '+' ) _ factor)*)              { return binaryNode(x, pairs);  }
 factor     = x:unary  _ pairs:(( ( '/' / '*' / '%' ) _ unary)*)         { return binaryNode(x, pairs);  }
