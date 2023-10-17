@@ -11,6 +11,6 @@ function makeAdder(x: isInt): isFn {
 }
 
 let add5: isFn = makeAdder(5);
-println(add5(6));
+assert(add5(6) == 11);
 
-println(makeAdder(2)(3));
+assert(makeAdder(2)(3) == 5);

@@ -19,4 +19,10 @@ function setIn(settable: isAny, ks: isList, v: isAny): isAny {
     }
 }
 
-println(setIn(m, List(0, 1, 2), "b"));
+assert(setIn(m, List(0, 1, 2), "b") == Map(
+    0, Map(
+        1, Map(
+            2, "b"
+           )
+    )
+));

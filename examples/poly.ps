@@ -46,13 +46,14 @@ function inc(x: isOdd): isEven {
     AS(isEven, x + 1)
 }
 
-let incInt: isInt = inc(1);
-println("inc isInt  1: " + type(incInt) + " " + incInt);
+let int: isInt = 1;
+assert(int.inc == 2);
+assert(int.inc.type == isInt);
 
 let even: isEven = AS(isEven, 2);
-let incEven: isOdd = inc(even);
-println("inc isEven 2: " + type(incEven) + " " + incEven);
+assert(even.inc == 3);
+assert(even.inc.type == isOdd);
 
 let odd: isOdd = AS(isOdd, 3);
-let incOdd: isEven = inc(odd);
-println("inc isOdd  3: " + type(incOdd) + " " + incOdd);
+assert(odd.inc == 4);
+assert(odd.inc.type == isEven);

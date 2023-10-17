@@ -4,8 +4,12 @@ let m: isMap = Map(
     List(0), '_'
 );
 
-println(m);
-println(size(m));
-println(isEmpty(m));
-println("m[List(0)]: " + m[List(0)]);
-println("m[0] = 10: " + set(m, 0, 10));
+assert(str(m) == "{0: 1, a: 2, [0]: _}");
+assert(size(m) == 3);
+assert(isEmpty(m) == false);
+assert(m[List(0)] == '_');
+assert(set(m, 0, 10) == Map(
+    0,       10,
+    "a",     2,
+    List(0), '_'
+));

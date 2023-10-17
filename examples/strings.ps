@@ -1,10 +1,10 @@
 // strings are double quoted
-println("hello, world!");
+assert("hello, world!".type == isString);
 
 // + is overridden
 // to do string concatenation
-println("hello, " + 123 + "!");
+assert("hello, " + 123 + "!" == "hello, 123!");
 
 // it converts values to string
 // before concat-ing
-println("hello, " + type("") + "!")
+assert("hello, " + type("") + "!" == "hello, isString!")

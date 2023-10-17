@@ -1,15 +1,11 @@
 // int + int -> int
-println(1 + 2)
-println(type(1 + 2))
-
-println("")
+assert(1 + 2 == 3);
+assert(type(1 + 2) == isInt);
 
 // int + real -> real
-println(1 + 3.2)
-println(type(1 + 3.2))
-
-println("")
+assert(1 + 3.2 == 4.2);
+assert(type(1 + 3.2) == isReal);
 
 // real + int -> real
-println(1.3 + 3)
-println(type(1.3 + 3))
+assert(1.3 + 3 == 4.3);
+assert(type(1.3 + 3) == isReal);

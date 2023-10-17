@@ -1,12 +1,11 @@
 // real
 let r: isReal = 3.5;
-println(toInt(r));
+assert(toInt(r) == 4);
 
 // char
-// let s: isString = "haha";
 let ch: isChar = '🙂';
-println(toInt(ch));
+assert(toInt(ch) == 128578);
 
 // bool
-println(toInt(true));
-println(toInt(false));
+assert(toInt(true)  == 1);
+assert(toInt(false) == 0);
