@@ -31,17 +31,17 @@ assert(is(
 // Infix ops
 // =========
 assert(is(
-    '_apply(times, List(Int(1), Int(2)))',
+    '_apply(apply, List(times, List(Int(1), Int(2))))',
     compileExpr('1 * 2')
 ));
 
 assert(is(
-    '_apply(add, List(Int(1), _apply(times, List(Int(2), Int(3)))))',
+    '_apply(apply, List(add, List(Int(1), _apply(apply, List(times, List(Int(2), Int(3)))))))',
     compileExpr('1 + 2 * 3')
 ));
 
 assert(is(
-    '_apply(isLessThanEq, List(Int(1), Int(2)))',
+    '_apply(apply, List(isLessThanEq, List(Int(1), Int(2))))',
     compileExpr('1 <= 2')
 ));
 
@@ -57,7 +57,7 @@ assert(is(
 // Complex expressions
 // ===================
 assert(is(
-    '_apply(times, List(Int(5), _apply(apply, List(minus, List(Int(5), Int(1))))))',
+    '_apply(apply, List(times, List(Int(5), _apply(apply, List(minus, List(Int(5), Int(1)))))))',
     compileExpr('5 * minus(5, 1)')
 ));
 
@@ -76,17 +76,17 @@ assert(is(
 // if / else
 // =========
 assert(is(
-    '(_is(TRUE, (_apply(isLessThan, List(Int(1), Int(2)))))? (Int(1)): (null))',
+    '(_is(TRUE, (_apply(apply, List(isLessThan, List(Int(1), Int(2))))))? (Int(1)): (null))',
     compileExpr('if (1 < 2) 1')
 ));
 
 assert(is(
-    '(_is(TRUE, (_apply(isLessThan, List(Int(1), Int(2)))))? (((() => { ; return Int(1); })())): (((() => { ; return Int(2); })())))',
+    '(_is(TRUE, (_apply(apply, List(isLessThan, List(Int(1), Int(2))))))? (((() => { ; return Int(1); })())): (((() => { ; return Int(2); })())))',
     compileExpr('if (1 < 2) { 1 } else { 2 }')
 ));
 
 assert(is(
-    '(_is(TRUE, (_apply(isLessThan, List(Int(1), Int(2)))))? (Int(1)): ((_is(TRUE, (_apply(isLessThan, List(Int(2), Int(3)))))? (Int(2)): (Int(3)))))',
+    '(_is(TRUE, (_apply(apply, List(isLessThan, List(Int(1), Int(2))))))? (Int(1)): ((_is(TRUE, (_apply(apply, List(isLessThan, List(Int(2), Int(3))))))? (Int(2)): (Int(3)))))',
     compileExpr(`
         if (1 < 2) 1 
         else if (2 < 3) 2 
@@ -102,7 +102,7 @@ assert(is(`
     inc,
     List(isInt),
     isInt,
-    ((x) => ((() => { ; return _apply(add, List(x, Int(1))); })()))
+    ((x) => ((() => { ; return _apply(apply, List(add, List(x, Int(1)))); })()))
 );; })())
     `.trim(),
     compileExpr(`
