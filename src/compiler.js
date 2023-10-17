@@ -25,53 +25,6 @@ function compileLiteral(node) {
     }
 }
 
-function compileUnaryExpression(node) {
-    let opToFn = {
-        '!':  'neg',
-        '-':  'neg',
-    };
-
-    let { op, value } = node;
-    let fn = opToFn[op];
-
-    if (!isNull(fn)) {
-        let compiledValue  = compileAST(value);
-        return `_apply(${fn}, List(${compiledValue}))`;   
-    } else {
-        console.error(`Unhandled unary expression: ${prettify(node)} at ${prettify(node.loc)}`);
-        return '????';
-    }
-}
-
-
-function compileBinaryExpression(node) {
-    let opToFn = {
-        '*':  'times',
-        '/':  'divide',
-        '%':  'mod',
-        '+':  'add',
-        '-':  'minus',
-//      '**': 'pow',
-        '<' : 'isLessThan',
-        '<=': 'isLessThanEq',
-        '==': 'is',
-        '>' : 'isGreaterThan',
-        '>=': 'isGreaterThanEq'
-    };
-
-    let { op, left, right } = node;
-    let fn = opToFn[op];
-
-    if (!isNull(fn)) {
-        let compiledLeft  = compileAST(left);
-        let compiledRight = compileAST(right);    
-        return `_apply(${fn}, List(${compiledLeft}, ${compiledRight}))`;
-    } else {
-        console.error(`Unhandled binary expression: ${prettify(node)} at ${prettify(node.loc)}`);
-        return '????';
-    }
-}
-
 function compileLambdaExpression({ args, body }) {
     let argsStr = args.map(compileAST).join(', ');
     let compiledBody = compileAST(body);
@@ -189,10 +142,6 @@ function compileAST(ast) {
             return compileLiteral(ast);
         case 'symbol':
             return ast.value;
-        case 'unary-exp':
-            return compileUnaryExpression(ast);
-        case 'binary-exp':
-            return compileBinaryExpression(ast);
         case 'lambda-exp':
             return compileLambdaExpression(ast);
         case 'if-exp':

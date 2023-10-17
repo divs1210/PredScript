@@ -129,26 +129,55 @@
     }
 
     function unaryNode(op, x) {
+        let opToFn = {
+            '!':  'neg',
+            '-':  'neg'
+        };
+
+        let f = opToFn[op];
+
         return {
-            type:  'unary-exp', 
-            op:    op,
-            value: x,
-            loc:   location()
+            type: 'call-exp', 
+            f: {
+                type: 'symbol', 
+                value: f,
+                loc: location()
+            },
+            args: [x],
+            loc:  location()
         };
     }
 
     function binaryNode(x, pairs) {
         if (pairs.length === 0)
             return x;
-        
+
+        let opToFn = {
+            '*':  'times',
+            '/':  'divide',
+            '%':  'mod',
+            '+':  'add',
+            '-':  'minus',
+    //      '**': 'pow',
+            '<' : 'isLessThan',
+            '<=': 'isLessThanEq',
+            '==': 'is',
+            '>' : 'isGreaterThan',
+            '>=': 'isGreaterThanEq'
+        };
+
         let [op, _, p0] = pairs[0];
+        let f = opToFn[op];
         return binaryNode(
             {
-                type:  'binary-exp',
-                op:    op,
-                left:  x,
-                right: p0,
-                loc:   location()
+                type:  'call-exp',
+                f: {
+                    type: 'symbol', 
+                    value: f,
+                    loc: location()
+                },
+                args: [x, p0],
+                loc: location()
             },
             pairs.slice(1)
         );
