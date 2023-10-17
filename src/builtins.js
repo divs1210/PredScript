@@ -860,14 +860,14 @@ function _Lambda(f) {
 
 
 // assertions
-let assert = _Lambda((check, msg) => {
+const assert = _Lambda((check, msg) => {
     if (!_is(check, TRUE))
         throw new Error(`Assertion failed! Message: ${msg?.get('val') || 'null'}`);
 
     return NULL;
 });
 
-let assertError = _Lambda((checkFn, msg) => {
+const assertError = _Lambda((checkFn, msg) => {
     let threw = false;
 
     try {
