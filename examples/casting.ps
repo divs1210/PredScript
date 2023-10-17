@@ -9,30 +9,33 @@ __AS__(isPred, isLessThan5);
 derive(isInt, isLessThan5);
 
 let two: isInt = 2;
-println("two: " + type(two));
+assert(type(two) == isInt);
 
 // `as` soft-casts 
-// the expression on the right
-// to the type on the left
+// the value on the right
+// to the predicate on the left
+// if the value satisfies the predicate
 let softCastedTwo: isLessThan5 = as(isLessThan5, two);
-println("softCastedTwo: " + type(softCastedTwo));
+assert(type(softCastedTwo) == isLessThan5);
 
 // soft-casts complain at runtime
 // if the casting is unsuccessful
 
 // `two`'s type is still `isInt`
-println("two: " + type(two));
+assert(type(two) == isInt);
 
 let ten: isInt = 10;
-// `AS` hard-casts a value
+// `AS` hard-casts
+// a value to a predicate
+// without checking
 let hardCastedTen: isLessThan5 = AS(isLessThan5, ten);
-println("hardCastedTen: " + type(hardCastedTen));
+assert(type(hardCastedTen) == isLessThan5);
 
 // hard-casts done using `AS`
-// don't type check before casting
+// don't check before casting
 
 // you are telling the runtime
 // to trust your judgement
 
 // `ten`'s type is still `isInt`
-println("ten: " + type(ten));
+assert(type(ten) == isInt);

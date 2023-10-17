@@ -1,16 +1,12 @@
 interface haba;
 
-function haba(x: isInt, y: isReal): isNull {
-    println("int, real")
+function haba(x: isInt, y: isReal): isReal {
+    x + y
 }
 
-function haba(x: isReal, y: isInt): isNull {
-    println("real, int")
+function haba(x: isReal, y: isInt): isReal {
+    x + y
 }
 
-// this should work
-haba(2, 3.1);
-
-// this should fail
-// with ambiguity error
-haba(1, 1);
+assert(haba(2, 3.1) == 5.1);
+assertError(() => haba(1, 1), "ambiguity error");
