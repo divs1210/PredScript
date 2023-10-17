@@ -129,11 +129,22 @@
     }
 
     function unaryNode(op, x) {
+        let opToFn = {
+            '!':  'neg',
+            '-':  'neg'
+        };
+
+        let f = opToFn[op];
+
         return {
-            type:  'unary-exp', 
-            op:    op,
-            value: x,
-            loc:   location()
+            type: 'call-exp', 
+            f: {
+                type: 'symbol', 
+                value: f,
+                loc: location()
+            },
+            args: [x],
+            loc:  location()
         };
     }
 
