@@ -859,6 +859,30 @@ function _Lambda(f) {
 }
 
 
+// assertions
+const assert = _Lambda((check, msg) => {
+    if (!_is(check, TRUE))
+        throw new Error(`Assertion failed! Message: ${msg?.get('val') || 'null'}`);
+
+    return NULL;
+});
+
+const assertError = _Lambda((checkFn, msg) => {
+    let threw = false;
+
+    try {
+        val(checkFn)();
+    } catch(e) {
+        threw = true;
+    }
+
+    if (!threw)
+        throw new Error(`Assertion failed! Message: ${msg?.get('val') || 'null'}`);
+
+    return NULL;
+});
+
+
 module.exports = {
     MultiFn,
     isFn,
@@ -922,5 +946,7 @@ module.exports = {
     AS,
     as,
     isA,
-    _Lambda
+    _Lambda,
+    assert,
+    assertError
 };
