@@ -121,7 +121,7 @@ function compileInterface(node) {
         params = 
             '<' 
             + node.args
-              .map(arg => "${(_apply(str, List(" + arg + "))).get('val')}")
+              .map(arg => "${(_apply(toString, List(" + arg + "))).get('val')}")
               .join(', ') 
             + '>';
 
