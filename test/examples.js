@@ -11,12 +11,12 @@ async function runFile(fileName) {
     console.log(`Running: ${fileName}`);
 
     // compile file
-    var [err, stdout, stderr] = await exec(`node compile examples/${fileName}`);
+    var [err, stdout, stderr] = await exec(`node compile examples/${fileName} f`);
     if (err || stderr)
         throw new Error(err?.message || stderr);
 
     // run file
-    var [err, stdout, stderr] = await exec(`node dist/index.js`);
+    var [err, stdout, stderr] = await exec(`node dist/index.temp.js`);
     if(err || stderr)
         throw new Error(err?.message || stderr);
     else if(stdout)
