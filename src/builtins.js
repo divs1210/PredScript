@@ -1,6 +1,6 @@
 const immutable = require('immutable');
 const { Map: _Map, is: _is, List: _List } = immutable;
-const BigNumber = require('bignumber.js');
+const BigNumber = require('decimal.js');
 const { MultiMethod, derive: _derive, isA: _isA, ancestorsOf } = require('./multi');
 const { val } = require('./util');
 
@@ -320,12 +320,12 @@ Implement(
     isInt,
     List(isReal),
     isBool, 
-    r => val(r).integerValue().eq(val(r)) ? TRUE : FALSE
+    r => val(r).floor().eq(val(r)) ? TRUE : FALSE
 );
 
 function Int(n) {
     return Obj(
-        (new BigNumber(n)).integerValue(),
+        (new BigNumber(n)).floor(),
         isInt
     );
 }
@@ -396,12 +396,6 @@ Implement(
     isInt,
     (x, y) => Int(x.get('val').mod(y.get('val')))
 );
-Implement(
-    mod,
-    List(isReal, isReal),
-    isReal,
-    (x, y) => Real(x.get('val').mod(y.get('val')))
-);
 
 const pow = MultiFn('pow');
 Implement(
@@ -422,7 +416,7 @@ Implement(
     abs,
     List(isInt),
     isInt,
-    (x) => Int(val(x).abs().integerValue())
+    (x) => Int(val(x).abs().floor())
 );
 Implement(
     abs,
@@ -493,7 +487,7 @@ Derive(isInt, isChar);
 
 function CharFromCodePoint(jsCodePoint) {
     return Obj(
-        (new BigNumber(jsCodePoint)).integerValue(),
+        (new BigNumber(jsCodePoint)).floor(),
         isChar
     );
 }
@@ -523,7 +517,7 @@ Implement(
     List(isReal),
     isInt,
     r => {
-        let n = val(r).integerValue(BigNumber.ROUND_HALF_CEIL);
+        let n = val(r).round(BigNumber.ROUND_HALF_CEIL);
         return Obj(n, isInt);
     }
 );

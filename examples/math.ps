@@ -1,3 +1,5 @@
+// Add
+// ===
 // int + int -> int
 assert(1 + 2 == 3);
 assert(type(1 + 2) == isInt);
@@ -9,3 +11,98 @@ assert(type(1 + 3.2) == isReal);
 // real + int -> real
 assert(1.3 + 3 == 4.3);
 assert(type(1.3 + 3) == isReal);
+
+// real + real -> real
+assert(1.3 + 3.2 == 4.5);
+assert(type(1.3 + 3.2) == isReal);
+
+
+// Subtract
+// ========
+// int - int -> int
+assert(1 - 2 == -1);
+assert(type(1 - 2) == isInt);
+
+// int - real -> real
+assert(3 - 1.2 == 1.8);
+assert(type(3 - 1.2) == isReal);
+
+// real - int -> real
+assert(3.5 - 2 == 1.5);
+assert(type(3.5 - 2) == isReal);
+
+// real - real -> real
+assert(3.5 - 2.0 == 1.5);
+assert(type(3.5 - 2.0) == isReal);
+
+
+// Mulitply
+// ========
+// int * int -> int
+assert(2 * 2 == 4);
+assert(type(2 * 2) == isInt);
+
+// int * real -> real
+assert(3 * 1.2 == 3.6);
+assert(type(3 * 1.2) == isReal);
+
+// real * int -> real
+assert(3.3 * 2 == 6.6);
+assert(type(3.3 * 2) == isReal);
+
+// real * real -> real
+assert(3.3 * 2.0 == 6.6);
+assert(type(3.3 * 2.0) == isReal);
+
+
+// Divide
+// ======
+// int / int -> int
+assert(3 / 2 == 1, "int / int -> int");
+assert(type(3 / 2) == isInt);
+
+// int / real -> real
+assert(3 / 2.0 == 1.5);
+assert(type(3 / 2.0) == isReal);
+
+// real / int -> real
+assert(6.6 / 2 == 3.3);
+assert(type(6.6 / 2) == isReal);
+
+// real / real -> real
+assert(6.6 / 2.0 == 3.3);
+assert(type(6.6 / 2.0) == isReal);
+
+
+// Mod
+// ===
+// int / int -> int
+assert(4 % 2 == 0);
+assert(5 % 2 == 1);
+assert(type(4 % 2) == isInt);
+
+
+// Pow
+// ===
+// int ** int -> int
+assert(2 ** 2 == 4);
+assert(type(2 ** 2) == isInt);
+
+// int ** real -> real
+assert(4 ** 0.5 == 2.0);
+assert(type(4 ** 0.5) == isReal);
+
+// real ** int -> real
+assert(2.0 ** 2 == 4.0);
+assert(type(2.0 ** 2) == isReal);
+
+// real ** real -> real
+assert(2.0 ** 2.0 == 4.0);
+assert(type(2.0 ** 2.0) == isReal);
+
+
+// toInt
+// =====
+assert(toInt(3.2) == 3);
+assert(toInt(2.5) == 3);
+assert(toInt(2.9) == 3);
