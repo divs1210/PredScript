@@ -431,4 +431,6 @@ SYMBOL      = s:(SYMBOLSTART (SYMBOLSTART / [0-9])*)           { return symbolNo
 SYMBOLSTART = [a-zA-Z] / '$' / '_'
 
 _  = __*
-__ = [ \r\t\n]+
+__ = (SPACE / COMMENT)+
+SPACE = [ \t\r\n]
+COMMENT = '//' (![\n\r] .)*
