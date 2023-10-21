@@ -8,3 +8,15 @@ assert("hello, " + 123 + "!" == "hello, 123!");
 // it converts values to string
 // before concat-ing
 assert("hello, " + type("") + "!" == "hello, isString!")
+
+// strings can be multiline
+let s: isString = "
+
+hello
+
+";
+assert(s == "
+
+hello
+
+");
