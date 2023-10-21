@@ -1,11 +1,15 @@
 interface f;
 
-memoized function f(x: isInt): isNull {
-    // TODO: mutate a var instead of printing,
-    // and assert the value
-    println("f called with: " + x);
+let xs: isRef = Ref(List());
+
+memoized function f(x: isInt): isRef {
+    xs()
+    .push($this, x)
+    .set(xs, $this)
 }
 
 f(5);
 f(5); // this call will be skipped
 f(6);
+
+assert(xs() == List(5, 6));
