@@ -443,6 +443,14 @@ Implement(
 );
 
 
+const isNot = MultiFn('isNot');
+Implement(
+    isNot,
+    List(isAny, isAny),
+    isBool,
+    (x, y) => _apply(neg, List(_apply(is, List(x, y))))
+);
+
 const isLessThan = MultiFn('isLessThan');
 Implement(
     isLessThan,
@@ -954,6 +962,7 @@ module.exports = {
     pow,
     abs,
     is,
+    isNot,
     _is,
     isLessThan,
     isLessThanEq,

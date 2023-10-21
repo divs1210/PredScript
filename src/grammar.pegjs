@@ -162,7 +162,7 @@
             '<' : 'isLessThan',
             '<=': 'isLessThanEq',
             '==': 'is',
-    //      '!=': 'isNot',
+            '!=': 'isNot',
             '>' : 'isGreaterThan',
             '>=': 'isGreaterThanEq'
         };
@@ -391,7 +391,7 @@ multiFnArg       = argName:SYMBOL _ ':' _ argType:SYMBOL                        
 
 expression = logic
 logic      = x:equality _ pairs:(( ( '&&' / '||' ) _ equality)*)        { return logicNode(x, pairs);   }
-equality   = x:comparison _ pairs:(( ( '==' ) _ comparison)*)           { return binaryNode(x, pairs);  }
+equality   = x:comparison _ pairs:(( ( '==' / '!=' ) _ comparison)*)    { return binaryNode(x, pairs);  }
 comparison = x:term   _ pairs:(( ( '>=' / '>' / '<=' / '<' ) _ term)*)  { return binaryNode(x, pairs);  }
 term       = x:factor _ pairs:(( ( '-' / '+' ) _ factor)*)              { return binaryNode(x, pairs);  }
 factor     = x:unary  _ pairs:(( ( '**' / '/' / '*' / '%' ) _ unary)*)  { return binaryNode(x, pairs);  }
