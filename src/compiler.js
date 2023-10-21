@@ -15,7 +15,7 @@ function compileLiteral(node) {
         case 'char':
             return `Char('${val}')`;
         case 'string':
-            return `String("${val}")`;
+            return `String(\`${val}\`)`;
         case 'null':
             return `NULL`;
         default: {
