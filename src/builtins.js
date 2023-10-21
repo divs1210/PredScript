@@ -442,7 +442,6 @@ Implement(
     (x, y) => Bool(x.get('val').eq(y.get('val')))
 );
 
-
 const isNot = MultiFn('isNot');
 Implement(
     isNot,
@@ -459,7 +458,6 @@ Implement(
     (x, y) => Bool(x.get('val').lt(y.get('val')))
 );
 
-
 const isLessThanEq = MultiFn('isLessThanEq');
 Implement(
     isLessThanEq,
@@ -468,7 +466,6 @@ Implement(
     (x, y) => Bool(x.get('val').lte(y.get('val')))
 );
 
-
 const isGreaterThan = MultiFn('isGreaterThan');
 Implement(
     isGreaterThan,
@@ -476,7 +473,6 @@ Implement(
     isBool,
     (x, y) => Bool(x.get('val').gt(y.get('val')))
 );
-
 
 const isGreaterThanEq = MultiFn('isGreaterThanEq');
 Implement(
