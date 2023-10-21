@@ -1,0 +1,16 @@
+let r: isRef = Ref(0);
+
+assert(
+    r() == 0, 
+    "refs are callable"
+);
+
+assert(
+    set(r, 1) == r,
+    "set(ref, x) returns ref"
+);
+
+assert(
+    r() == 1,
+    "set mutates the value"
+);

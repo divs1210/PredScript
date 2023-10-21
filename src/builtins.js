@@ -747,6 +747,31 @@ Implement(
 );
 
 
+// Refs
+// ====
+const isRef = MultiFn("isRef");
+setType(isRef, isPred);
+Derive(isAny, isRef);
+
+function _Ref(x) {
+    let obj = { val: x };
+    return Obj(obj, isRef);
+}
+_Ref.mName = 'Ref';
+
+const Ref = Obj(_Ref, isFn);
+
+Implement(
+    set,
+    List(isRef, isAny),
+    isAny,
+    (ref, newVal) => {
+        val(ref).val = newVal;
+        return ref;
+    }
+);
+
+
 // Apply
 // =====
 function _apply(f, args) {
@@ -761,6 +786,12 @@ Implement(
     List(isFn, isList),
     isAny,
     _apply
+);
+Implement(
+    apply,
+    List(isRef, isList),
+    isAny,
+    (r, _) => val(r).val
 );
 
 
@@ -931,6 +962,8 @@ module.exports = {
     String,
     isString,
     toString,
+    isRef,
+    Ref,
     println,
     type,
     _type,
