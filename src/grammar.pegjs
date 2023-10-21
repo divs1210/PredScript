@@ -210,11 +210,19 @@
     function getExprNode(from, keys) {
         if(keys.length === 1)
             return {
-                type: 'get-exp',
-                fromExp: from,
-                keyExp: keys[0][2],
+                type: 'call-exp',
+                f: {
+                    "type": "symbol",
+                    "value": "get",
+                    "loc": location()
+                },
+                args: [
+                    from,
+                    keys[0][2]
+                ],
                 loc: location()
             };
+
         return getExprNode(
             getExprNode(
                 from,
