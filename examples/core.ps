@@ -173,6 +173,51 @@ assert(c3 == AS(isComplexNumber, List(2, -3)));
 assert(toString(c3) == "(2 - 3i)");
 
 
+// refs (test)
+// ===========
+interface gen_isRefOf;
+
+memoized function gen_isRefOf(t: isPred): isPred {
+    interface isRefOf<t>;
+
+    function isRefOf(r: isRef): isBool {
+        r().type == t
+    }
+
+    function apply(r: isRefOf, _: isList): t {
+        r
+        .AS(isRef, $this)
+        .$this()
+    }
+
+    function set(r: isRefOf, newVal: isAny): isRefOf {
+        set(r, as(t, newVal))
+    }
+
+    function set(r: isRefOf, newVal: t): isRefOf {
+        r
+        .AS(isRef, $this)
+        .set($this, newVal)
+        .AS(isRefOf, $this)
+    }
+
+    __AS__(isPred, isRefOf);
+    derive(isRef, isRefOf);
+
+    isRefOf
+}
+
+let isRefOfInt: isPred = gen_isRefOf(isInt);
+let ref: isRefOfInt = as(isRefOfInt, Ref(0));
+
+assert(ref() == 0);
+assertError(() => set(ref, "hello"));
+assert(ref() == 0);
+
+assert(set(ref, 1).type == isRefOfInt);
+assert(ref() == 1);
+
+
 // // well-typed map (test)
 // // =====================
 // interface gen_map;
