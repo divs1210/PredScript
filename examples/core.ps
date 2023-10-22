@@ -1,63 +1,54 @@
-interface spy;
-
-interface map;
-interface zip;
-interface every;
-
-interface gen_isFnOf;
-interface gen_isListOf;
-interface gen_isVector;
-interface gen_isTuple;
-
-
 // useful for debugging
+interface spy;
 function spy(x: isAny, tag: isString): isAny {
     println(tag + ": " + x)
     x
 }
 
 
-// not well-typed map
-// will stack overflow for large lists
-// we need loops / lazy seqs / stackless impl
+interface map;
 function map(xs: isList, f: isFn): isList {
-    if (isEmpty(xs))
-        List()
-    else
-        xs
-        .slice($this, 1)
-        .map($this, f)
-        .unshift($this, f(xs[0]))
+    loop(xs = xs, acc = List()) {
+        if (isEmpty(xs))
+            acc
+        else
+            recur(
+                slice(xs, 1), 
+                push(acc, f(xs[0]))
+            )
+    }
 }
 
 
-// not well-typed zip
-// assuming both are of equal length
+interface zip;
 function zip(xs: isList, ys: isList): isList {
-    if (isEmpty(xs))
-        List()
-    else
-        xs
-        .slice($this, 1)
-        .zip($this, slice(ys, 1))
-        .unshift($this, List(xs[0], ys[0]))
+    loop(xs = xs, ys = ys, acc = List()) {
+        if (isEmpty(xs) && isEmpty(ys))
+            acc
+        else
+            recur(
+                slice(xs, 1),
+                slice(ys, 1), 
+                push(acc, List(xs[0], ys[0]))
+            )
+    }
 }
 
 
-// well typed every
+interface every;
 function every(xs: isList, f: isPred): isBool {
-    if (isEmpty(xs))
-        true
-    else if (f(xs[0]))
-        xs
-        .slice($this, 1)
-        .every($this, f)
-    else
-        false
+    loop(xs = xs) {
+        if (isEmpty(xs))
+            true
+        else if (f(xs[0]))
+            recur(slice(xs, 1))
+        else
+            false
+    }
 }
 
 
-// generic lists
+interface gen_isListOf;
 memoized function gen_isListOf(t: isPred): isPred {
     interface isListOf<t>;
 
@@ -73,6 +64,7 @@ memoized function gen_isListOf(t: isPred): isPred {
 
 
 // vectors are lists of fixed size
+interface gen_isVector;
 memoized function gen_isVector(elementType: isPred, vSize: isInt): isPred {
     let isParentType: isPred = gen_isListOf(elementType);
 
@@ -97,6 +89,7 @@ let isListOfPreds: isPred = gen_isListOf(isPred);
 
 
 // tuples are vectors of mixed types
+interface gen_isTuple;
 memoized function gen_isTuple(preds: isList): isPred {
     gen_isTuple(as(isListOfPreds, preds))
 }
@@ -126,25 +119,6 @@ memoized function gen_isTuple(preds: isListOfPreds): isPred {
 
     isTuple
 }
-
-
-// well-typed fns
-// memoized function gen_isFnOf(argTypes: isList, retType: isPred): isPred {
-//     gen_isFnOf(as(isListOfPreds, argTypes), retType);
-// }
-
-// memoized function gen_isFnOf(argTypes: isListOfPreds, retType: isPred): isPred {
-//     interface isFnOf<argTypes, retType>;
-
-//     function isFnOf(f: isFn): isBool {
-//         isImplementedFor(f, argTypes, retType)
-//     }
-
-//     __AS__(isPred, isFnOf);
-//     derive(isFn, isFnOf);
-
-//     isFnOf
-// }
 
 
 // complex numbers (test)
@@ -216,52 +190,3 @@ assert(ref() == 0);
 
 assert(set(ref, 1).type == isRefOfInt);
 assert(ref() == 1);
-
-
-// // well-typed map (test)
-// // =====================
-// interface gen_map;
-
-// // how do we make the return type better?
-// // ideally it should be: 
-// //   gen_isFnOf(List(gen_isListOf(X), gen_isFnOf(List(X), Y)), gen_isListOf(Y))
-// //   Fn<[List<X>, Fn<[X], Y>], List<Y>>
-// // also how do we define map for vectors?
-// memoized function gen_map(x: isPred, y: isPred): isFn {
-//     let isListOfX:  isPred = gen_isListOf(x);
-//     let isListOfY:  isPred = gen_isListOf(y);
-//     let isFnOfXToY: isPred = gen_isFnOf(List(x), y);
-//     let dyn_map:    isFn   = map;
-
-//     interface map<x, y>;
-
-//     function map(xs: isListOfX, f: isFnOfXToY): isListOfY {
-//         dyn_map(xs, f)
-//         .AS(isListOfY, $this)
-//     }
-
-//     map
-// }
-
-
-// let isListOfInts:      isPred = gen_isListOf(isInt);
-// let isFnOfIntToString: isPred = gen_isFnOf(List(isInt), isString);
-// let mapIntToString:    isFn   = gen_map(isInt, isString);
-
-// let ints: isListOfInts = List(0, 1, 2, 3, 4).as(isListOfInts, $this);
-// let intToString: isFnOfIntToString = as(isFnOfIntToString, str);
-
-// println(mapIntToString(ints, intToString));
-
-
-
-// ideal
-// function<X: isPred, Y: isPred> map(xs: isList<X>, f: isFn<[X], Y>): isList<Y> {
-//     if (isEmpty(xs))
-//         List()
-//     else
-//         xs
-//         .slice($this, 1)
-//         .map($this, f)
-//         .unshift($this, f(xs[0]))
-// }
