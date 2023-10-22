@@ -11,8 +11,9 @@ function recur(x) {
 function loop(init, f) {
     let res = f(init);
     
-    if (res instanceof Recur)
-        return loop(res.x, f);
+    while(res instanceof Recur) {
+        res = f(res.x);
+    }
 
     return res;
 }
