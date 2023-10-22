@@ -93,6 +93,15 @@
         );
     }
 
+    function loopExprNode(args, body) {
+        return {
+            type: 'loop-expr',
+            args: args,
+            body: body,
+            loc:  location()
+        };
+    }
+
     function ifNode(cond, then, _else) {
         return {
             type: 'if-exp',
@@ -382,20 +391,20 @@
     }
 }
 
-program   = p:((_ statement _)*)                                                               { return programNode(p);                                 }
+program   = p:((_ statement _)*)                                                               { return programNode(p);                                     }
 
-statement        = s:(interfaceStatement / letStatement / multiFnStatement / exprStatement) // { return statementNode(s);                               }
-exprStatement    = e:expression (_ ';')?                                                       { return exprStatementNode(e);                           }
-letStatement     = 'let' __ name:SYMBOL _ ':' _ type:SYMBOL _ '=' _ val:expression (_ ';')?    { return letNode({ name, type, val });                   }
+statement        = s:(interfaceStatement / letStatement / multiFnStatement / exprStatement) // { return statementNode(s);                                   }
+exprStatement    = e:expression (_ ';')?                                                       { return exprStatementNode(e);                               }
+letStatement     = 'let' __ name:SYMBOL _ ':' _ type:SYMBOL _ '=' _ val:expression (_ ';')?    { return letNode({ name, type, val });                       }
 
 interfaceStatement = 'interface' __ name:SYMBOL args:(_ '<' ((SYMBOL (_ ',' _ SYMBOL)*)?) _ '>')? (_ ';')?                                       
-                                                                                               { return interfaceNode(name, args);                      }
+                                                                                               { return interfaceNode(name, args);                          }
 
 multiFnStatement = memo:('memoized'?) _ 'function' __ fname:SYMBOL _ args:('(' _ multiFnArgs? _ ')') _ ':' _ retType:SYMBOL _ body:block
                                                                                                { return multiFnNode({ memo, fname, args, retType, body });  }
 
-multiFnArgs      = x:multiFnArg xs:((_ ',' _ multiFnArg)*)                                     { return multiFnArgsNode({ x, xs });                     }
-multiFnArg       = argName:SYMBOL _ ':' _ argType:SYMBOL                                       { return multiFnArgNode({ argName, argType });           }
+multiFnArgs      = x:multiFnArg xs:((_ ',' _ multiFnArg)*)                                     { return multiFnArgsNode({ x, xs });                         }
+multiFnArg       = argName:SYMBOL _ ':' _ argType:SYMBOL                                       { return multiFnArgNode({ argName, argType });               }
 
 expression = logic
 logic      = x:equality _ pairs:(( ( '&&' / '||' ) _ equality)*)        { return logicNode(x, pairs);   }
@@ -408,6 +417,7 @@ unary      = op:( '!' / '-' ) _ x:unary                                 { return
              / lambdaExpr
              / ifExpr
              / getExpr
+             / loopExpr
              / fnCall
              / primary
 
@@ -420,14 +430,21 @@ getExpr    = f:fromExpr _ ks:(keyExpr+)                                         
 fromExpr   = fnCall / SYMBOL / STRING
 keyExpr    = '[' _ expression _ ']'
 
-fnCall     = f:primary _ argLists:(fnCallArgs+)                                      { return fnCallNode(f, argLists);   }
-fnCallArgs = '(' _ args:((expression (_ ',' _ expression)*)?) _ ')'                  { return fnCallArgsNode(args);      }
+fnCall     = f:primary _ argLists:(fnCallArgs+)                                      { return fnCallNode(f, argLists);    }
+fnCallArgs = '(' _ args:((expression (_ ',' _ expression)*)?) _ ')'                  { return fnCallArgsNode(args);       }
 
-dotNotation = x:(fnCall / primary) y:(_ '.' _ (fnCall / grouping / SYMBOL))+         { return dotNotation(x, y);         }
+loopExpr     = 'loop' _  '(' _ args:loopExprArgs _ ')' _ body:block                  { return loopExprNode(args, body);   }
+loopExprArgs = first:loopExprArg rest:(_ ',' _ loopExprArg)* { 
+    rest = rest || []; 
+    return [first, ...rest.map(arg => arg[3])];
+}
+loopExprArg  = name:SYMBOL _ '=' _ value:expression                                  { return { name, value };            }
+
+dotNotation = x:(fnCall / primary) y:(_ '.' _ (fnCall / grouping / SYMBOL))+         { return dotNotation(x, y);          }
 
 primary    = REAL / INTEGER / CHAR / STRING / BOOL / NULL / SYMBOL / block / grouping
-grouping   = '(' _ e:expression _ ')'                                                { return groupingNode(e);           }
-block      = '{' _ b:((_ statement _)*) _ '}'                                        { return blockNode(b);              }
+grouping   = '(' _ e:expression _ ')'                                                { return groupingNode(e);            }
+block      = '{' _ b:((_ statement _)*) _ '}'                                        { return blockNode(b);               }
 
 NULL        = 'null'                                           { return nullNode;      }
 INTEGER     = i:([0-9]+)                                       { return intNode(i);    }
