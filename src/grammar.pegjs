@@ -95,9 +95,17 @@
 
     function loopExprNode(args, body) {
         return {
-            type: 'loop-expr',
+            type: 'loop-exp',
             args: args,
             body: body,
+            loc:  location()
+        };
+    }
+
+    function recurExprNode(args) {
+        return {
+            type: 'recur-exp',
+            args: args,
             loc:  location()
         };
     }
@@ -418,6 +426,7 @@ unary      = op:( '!' / '-' ) _ x:unary                                 { return
              / ifExpr
              / getExpr
              / loopExpr
+             / recurExpr
              / fnCall
              / primary
 
@@ -433,7 +442,8 @@ keyExpr    = '[' _ expression _ ']'
 fnCall     = f:primary _ argLists:(fnCallArgs+)                                      { return fnCallNode(f, argLists);    }
 fnCallArgs = '(' _ args:((expression (_ ',' _ expression)*)?) _ ')'                  { return fnCallArgsNode(args);       }
 
-loopExpr     = 'loop' _  '(' _ args:loopExprArgs _ ')' _ body:block                  { return loopExprNode(args, body);   }
+loopExpr     = 'loop'  _ '(' _ args:loopExprArgs _ ')' _ body:block                  { return loopExprNode(args, body);   }
+recurExpr    = 'recur' _ '(' _ args:loopExprArgs _ ')'                               { return recurExprNode(args);        }
 loopExprArgs = first:loopExprArg rest:(_ ',' _ loopExprArg)* { 
     rest = rest || []; 
     return [first, ...rest.map(arg => arg[3])];

@@ -13,8 +13,8 @@ function map(xs: isList, f: isFn): isList {
             acc
         else
             recur(
-                slice(xs, 1), 
-                push(acc, f(xs[0]))
+                xs  = slice(xs, 1),
+                acc = push(acc, f(xs[0]))
             )
     }
 }
@@ -27,9 +27,9 @@ function zip(xs: isList, ys: isList): isList {
             acc
         else
             recur(
-                slice(xs, 1),
-                slice(ys, 1), 
-                push(acc, List(xs[0], ys[0]))
+                xs  = slice(xs, 1),
+                ys  = slice(ys, 1), 
+                acc = push(acc, List(xs[0], ys[0]))
             )
     }
 }
@@ -41,7 +41,7 @@ function every(xs: isList, f: isPred): isBool {
         if (isEmpty(xs))
             true
         else if (f(xs[0]))
-            recur(slice(xs, 1))
+            recur(xs = slice(xs, 1))
         else
             false
     }

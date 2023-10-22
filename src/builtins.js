@@ -1,7 +1,8 @@
 const immutable = require('immutable');
 const { Map: _Map, is: _is, List: _List } = immutable;
 const BigNumber = require('decimal.js');
-const { MultiMethod, derive: _derive, isA: _isA, ancestorsOf } = require('./multi');
+const { MultiMethod, derive: _derive, isA: _isA, } = require('./multi');
+const { loop, recur } = require('./loop');
 const { val, isNull: isJSNull } = require('./util');
 
 // TODO: ffi: fromJS and toJS
@@ -992,5 +993,7 @@ module.exports = {
     isA,
     _Lambda,
     assert,
-    assertError
+    assertError,
+    loop,
+    recur
 };

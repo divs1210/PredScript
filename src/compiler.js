@@ -38,13 +38,30 @@ function compileIfExpression(expr) {
 }
 
 function compileLoopExpression({ args, body }) {
-// loop(xs = xs, acc = List()) {
-//    if(isEmpty(xs))
-//        acc
-//    else
-//        recur(slice(xs, 1), push(acc, xs[0]))
-// }
-    return 'NULL';
+    let compiledInit =
+        args
+        .map(arg => arg.name.value + ': ' + compileAST(arg.value))
+        .join(', ');
+    
+    let compiledArgs =
+        args
+        .map(arg => arg.name.value)
+        .join(', ');
+    
+    let compiledBody = compileAST(body);
+
+    return `
+loop({ ${compiledInit} }, ({ ${compiledArgs} }) => ${compiledBody})
+    `.trim();
+}
+
+function compileRecurExpression({ args }) {
+    let compiledArgs =
+        args
+        .map(arg => arg.name.value + ': ' + compileAST(arg.value))
+        .join(', ');
+
+    return `recur({ ${compiledArgs} })`;
 }
 
 function compileCallExpression(node) {
@@ -152,6 +169,8 @@ function compileAST(ast) {
             return compileIfExpression(ast);
         case 'loop-exp':
             return compileLoopExpression(ast);
+        case 'recur-exp':
+            return compileRecurExpression(ast);
         case 'call-exp':
             return compileCallExpression(ast);
         case 'let-stmt':
