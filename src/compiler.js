@@ -37,6 +37,16 @@ function compileIfExpression(expr) {
     return `(_is(TRUE, (${cond}))? (${then}): (${alt}))`;
 }
 
+function compileLoopExpression({ args, body }) {
+// loop(xs = xs, acc = List()) {
+//    if(isEmpty(xs))
+//        acc
+//    else
+//        recur(slice(xs, 1), push(acc, xs[0]))
+// }
+    return 'NULL';
+}
+
 function compileCallExpression(node) {
     let f = compileAST(node.f);
     let args = node.args.map(compileAST).join(', ');
@@ -140,6 +150,8 @@ function compileAST(ast) {
             return compileLambdaExpression(ast);
         case 'if-exp':
             return compileIfExpression(ast);
+        case 'loop-exp':
+            return compileLoopExpression(ast);
         case 'call-exp':
             return compileCallExpression(ast);
         case 'let-stmt':

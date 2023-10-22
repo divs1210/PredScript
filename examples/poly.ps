@@ -2,8 +2,6 @@
 // new predicates
 // ==================================
 interface isEven;
-interface isOdd;
-
 function isEven(x: isInt): isBool {
     x % 2 == 0
 }
@@ -11,6 +9,7 @@ __AS__(isPred, isEven);
 derive(isInt, isEven);
 
 
+interface isOdd;
 function isOdd(x: isInt): isBool {
     !isEven(x)
 }
@@ -22,7 +21,6 @@ derive(isInt, isOdd);
 // an increment function
 // ==================================
 interface inc;
-
 function inc(x: isInt): isInt {
     x + 1
 }
