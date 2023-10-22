@@ -108,7 +108,7 @@ memoized function gen_isTuple(preds: isListOfPreds): isPred {
         .map($this, type)
         .zip($this, preds)
         .every($this, AS(isPred, (pair) => {
-            let isActual: isPred   = pair[0];
+            let isActual:   isPred = pair[0];
             let isExpected: isPred = pair[1];
             isA(isExpected, isActual);
         }))
