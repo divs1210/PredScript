@@ -1,8 +1,8 @@
-let res: isInt = loop(x = 5, acc = 0) {
+let sum: isInt = loop(x = 5, acc = 0) {
     if (x == 0)
         acc
     else
         recur(x = x - 1, acc = acc + x)
 };
 
-assert(res == 5 + 4 + 3 + 2 + 1);
+assert(sum == 5 + 4 + 3 + 2 + 1);
