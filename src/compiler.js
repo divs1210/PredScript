@@ -37,6 +37,33 @@ function compileIfExpression(expr) {
     return `(_is(TRUE, (${cond}))? (${then}): (${alt}))`;
 }
 
+function compileLoopExpression({ args, body }) {
+    let compiledInit =
+        args
+        .map(arg => arg.name.value + ': ' + compileAST(arg.value))
+        .join(', ');
+    
+    let compiledArgs =
+        args
+        .map(arg => arg.name.value)
+        .join(', ');
+    
+    let compiledBody = compileAST(body);
+
+    return `
+loop({ ${compiledInit} }, ({ ${compiledArgs} }) => ${compiledBody})
+    `.trim();
+}
+
+function compileRecurExpression({ args }) {
+    let compiledArgs =
+        args
+        .map(arg => arg.name.value + ': ' + compileAST(arg.value))
+        .join(', ');
+
+    return `recur({ ${compiledArgs} })`;
+}
+
 function compileCallExpression(node) {
     let f = compileAST(node.f);
     let args = node.args.map(compileAST).join(', ');
@@ -140,6 +167,10 @@ function compileAST(ast) {
             return compileLambdaExpression(ast);
         case 'if-exp':
             return compileIfExpression(ast);
+        case 'loop-exp':
+            return compileLoopExpression(ast);
+        case 'recur-exp':
+            return compileRecurExpression(ast);
         case 'call-exp':
             return compileCallExpression(ast);
         case 'let-stmt':

@@ -1,11 +1,10 @@
 const immutable = require('immutable');
 const { Map: _Map, is: _is, List: _List } = immutable;
 const BigNumber = require('decimal.js');
-const { MultiMethod, derive: _derive, isA: _isA, ancestorsOf } = require('./multi');
-const { val } = require('./util');
+const { MultiMethod, derive: _derive, isA: _isA, } = require('./multi');
+const { loop, recur } = require('./loop');
+const { val, isNull: isJSNull } = require('./util');
 
-// TODO: expose: [every, map, zip]?
-// TODO: rename str to toString, int to toInt, etc. and make toList so that mapping over Maps becomes possible
 // TODO: ffi: fromJS and toJS
 
 // reify JS
@@ -671,12 +670,16 @@ Implement(
     (m) => Int(val(m).size)
 );
 
+
 const get = MultiFn('get');
 Implement(
     get,
     List(isList, isInt),
     isAny,
-    (l, idx) => val(l).get(val(idx).toNumber())
+    (l, idx) => {
+        let res = val(l).get(val(idx).toNumber());
+        return isJSNull(res) ? NULL : res;
+    }
 );
 Implement(
     get,
@@ -685,14 +688,17 @@ Implement(
     // correctly handles unicode
     (s, idx) => {
         let jsCodePoint = val(s).codePointAt(val(idx).toNumber());
-        return CharFromCodePoint(jsCodePoint);
+        return isJSNull(jsCodePoint) ? NULL : CharFromCodePoint(jsCodePoint);
     }
 );
 Implement(
     get,
     List(isMap, isAny),
     isAny,
-    (m, k) => val(m).get(k)
+    (m, k) => {
+        let res = val(m).get(k);
+        return isJSNull(res) ? NULL : res;
+    }
 );
 
 
@@ -732,6 +738,13 @@ Implement(
     isList,
     (l, start) => Obj(val(l).slice(val(start).toNumber()), isList)
 );
+Implement(
+    slice,
+    List(isList, isInt, isInt),
+    isList,
+    (l, start, end) => Obj(val(l).slice(val(start).toNumber(), val(end).toNumber()), isList)
+);
+
 
 const unshift = MultiFn('unshift');
 Implement(
@@ -980,5 +993,7 @@ module.exports = {
     isA,
     _Lambda,
     assert,
-    assertError
+    assertError,
+    loop,
+    recur
 };

@@ -1,0 +1,9 @@
+assert(
+    loop(x = 5, acc = 0) {
+        if (x == 0)
+            acc
+        else
+            recur(x = x - 1, acc = acc + x)
+    } 
+    == (5 + 4 + 3 + 2 + 1)
+);
