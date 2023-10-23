@@ -50,14 +50,21 @@ function every(xs: isList, f: isPred): isBool {
 
 interface gen_isListOf;
 memoized function gen_isListOf(t: isPred): isPred {
-    interface isListOf<t>;
+    interface isListOf<t> extends isList;
 
     function isListOf(obj: isList): isBool {
         obj.every($this, AS(isPred, (x) => isA(t, type(x))))
     }
 
-    __AS__(isPred, isListOf);    
-    derive(isList, isListOf);
+    function get(obj: isListOf, idx: isInt): t {
+        AS(isList, obj)[idx]
+    }
+
+    function set(obj: isListOf, idx: isInt, newVal: t): isListOf {
+        AS(isList, obj)
+        .set($this, idx, newVal)
+        .AS(isListOf, $this)
+    }
 
     isListOf
 }
@@ -68,7 +75,7 @@ interface gen_isVector;
 memoized function gen_isVector(elementType: isPred, vSize: isInt): isPred {
     let isParentType: isPred = gen_isListOf(elementType);
 
-    interface isVector<elementType, vSize>;
+    interface isVector<elementType, vSize> extends isParentType;
 
     function isVector(obj: isList): isBool {
         isVector(as(isParentType, obj))
@@ -77,9 +84,6 @@ memoized function gen_isVector(elementType: isPred, vSize: isInt): isPred {
     function isVector(obj: isParentType): isBool {
         obj.size == vSize
     }
-
-    __AS__(isPred, isVector);
-    derive(isParentType, isVector);
 
     isVector
 }
@@ -97,15 +101,14 @@ memoized function gen_isTuple(preds: isList): isPred {
 memoized function gen_isTuple(preds: isListOfPreds): isPred {
     let isParentType: isPred = gen_isVector(isAny, size(preds));
 
-    interface isTuple<preds>;
+    interface isTuple<preds> extends isParentType;
 
     function isTuple(obj: isList): isBool {
         isTuple(as(isParentType, obj));
     }
 
     function isTuple(obj: isParentType): isBool {
-        obj
-        .map($this, type)
+        map(obj, type)
         .zip($this, preds)
         .every($this, AS(isPred, (pair) => {
             let isActual:   isPred = pair[0];
@@ -113,9 +116,6 @@ memoized function gen_isTuple(preds: isListOfPreds): isPred {
             isA(isExpected, isActual);
         }))
     }
-
-    __AS__(isPred, isTuple);
-    derive(isParentType, isTuple);
 
     isTuple
 }
@@ -152,16 +152,14 @@ assert(toString(c3) == "(2 - 3i)");
 interface gen_isRefOf;
 
 memoized function gen_isRefOf(t: isPred): isPred {
-    interface isRefOf<t>;
+    interface isRefOf<t> extends isRef;    
 
     function isRefOf(r: isRef): isBool {
         r().type == t
     }
 
     function apply(r: isRefOf, _: isList): t {
-        r
-        .AS(isRef, $this)
-        .$this()
+        AS(isRef, r)()
     }
 
     function set(r: isRefOf, newVal: isAny): isRefOf {
@@ -169,14 +167,10 @@ memoized function gen_isRefOf(t: isPred): isPred {
     }
 
     function set(r: isRefOf, newVal: t): isRefOf {
-        r
-        .AS(isRef, $this)
+        AS(isRef, r)
         .set($this, newVal)
         .AS(isRefOf, $this)
     }
-
-    __AS__(isPred, isRefOf);
-    derive(isRef, isRefOf);
 
     isRefOf
 }

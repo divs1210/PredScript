@@ -136,8 +136,8 @@ Implement(
 
 function compileInterface(node) {
     let mName = node.name;
+    
     let params = "";
-
     if(node.args.length > 0)
         params = 
             '<' 
@@ -145,8 +145,10 @@ function compileInterface(node) {
               .map(arg => "${(_apply(toString, List(" + arg + "))).get('val')}")
               .join(', ') 
             + '>';
+    
+    let parent = node.parent || 'null';
 
-    return `const ${node.name} = MultiFn("${mName}" + \`${params}\`);`;
+    return `const ${node.name} = MultiFn("${mName}" + \`${params}\`, ${parent});`;
 }
 
 function compileAST(ast) {
