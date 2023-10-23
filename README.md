@@ -43,7 +43,7 @@ async function fetchUserById(id: isInt): isUser {
     .as(isUser, $this)
 }
 
-fetchUserById(5).await;
+let u: isUser = fetchUserById(5).await;
 ```
 
 ## Design goals
