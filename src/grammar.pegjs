@@ -48,7 +48,9 @@
     function stringNode(parsed) {
         return {
             type: 'string', 
-            value: parsed[1].map(x => x[1]).join(''),
+            value: parsed[1]
+                .map(x => Array.isArray(x) ? x[1] : x)
+                .join(''),
             loc: location()
         };
     }
@@ -460,8 +462,10 @@ NULL        = 'null'                                           { return nullNode
 INTEGER     = i:([0-9]+)                                       { return intNode(i);    }
 REAL        = n:([0-9]+ '.' [0-9]+)                            { return realNode(n);   }
 BOOL        = b:('true' / 'false')                             { return boolNode(b);   } 
+
 CHAR        = c:("'" (!"'" .)* "'")                            { return charNode(c);   }
-STRING      = s:('"' (!'"' .)* '"')                            { return stringNode(s); }
+STRING      = s:('"' ([^"\\] / ('\\' .))* '"')                 { return stringNode(s); }
+
 SYMBOL      = s:(SYMBOLSTART (SYMBOLSTART / [0-9])*)           { return symbolNode(s); }
 SYMBOLSTART = [a-zA-Z] / '$' / '_'
 
