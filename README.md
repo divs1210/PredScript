@@ -43,13 +43,7 @@ async function fetchUserById(id: isInt): isUser {
     .as(isUser, $this)
 }
 
-fetchUserById(5).await(this);
-// => { 
-//  id: 5,
-//  name: "Bob",
-//  email: "bob@jimale.com", 
-//  dob: "1991-02-23" 
-// }
+fetchUserById(5).await;
 ```
 
 ## Design goals
