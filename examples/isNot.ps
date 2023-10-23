@@ -1,5 +1,5 @@
 assert(1 != 3);
 assert("a" != "b");
 
-assertError(1 != 1);
-assertError("a" != "a");
+assert((1 != 1) == false);
+assert(("a" != "a") == false);
