@@ -35,12 +35,14 @@
         // correctly handle unicode
         let chars = [...str];
 
-        if (chars.length > 1)
+        if (chars.length === 0 
+         || chars[0] !== '\\' && chars.length > 1
+         || chars[0] === '\\' && chars.length !== 2)
             throw new Error(`Invalid character literal: '${str}' at ${JSON.stringify(location(), null, 2)}.`);
 
         return {
             type: 'char', 
-            value: chars[0],
+            value: chars[0] === '\\' ? chars.slice(0, 2).join('') : chars[0],
             loc: location()
         };
     }
@@ -48,7 +50,9 @@
     function stringNode(parsed) {
         return {
             type: 'string', 
-            value: parsed[1].map(x => x[1]).join(''),
+            value: parsed[1]
+                .flat(1)
+                .join(''),
             loc: location()
         };
     }
@@ -460,8 +464,10 @@ NULL        = 'null'                                           { return nullNode
 INTEGER     = i:([0-9]+)                                       { return intNode(i);    }
 REAL        = n:([0-9]+ '.' [0-9]+)                            { return realNode(n);   }
 BOOL        = b:('true' / 'false')                             { return boolNode(b);   } 
-CHAR        = c:("'" (!"'" .)* "'")                            { return charNode(c);   }
-STRING      = s:('"' (!'"' .)* '"')                            { return stringNode(s); }
+
+CHAR        = c:("'" ([^'\\] / ('\\' .))* "'")                 { return charNode(c);   }
+STRING      = s:('"' ([^"\\] / ('\\' .))* '"')                 { return stringNode(s); }
+
 SYMBOL      = s:(SYMBOLSTART (SYMBOLSTART / [0-9])*)           { return symbolNode(s); }
 SYMBOLSTART = [a-zA-Z] / '$' / '_'
 

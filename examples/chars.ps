@@ -3,3 +3,8 @@ let ch: isChar = 'h';
 assert(type(ch) == isChar);
 
 assert(toInt(ch) == 104);
+
+// escaped char
+assert('\'' == get("'", 0));
+assert('\n' == get("
+", 0));
