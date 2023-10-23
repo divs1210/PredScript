@@ -206,7 +206,7 @@ _isFn.implementFor(
     _ => TRUE
 );
 
-function MultiFn(name) {
+function _MultiFn(name) {
     return Obj(
         new MultiMethod(name, getType),
         isFn
@@ -230,7 +230,7 @@ function Implement(multi, argTypes, retType, f) {
 
 // derive
 // ======
-const derive = MultiFn('derive');
+const derive = _MultiFn('derive');
 const Derive = val(derive);
 
 Implement(
@@ -262,6 +262,20 @@ Implement(
 );
 
 
+// MultiFn cntd
+// ============
+function MultiFn(name, parent) {
+    let obj = _MultiFn(name);
+
+    if(parent) {
+        setType(obj, isPred);
+        Derive(parent, obj);
+    }        
+    
+    return obj;
+}
+
+
 // type
 // ====
 const type = MultiFn('type');
@@ -289,9 +303,7 @@ Implement(
 
 // Real Numbers
 // ============
-const isReal = MultiFn("isReal");
-setType(isReal, isPred);
-Derive(isAny, isReal);
+const isReal = MultiFn("isReal", isAny);
 
 function Real(n) {
     return Obj(
@@ -311,9 +323,7 @@ Implement(
 
 // Integers
 // ========
-const isInt = MultiFn("isInt");
-setType(isInt, isPred);
-Derive(isReal, isInt);
+const isInt = MultiFn("isInt", isReal);
 
 Implement(
     isInt,
@@ -328,6 +338,13 @@ function Int(n) {
         isInt
     );
 }
+
+Implement(
+    neg,
+    List(isInt),
+    isInt,
+    r => Int(BigNumberZERO.minus(val(r)))
+);
 
 
 // Arithmetic
@@ -484,9 +501,7 @@ Implement(
 
 // Chars
 // =====
-const isChar = MultiFn("isChar");
-setType(isChar, isPred);
-Derive(isInt, isChar);
+const isChar = MultiFn("isChar", isInt);
 
 function CharFromCodePoint(jsCodePoint) {
     return Obj(
@@ -528,9 +543,7 @@ Implement(
 
 // Map
 // ===
-const isMap = MultiFn("isMap");
-setType(isMap, isPred);
-Derive(isAny, isMap);
+const isMap = MultiFn("isMap", isAny);
 
 function Map(...jsArray) {
     return Obj(
@@ -542,9 +555,7 @@ function Map(...jsArray) {
 
 // Strings
 // =======
-const isString = MultiFn("isString");
-setType(isString, isPred);
-Derive(isAny, isString);
+const isString = MultiFn("isString", isAny);
 
 const String = (s) => Obj(s, isString);
 
@@ -766,9 +777,7 @@ Implement(
 
 // Refs
 // ====
-const isRef = MultiFn("isRef");
-setType(isRef, isPred);
-Derive(isAny, isRef);
+const isRef = MultiFn("isRef", isAny);
 
 function _Ref(x) {
     let obj = { val: x };

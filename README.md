@@ -34,13 +34,13 @@ That's the question PredScript wants to answer.
 // this can be type checked at compile time
 async function fetchUserById(id: isInt): isUser {
     id
-    .fetchUserByIdURLTemplate(this)
-    .fetch(this)
-    .await(this)
-    .get(this, "body")
-    .parseJSON(this)
+    .fetchUserByIdURLTemplate
+    .fetch
+    .await
+    .get($this, "body")
+    .parseJSON
     // validate and cast at runtime 
-    .as(isUser, this)
+    .as(isUser, $this)
 }
 
 fetchUserById(5).await(this);

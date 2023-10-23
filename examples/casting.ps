@@ -1,12 +1,8 @@
-interface isLessThan5;
+interface isLessThan5 extends isInt;
 
 function isLessThan5(x: isInt): isBool {
     x < 5
 }
-// `__AS__` is the rough-casting operator
-// it mutates the type metadata of the object
-__AS__(isPred, isLessThan5);
-derive(isInt, isLessThan5);
 
 let two: isInt = 2;
 assert(type(two) == isInt);

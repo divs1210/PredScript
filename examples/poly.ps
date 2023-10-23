@@ -1,20 +1,15 @@
 // ==================================
 // new predicates
 // ==================================
-interface isEven;
+interface isEven extends isInt;
 function isEven(x: isInt): isBool {
     x % 2 == 0
 }
-__AS__(isPred, isEven);
-derive(isInt, isEven);
 
-
-interface isOdd;
+interface isOdd extends isInt;
 function isOdd(x: isInt): isBool {
     !isEven(x)
 }
-__AS__(isPred, isOdd);
-derive(isInt, isOdd);
 
 
 // ==================================
@@ -25,9 +20,6 @@ function inc(x: isInt): isInt {
     x + 1
 }
 
-// it can now be overridden
-// for our new predicates!
-
 function inc(x: isEven): isOdd {
     // integer addition
     // hard casted to isOdd
@@ -37,13 +29,13 @@ function inc(x: isEven): isOdd {
 }
 
 function inc(x: isOdd): isEven {
-    // integer addition
-    // hard casted to isEven
-    // hard casts don't check
-    // before casting
     AS(isEven, x + 1)
 }
 
+
+// ==================================
+// assertions
+// ==================================
 let int: isInt = 1;
 assert(int.inc == 2);
 assert(int.inc.type == isInt);

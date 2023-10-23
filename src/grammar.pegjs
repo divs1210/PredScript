@@ -386,7 +386,7 @@
         };
     }
     
-    function interfaceNode(name, args) {
+    function interfaceNode(name, args, e) {
         if (!args)
             args = [];
         else if (args[2][1].length === 0)
@@ -394,10 +394,13 @@
         else
             args = [args[2][0]].concat(args[2][1].map(arg => arg[3]));
 
+        let parent = e && e[3];
+
         return {
             type: 'interface-stmt',
             name: name.value,
             args: args.map(arg => arg.value),
+            parent: parent?.value,
             loc: location()
         }
     }
@@ -409,8 +412,10 @@ statement        = s:(interfaceStatement / letStatement / multiFnStatement / exp
 exprStatement    = e:expression (_ ';')?                                                       { return exprStatementNode(e);                               }
 letStatement     = 'let' __ name:SYMBOL _ ':' _ type:SYMBOL _ '=' _ val:expression (_ ';')?    { return letNode({ name, type, val });                       }
 
-interfaceStatement = 'interface' __ name:SYMBOL args:(_ '<' ((SYMBOL (_ ',' _ SYMBOL)*)?) _ '>')? (_ ';')?                                       
-                                                                                               { return interfaceNode(name, args);                          }
+interfaceStatement = 
+    'interface' 
+    __ name:SYMBOL args:(_ '<' ((SYMBOL (_ ',' _ SYMBOL)*)?) _ '>')? 
+    e:(_ 'extends' _ SYMBOL)? (_ ';')?                                                         { return interfaceNode(name, args, e);                       }
 
 multiFnStatement = memo:('memoized'?) _ 'function' __ fname:SYMBOL _ args:('(' _ multiFnArgs? _ ')') _ ':' _ retType:SYMBOL _ body:block
                                                                                                { return multiFnNode({ memo, fname, args, retType, body });  }

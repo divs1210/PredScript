@@ -1,17 +1,12 @@
-interface isEven;
-
 // define new predicate
+interface isEven extends isInt;
 function isEven(x: isInt): isBool {
     x % 2 == 0
 }
-__AS__(isPred, isEven);
-// all isEvens are valid isInts
-derive(isInt, isEven);
 
-let i: isInt  = 1;
 let e: isEven = as(isEven, 4);
 
-// + defined for [isInt, isInt] -> isInt
-// called for [isInt, isEven]
-let sum: isInt = i + e;
+// +  defined for [isInt, isInt]  -> isInt
+// but called for [isInt, isEven] -> isInt
+let sum: isInt = 1 + e;
 assert(sum == 5);
