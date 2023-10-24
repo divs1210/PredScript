@@ -9,7 +9,7 @@ PredScript is a typed functional programming language that uses predicates as ty
 ### Features
 
 - [functional and data driven language](/examples/collections.ps)
-- [functions are polymorphic and dispatch on types of all arguments](/examples/map.ps)
+- [functions are polymorphic and dispatch on types of all arguments](/examples/math.ps)
 - [types are arbitrary functions that return booleans](/examples/poly.ps)
 - [types can have subtypes](/examples/hierarchy.ps)
 
