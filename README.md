@@ -4,8 +4,14 @@
 
 ## What
 
-PredScript is a strongly typed functional programming language
-that uses predicates as types, and looks like JavaScript.
+PredScript is a typed functional programming language that uses predicates as types.
+
+### Features
+
+- [functional and data driven language](/examples/collections.ps)
+- [functions are polymorphic and dispatch on types of all arguments](/examples/map.ps)
+- [types are arbitrary functions that return booleans](/examples/poly.ps)
+- [types can have subtypes](/examples/hierarchy.ps)
 
 **!! BEWARE: WIP !!**
 
@@ -33,8 +39,7 @@ That's the question PredScript wants to answer.
 ```typescript
 // this can be type checked at compile time
 async function fetchUserById(id: isInt): isUser {
-    id
-    .fetchUserByIdURLTemplate
+    (baseURL + "/users/" + id)
     .fetch
     .await
     .get($this, "body")
@@ -43,7 +48,7 @@ async function fetchUserById(id: isInt): isUser {
     .as(isUser, $this)
 }
 
-let u: isUser = fetchUserById(5).await;
+fetchUserById(5).then($this, println);
 ```
 
 ## Design goals
