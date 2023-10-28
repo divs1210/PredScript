@@ -637,6 +637,36 @@ Implement(
 );
 
 
+// toList
+// ======
+const toList = MultiFn("toList");
+Implement(
+    toList,
+    List(isString),
+    isList,
+    s => {
+        let jsString = val(s);
+        let jsChars = [...jsString];
+        return List(...jsChars.map(Char));
+    }
+);
+Implement(
+    toList,
+    List(isMap),
+    isList,
+    m => {
+        let jsMap = val(m);
+        let jsList = _List(jsMap);
+        let ret = Obj(
+            jsList.map(kv => List(...kv)),
+            isList
+        );
+
+        return ret;
+    }
+);
+
+
 // Collections
 // ===========
 const isEmpty = MultiFn('isEmpty');
@@ -961,6 +991,7 @@ module.exports = {
     isList,
     List,
     _List,
+    toList,
     isMap,
     Map,
     size,

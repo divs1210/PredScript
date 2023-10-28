@@ -1,3 +1,7 @@
+// this file will eventually
+// become the core ps module
+// =========================
+
 // useful for debugging
 interface spy;
 function spy(x: isAny, tag: isString): isAny {
@@ -184,3 +188,54 @@ assert(ref() == 0);
 
 assert(set(ref, 1).type == isRefOfInt);
 assert(ref() == 1);
+
+
+// typed maps (test)
+// =================
+interface gen_isMapOf;
+memoized function gen_isMapOf(keyType: isPred, valType: isPred): isPred {
+    interface isMapOf<keyType, valType> extends isMap;
+
+    function isMapOf(obj: isMap): isBool {
+        obj
+        .toList
+        .every($this, AS(isPred, (pair) => {
+            isA(keyType, pair[0].type) 
+            && isA(valType, pair[1].type)
+        }))
+    }
+
+    isMapOf
+}
+
+let isDict: isPred = gen_isMapOf(isString, isAny);
+
+interface gen_isRecord;
+memoized function gen_isRecord(m: isMap): isPred {
+    gen_isRecord(as(isDict, m))
+}
+
+memoized function gen_isRecord(m: isDict): isPred {
+    interface isRecord<m> extends isDict;
+
+    function isRecord(obj: isMap): isBool {
+        isRecord(as(isDict, obj))
+    }
+
+    function isRecord(obj: isDict): isBool {
+        m
+        .toList
+        .every($this, AS(isPred, (pair) => { 
+            let key: isString = pair[0];
+            let valType: isPred = pair[1];
+
+            isA(valType, obj[key].type)
+        }))
+    }
+
+    isRecord
+}
+
+let isUser: isPred = gen_isRecord({ "id": isInt, "username": isString });
+assert(isUser({ "id": 1, "username": "johndoe" }));
+assert(isUser({}) == false);

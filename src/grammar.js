@@ -2741,7 +2741,10 @@ function peg$parse(input, options) {
     s0 = peg$currPos;
     s1 = peg$parsefnCall();
     if (s1 === peg$FAILED) {
-      s1 = peg$parseprimary();
+      s1 = peg$parsegetExpr();
+      if (s1 === peg$FAILED) {
+        s1 = peg$parseprimary();
+      }
     }
     if (s1 !== peg$FAILED) {
       s2 = [];
