@@ -65,22 +65,22 @@
         };
     }
 
-    function arrayNode(args) {
+    function listNode(args) {
         if(!args || args.length === 0)
             return {
-                type: 'array-exp',
+                type: 'list-exp',
                 args: [],
                 loc:  location()
             };
         else if (args.length === 1)
             return {
-                type: 'array-exp',
+                type: 'list-exp',
                 args: [args[0]],
                 loc:  location()                
             };
         else
             return {
-                type: 'array-exp',
+                type: 'list-exp',
                 args: [args[0]].concat(args[1].map(arg => arg[3])),
                 loc:  location()                
             };
@@ -466,7 +466,7 @@ ifExpr     = 'if' _ '(' _ cond:expression _ ')' _ then:expression _else:((_ 'els
 lambdaExpr = '(' _ args:((SYMBOL (_ ',' _ SYMBOL)*)?) _ ')' _ '=>' _ body:expression { return lambdaNode(args, body);     }
 
 getExpr    = f:fromExpr _ ks:(keyExpr+)                                              { return getExprNode(f, ks);         }
-fromExpr   = fnCall / SYMBOL / STRING / ARRAY
+fromExpr   = fnCall / SYMBOL / STRING / LIST
 keyExpr    = '[' _ expression _ ']'
 
 fnCall     = f:primary _ argLists:(fnCallArgs+)                                      { return fnCallNode(f, argLists);    }
@@ -482,12 +482,12 @@ loopExprArg  = name:SYMBOL _ '=' _ value:expression                             
 
 dotNotation = x:(fnCall / primary) y:(_ '.' _ (fnCall / grouping / SYMBOL))+         { return dotNotation(x, y);          }
 
-primary    = REAL / INTEGER / CHAR / STRING / BOOL / NULL / SYMBOL / ARRAY / block / grouping
+primary    = REAL / INTEGER / CHAR / STRING / BOOL / NULL / SYMBOL / LIST / block / grouping
 
 grouping   = '(' _ e:expression _ ')'                                                { return groupingNode(e);            }
 block      = '{' _ b:((_ statement _)*) _ '}'                                        { return blockNode(b);               }
 
-ARRAY      = '[' _ args:((expression (_ ',' _ expression)*)?) _ ']'                  { return arrayNode(args);            }
+LIST      = '[' _ args:((expression (_ ',' _ expression)*)?) _ ']'                  { return listNode(args);              }
 
 NULL        = 'null'                                           { return nullNode;      }
 INTEGER     = i:([0-9]+)                                       { return intNode(i);    }

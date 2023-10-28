@@ -64,7 +64,7 @@ function compileRecurExpression({ args }) {
     return `recur({ ${compiledArgs} })`;
 }
 
-function compileArrayExpression(node) {
+function compileListExpression(node) {
     let args = node.args.map(compileAST).join(', ');
     return `List(${args})`;
 }
@@ -73,9 +73,6 @@ function compileCallExpression(node) {
     let f = compileAST(node.f);
     let args = node.args.map(compileAST).join(', ');
 
-    // if (f === 'List')
-    //     return `List(${args})`;
-    // else 
     if (f === 'Map')
         return `Map(${args})`;
 
@@ -171,8 +168,8 @@ function compileAST(ast) {
             return compileLiteral(ast);
         case 'symbol':
             return ast.value;
-        case 'array-exp':
-            return compileArrayExpression(ast);
+        case 'list-exp':
+            return compileListExpression(ast);
         case 'lambda-exp':
             return compileLambdaExpression(ast);
         case 'if-exp':

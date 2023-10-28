@@ -238,7 +238,7 @@ function peg$parse(input, options) {
       peg$c91 = "}",
       peg$c92 = peg$literalExpectation("}", false),
       peg$c93 = function(b) { return blockNode(b);               },
-      peg$c94 = function(args) { return arrayNode(args);            },
+      peg$c94 = function(args) { return listNode(args);              },
       peg$c95 = "null",
       peg$c96 = peg$literalExpectation("null", false),
       peg$c97 = function() { return nullNode;      },
@@ -2200,7 +2200,7 @@ function peg$parse(input, options) {
       if (s0 === peg$FAILED) {
         s0 = peg$parseSTRING();
         if (s0 === peg$FAILED) {
-          s0 = peg$parseARRAY();
+          s0 = peg$parseLIST();
         }
       }
     }
@@ -2858,7 +2858,7 @@ function peg$parse(input, options) {
               if (s0 === peg$FAILED) {
                 s0 = peg$parseSYMBOL();
                 if (s0 === peg$FAILED) {
-                  s0 = peg$parseARRAY();
+                  s0 = peg$parseLIST();
                   if (s0 === peg$FAILED) {
                     s0 = peg$parseblock();
                     if (s0 === peg$FAILED) {
@@ -3027,7 +3027,7 @@ function peg$parse(input, options) {
     return s0;
   }
 
-  function peg$parseARRAY() {
+  function peg$parseLIST() {
     var s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10;
 
     s0 = peg$currPos;
@@ -3877,22 +3877,22 @@ function peg$parse(input, options) {
           };
       }
 
-      function arrayNode(args) {
+      function listNode(args) {
           if(!args || args.length === 0)
               return {
-                  type: 'array-exp',
+                  type: 'list-exp',
                   args: [],
                   loc:  location()
               };
           else if (args.length === 1)
               return {
-                  type: 'array-exp',
+                  type: 'list-exp',
                   args: [args[0]],
                   loc:  location()                
               };
           else
               return {
-                  type: 'array-exp',
+                  type: 'list-exp',
                   args: [args[0]].concat(args[1].map(arg => arg[3])),
                   loc:  location()                
               };
