@@ -66,24 +66,29 @@
     }
 
     function listNode(args) {
-        if(!args || args.length === 0)
-            return {
-                type: 'list-exp',
-                args: [],
-                loc:  location()
-            };
-        else if (args.length === 1)
-            return {
-                type: 'list-exp',
-                args: [args[0]],
-                loc:  location()                
-            };
-        else
-            return {
-                type: 'list-exp',
-                args: [args[0]].concat(args[1].map(arg => arg[3])),
-                loc:  location()                
-            };
+        let flattenedArgs = 
+            (!args || args.length === 0)? []
+          : (args.length === 1)? [args[0]]
+          : [args[0]].concat(args[1].map(arg => arg[3]));
+        
+        return {
+            type: 'list-exp',
+            args: flattenedArgs,
+            loc:  location()                
+        };
+    }
+
+    function mapNode(args) {
+        let flattenedArgs = 
+            (!args || args.length === 0)? []
+          : (args.length === 1)? [args[0]]
+          : [args[0]].concat(args[1].map(arg => arg[3]));
+
+        return {
+            type: 'map-exp',
+            args: flattenedArgs,
+            loc:  location()
+        };
     }
 
     function blockNode(parsed) {
@@ -466,7 +471,7 @@ ifExpr     = 'if' _ '(' _ cond:expression _ ')' _ then:expression _else:((_ 'els
 lambdaExpr = '(' _ args:((SYMBOL (_ ',' _ SYMBOL)*)?) _ ')' _ '=>' _ body:expression { return lambdaNode(args, body);     }
 
 getExpr    = f:fromExpr _ ks:(keyExpr+)                                              { return getExprNode(f, ks);         }
-fromExpr   = fnCall / SYMBOL / STRING / LIST
+fromExpr   = fnCall / LIST / MAP / SYMBOL / STRING
 keyExpr    = '[' _ expression _ ']'
 
 fnCall     = f:primary _ argLists:(fnCallArgs+)                                      { return fnCallNode(f, argLists);    }
@@ -482,12 +487,15 @@ loopExprArg  = name:SYMBOL _ '=' _ value:expression                             
 
 dotNotation = x:(fnCall / primary) y:(_ '.' _ (fnCall / grouping / SYMBOL))+         { return dotNotation(x, y);          }
 
-primary    = REAL / INTEGER / CHAR / STRING / BOOL / NULL / SYMBOL / LIST / block / grouping
+primary    = REAL / INTEGER / CHAR / STRING / BOOL / NULL / SYMBOL / LIST / MAP / block / grouping
 
 grouping   = '(' _ e:expression _ ')'                                                { return groupingNode(e);            }
 block      = '{' _ b:((_ statement _)*) _ '}'                                        { return blockNode(b);               }
 
-LIST      = '[' _ args:((expression (_ ',' _ expression)*)?) _ ']'                  { return listNode(args);              }
+LIST      = '[' _ args:((expression (_ ',' _ expression)*)?) _ ']'                   { return listNode(args);             }
+
+MAP       = '{' _ args:((MAPARG (_ ',' _ MAPARG)*)?) _ '}'                           { return mapNode(args);              }
+MAPARG    = k:expression _ ':' _ v:expression                                        { return { k, v };                   }
 
 NULL        = 'null'                                           { return nullNode;      }
 INTEGER     = i:([0-9]+)                                       { return intNode(i);    }
