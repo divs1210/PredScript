@@ -485,7 +485,8 @@ loopExprArgs = first:loopExprArg rest:(_ ',' _ loopExprArg)* {
 }
 loopExprArg  = name:SYMBOL _ '=' _ value:expression                                  { return { name, value };            }
 
-dotNotation = x:(fnCall / primary) y:(_ '.' _ (fnCall / grouping / SYMBOL))+         { return dotNotation(x, y);          }
+dotNotation = x:(fnCall / getExpr / primary) y:(_ '.' _ (fnCall / grouping / SYMBOL))+         
+                                                                                    { return dotNotation(x, y);          }
 
 primary    = REAL / INTEGER / CHAR / STRING / BOOL / NULL / SYMBOL / LIST / MAP / block / grouping
 
