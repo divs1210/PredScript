@@ -1,13 +1,13 @@
-let l1: isList = List(10, 20, 30);
+let l1: isList = [10, 20, 30];
 assert(toString(l1) == "[10, 20, 30]");
 assert(l1[1] == 20);
-assert(slice(l1, 1) == List(20, 30));
+assert(slice(l1, 1) == [20, 30]);
 
-let l2: isList = List(
-    List("0,0", "0,1"),
-    List("1,0", "1,1")
-);
+let l2: isList = [
+    ["0,0", "0,1"],
+    ["1,0", "1,1"]
+];
 assert(toString(l2) == "[[0,0, 0,1], [1,0, 1,1]]");
 assert(l2[1][0] == "1,0");
 
-assert(List(0, 1, 2)[0] == 0);
+assert([0, 1, 2][0] == 0);

@@ -1,6 +1,6 @@
 interface f;
 
-let xs: isRef = Ref(List());
+let xs: isRef = Ref([]);
 
 memoized function f(x: isInt): isRef {
     xs()
@@ -12,4 +12,4 @@ f(5);
 f(5); // this call will be skipped
 f(6);
 
-assert(xs() == List(5, 6));
+assert(xs() == [5, 6]);

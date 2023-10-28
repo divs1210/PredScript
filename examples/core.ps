@@ -8,7 +8,7 @@ function spy(x: isAny, tag: isString): isAny {
 
 interface map;
 function map(xs: isList, f: isFn): isList {
-    loop(xs = xs, acc = List()) {
+    loop(xs = xs, acc = []) {
         if (isEmpty(xs))
             acc
         else
@@ -22,14 +22,14 @@ function map(xs: isList, f: isFn): isList {
 
 interface zip;
 function zip(xs: isList, ys: isList): isList {
-    loop(xs = xs, ys = ys, acc = List()) {
+    loop(xs = xs, ys = ys, acc = []) {
         if (isEmpty(xs) && isEmpty(ys))
             acc
         else
             recur(
                 xs  = slice(xs, 1),
                 ys  = slice(ys, 1), 
-                acc = push(acc, List(xs[0], ys[0]))
+                acc = push(acc, [xs[0], ys[0]])
             )
     }
 }
@@ -123,13 +123,13 @@ memoized function gen_isTuple(preds: isListOfPreds): isPred {
 
 // complex numbers (test)
 // ======================
-let isComplexNumber: isPred = gen_isTuple(List(isReal, isReal));
+let isComplexNumber: isPred = gen_isTuple([isReal, isReal]);
 
 function add(x: isComplexNumber, y: isComplexNumber): isComplexNumber {
-    List(
+    [
         x[0] + y[0],
         x[1] + y[1]
-    ).AS(isComplexNumber, $this)
+    ].AS(isComplexNumber, $this)
 }
 
 function toString(x: isComplexNumber): isString {
@@ -139,11 +139,11 @@ function toString(x: isComplexNumber): isString {
     "(" + x[0] + sym + abs(im) + "i)"
 }
 
-let c1: isComplexNumber = as(isComplexNumber, List(1, 2));
-let c2: isComplexNumber = as(isComplexNumber, List(1, -5));
+let c1: isComplexNumber = as(isComplexNumber, [1, 2]);
+let c2: isComplexNumber = as(isComplexNumber, [1, -5]);
 let c3: isComplexNumber = c1 + c2;
 
-assert(c3 == AS(isComplexNumber, List(2, -3)));
+assert(c3 == AS(isComplexNumber, [2, -3]));
 assert(toString(c3) == "(2 - 3i)");
 
 
