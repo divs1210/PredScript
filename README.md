@@ -33,6 +33,11 @@ somewhere on the spectrum of `Dynamically Typed → Statically Typed`.
 ## Use Case
 
 ```typescript
+let isUser: isPred = gen_isRecord({
+    "id": isInt,
+    "username": isString
+});
+
 // this can be type checked at compile time
 async function fetchUserById(id: isInt): isUser {
     (baseURL + "/users/" + id)
