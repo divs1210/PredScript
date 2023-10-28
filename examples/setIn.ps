@@ -1,10 +1,4 @@
-let m: isMap = Map(
-    0, Map(
-        1, Map(
-            2, "a"
-           )
-    )
-);
+let m: isMap = { 0: { 1: { 2: "a" } } };
 
 interface setIn;
 function setIn(settable: isAny, ks: isList, v: isAny): isAny {
@@ -18,10 +12,4 @@ function setIn(settable: isAny, ks: isList, v: isAny): isAny {
     }
 }
 
-assert(setIn(m, [0, 1, 2], "b") == Map(
-    0, Map(
-        1, Map(
-            2, "b"
-           )
-    )
-));
+assert(setIn(m, [0, 1, 2], "b") == { 0: { 1: { 2: "b" } } });

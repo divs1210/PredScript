@@ -69,12 +69,18 @@ function compileListExpression(node) {
     return `List(${args})`;
 }
 
+function compileMapExpression(node) {
+    let args = node
+        .args
+        .map(({ k, v }) => [compileAST(k), compileAST(v)])
+        .flat(1)
+        .join(', ');
+    return `Map(${args})`;
+}
+
 function compileCallExpression(node) {
     let f = compileAST(node.f);
     let args = node.args.map(compileAST).join(', ');
-
-    if (f === 'Map')
-        return `Map(${args})`;
 
     return `_apply(apply, List(${f}, List(${args})))`;
 }
@@ -170,6 +176,8 @@ function compileAST(ast) {
             return ast.value;
         case 'list-exp':
             return compileListExpression(ast);
+        case 'map-exp':
+            return compileMapExpression(ast);
         case 'lambda-exp':
             return compileLambdaExpression(ast);
         case 'if-exp':

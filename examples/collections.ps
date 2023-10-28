@@ -16,18 +16,18 @@ assert(isEmpty(s) == false);
 assert(isEmpty(""));
 
 // map
-let m: isMap = Map(
-    0,   1,
-    "a", 2,
-    [0], '_'
-);
+let m: isMap = {
+      0: 1,
+    "a": 2,
+    [0]: '_'
+};
 assert(toString(m) == "{0: 1, a: 2, [0]: _}");
 assert(size(m) == 3);
 assert(isEmpty(m) == false);
-assert(isEmpty(Map()));
+assert(isEmpty({}));
 assert(m[[0]] == '_');
-assert(set(m, 0, 10) == Map(
-    0,   10,  
-    "a", 2,  
-    [0], '_')
-);
+assert(set(m, 0, 10) == {
+      0: 10,  
+    "a": 2,  
+    [0]: '_'
+});
