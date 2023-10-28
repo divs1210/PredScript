@@ -1,11 +1,11 @@
 // list
-let l: isList = List(3, 4, 5);
+let l: isList = [3, 4, 5];
 assert(toString(l) == "[3, 4, 5]");
 assert(size(l) == 3);
 assert(l[1] == 4);
-assert(set(l, 1, 10) == List(3, 10, 5));
+assert(set(l, 1, 10) == [3, 10, 5]);
 assert(isEmpty(l) == false);
-assert(isEmpty(List()));
+assert(isEmpty([]));
 
 // string
 let s: isString = "Haba Baba!";
@@ -17,17 +17,17 @@ assert(isEmpty(""));
 
 // map
 let m: isMap = Map(
-    0,       1,
-    "a",     2,
-    List(0), '_'
+    0,   1,
+    "a", 2,
+    [0], '_'
 );
 assert(toString(m) == "{0: 1, a: 2, [0]: _}");
 assert(size(m) == 3);
 assert(isEmpty(m) == false);
 assert(isEmpty(Map()));
-assert(m[List(0)] == '_');
+assert(m[[0]] == '_');
 assert(set(m, 0, 10) == Map(
-    0,       10,  
-    "a",     2,  
-    List(0), '_')
+    0,   10,  
+    "a", 2,  
+    [0], '_')
 );
