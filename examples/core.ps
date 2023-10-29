@@ -89,6 +89,18 @@ memoized function gen_isVector(elementType: isPred, vSize: isInt): isPred {
         obj.size == vSize
     }
 
+    function get(obj: isVector, idx: isInt): elementType {
+        // TODO: throw error if idx >= vSize
+        AS(isParentType, obj)[idx]
+    }
+
+    function set(obj: isVector, idx: isInt, newVal: elementType): isVector {
+        // TODO: throw error if idx >= vSize
+        AS(isParentType, obj)
+        .set($this, idx, newVal)
+        .AS(isVector, $this)
+    }
+
     isVector
 }
 
@@ -236,6 +248,8 @@ memoized function gen_isRecord(m: isDict): isPred {
     isRecord
 }
 
+// new record type
 let isUser: isPred = gen_isRecord({ "id": isInt, "username": isString });
-assert(isUser({ "id": 1, "username": "johndoe" }));
-assert(isUser({}) == false);
+
+// user record instance
+let user: isUser = as(isUser, { "id": 1, "username": "johndoe" });
