@@ -146,7 +146,13 @@ memoized function gen_isTuple(preds: isListOfPreds): isPred {
 
 // complex numbers (test)
 // ======================
-let isComplexNumber: isPred = gen_isTuple([isReal, isReal]);
+let isTupleOfRealReal: isPred = gen_isTuple([isReal, isReal]);
+
+interface isComplexNumber extends isTupleOfRealReal;
+
+function isComplexNumber(obj: isList): isBool {
+    isComplexNumber(as(isTupleOfRealReal, obj))
+}
 
 function add(x: isComplexNumber, y: isComplexNumber): isComplexNumber {
     [
@@ -167,7 +173,7 @@ let c2: isComplexNumber = as(isComplexNumber, [1, -5]);
 let c3: isComplexNumber = c1 + c2;
 
 assert(c3 == AS(isComplexNumber, [2, -3]));
-assert(toString(c3) == "(2 - 3i)");
+assert(c3.toString == "(2 - 3i)");
 
 
 // refs (test)
@@ -256,7 +262,13 @@ memoized function gen_isRecord(m: isDict): isPred {
 }
 
 // new record type
-let isUser: isPred = gen_isRecord({ "id": isInt, "username": isString });
+let isUserRecord: isPred = gen_isRecord({ "id": isInt, "username": isString });
+
+interface isUser extends isUserRecord;
+
+function isUser(obj: isMap): isBool {
+    isUser(as(isUserRecord, obj))
+}
 
 // user record instance
 let user: isUser = as(isUser, { "id": 1, "username": "johndoe" });

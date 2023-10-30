@@ -257,6 +257,12 @@ Implement(
             isBool, 
             _ => TRUE
         );
+        Implement(
+            isChild,
+            List(isParent),
+            isBool, 
+            _ => TRUE
+        );
         return NULL;
     }
 );
