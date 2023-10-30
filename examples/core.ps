@@ -115,7 +115,7 @@ memoized function gen_isTuple(preds: isList): isPred {
 }
 
 memoized function gen_isTuple(preds: isListOfPreds): isPred {
-    let isParentType: isPred = gen_isVector(isAny, size(preds));
+    let isParentType: isPred = gen_isVector(isAny, preds.size);
 
     interface isTuple<preds> extends isParentType;
 
@@ -131,6 +131,13 @@ memoized function gen_isTuple(preds: isListOfPreds): isPred {
             let isExpected: isPred = pair[1];
             isA(isExpected, isActual);
         }))
+    }
+
+    function set(obj: isTuple, idx: isInt, newVal: isAny): isTuple {
+        // TODO: throw error if idx >= vSize
+        AS(isParentType, obj)
+        .set($this, idx, as(preds[idx], newVal))
+        .AS(isTuple, $this)
     }
 
     isTuple
