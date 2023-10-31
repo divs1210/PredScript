@@ -184,7 +184,6 @@ memoized function gen_isTuple(preds: isListOfPreds): isPred {
     }
 
     function set(obj: isTuple, idx: isInt, newVal: isAny): isTuple {
-        // TODO: throw error if idx >= vSize
         AS(isParentType, obj)
         .set($this, idx, as(preds[idx], newVal))
         .AS(isTuple, $this)
