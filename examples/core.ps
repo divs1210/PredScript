@@ -70,6 +70,30 @@ memoized function gen_isListOf(t: isPred): isPred {
         .AS(isListOf, $this)
     }
 
+    function slice(obj: isListOf, start: isInt): isListOf {
+        AS(isList, obj)
+        .slice($this, start)
+        .AS(isListOf, $this)
+    }
+
+    function slice(obj: isListOf, start: isInt, end: isInt): isListOf {
+        AS(isList, obj)
+        .slice($this, start, end)
+        .AS(isListOf, $this)
+    }
+
+    function unshift(obj: isListOf, x: t): isListOf {
+        AS(isList, obj)
+        .unshift($this, x)
+        .AS(isListOf, $this)
+    }
+
+    function push(obj: isListOf, x: t): isListOf {
+        AS(isList, obj)
+        .push($this, x)
+        .AS(isListOf, $this)
+    }
+
     isListOf
 }
 
