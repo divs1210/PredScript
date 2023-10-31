@@ -970,6 +970,17 @@ const assertError = _Lambda((checkFn, msg) => {
 });
 
 
+// errors
+const error = _Lambda((msg, obj) => {
+    obj = obj || NULL;
+    
+    let e = new Error(val(msg));
+    e.__psData__ = obj;
+
+    throw e;
+});
+
+
 module.exports = {
     MultiFn,
     isFn,
@@ -1041,5 +1052,6 @@ module.exports = {
     assert,
     assertError,
     loop,
-    recur
+    recur,
+    error
 };
