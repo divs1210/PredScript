@@ -125,6 +125,32 @@ memoized function gen_isVector(elementType: isPred, vSize: isInt): isPred {
         .AS(isVector, $this)
     }
 
+    function slice(obj: isVector, start: isInt): isVector {
+        // TODO: throw error if start >= vSize
+        AS(isParentType, obj)
+        .slice($this, start)
+        .AS(isVector, $this)
+    }
+
+    function slice(obj: isVector, start: isInt, end: isInt): isVector {
+        // TODO: throw error if (start >= vSize || end >= vSize)
+        AS(isParentType, obj)
+        .slice($this, start, end)
+        .AS(isVector, $this)
+    }
+
+    function unshift(obj: isVector, x: elementType): isVector {
+        AS(isParentType, obj)
+        .unshift($this, x)
+        .AS(isVector, $this)
+    }
+
+    function push(obj: isVector, x: elementType): isVector {
+        AS(isParentType, obj)
+        .push($this, x)
+        .AS(isVector, $this)
+    }
+
     isVector
 }
 
