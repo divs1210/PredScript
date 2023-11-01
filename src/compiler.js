@@ -17,7 +17,7 @@ function compileLiteral(node) {
         case 'string':
             return `String(\`${val}\`)`;
         case 'regex':
-            return `new RegExp("${val}", "${node.flags}")`;
+            return `newRegExp(${val})`;
         case 'null':
             return `NULL`;
         default: {

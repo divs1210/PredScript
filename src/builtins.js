@@ -10,6 +10,7 @@ const { val, isNull: isJSNull } = require('./util');
 // reify JS
 // ========
 const _String = globalThis.String;
+const _RegExp = globalThis.RegExp;
 
 
 // objects and types
@@ -643,6 +644,48 @@ Implement(
 );
 
 
+// RegExps
+// =======
+const isRegExp = MultiFn("isRegExp", isAny);
+
+const RegExp = MultiFn("RegExp");
+Implement(
+    RegExp,
+    List(isString),
+    isRegExp,
+    src => {
+        let jsSrc = val(src);
+        let jsRegExp = new _RegExp(jsSrc);
+        return Obj(jsRegExp, isRegExp);
+    }
+);
+Implement(
+    RegExp,
+    List(isString, isString),
+    isRegExp,
+    (src, flags) => {
+        let jsSrc = val(src);
+        let jsFlags = val(flags);
+        let jsRegExp = new _RegExp(jsSrc, jsFlags);
+        return Obj(jsRegExp, isRegExp);
+    }
+);
+
+const newRegExp = r => Obj(r, isRegExp);
+
+const test = MultiFn('test');
+Implement(
+    test,
+    List(isRegExp, isString),
+    isBool,
+    (r, s) => {
+        let jsS = val(s);
+        let jsR = val(r);
+        return Bool(jsR.test(jsS));
+    }
+);
+
+
 // toList
 // ======
 const toList = MultiFn("toList");
@@ -1037,6 +1080,10 @@ module.exports = {
     String,
     isString,
     toString,
+    isRegExp,
+    RegExp,
+    newRegExp,
+    test,
     isRef,
     Ref,
     println,

@@ -60,8 +60,7 @@
     function regexNode(parsed) {
         return {
             type: 'regex', 
-            value: parsed[1].flat(1).join(''),
-            flags: parsed[3].join(''),
+            value: '/' + parsed[1].flat(1).join('') + '/' + parsed[3].join(''),
             loc: location()
         };
     }
