@@ -4301,7 +4301,7 @@ function peg$parse(input, options) {
           return {
               type: 'regex', 
               value: parsed[1].flat(1).join(''),
-              opts: parsed[3].join(''),
+              flags: parsed[3].join(''),
               loc: location()
           };
       }
