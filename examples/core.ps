@@ -289,13 +289,14 @@ memoized function gen_isRecord(m: isDict): isPred {
 }
 
 // new record type
-let isUserRecord: isPred = gen_isRecord({ "id": isInt, "username": isString });
+let isUserRecord: isPred = { "id": isInt, "username": isString }.gen_isRecord;
 
 interface isUser extends isUserRecord;
-
-function isUser(obj: isMap): isBool {
-    isUser(as(isUserRecord, obj))
+function isUser(m: isMap): isBool {
+    m
+    .as(isUserRecord, $this)
+    .isUser
 }
 
 // user record instance
-let user: isUser = as(isUser, { "id": 1, "username": "johndoe" });
+let user: isUser = { "id": 1, "username": "johndoe" }.as(isUser, $this);
