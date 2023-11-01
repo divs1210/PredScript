@@ -36,25 +36,20 @@ somewhere on the spectrum of `Dynamically Typed → Statically Typed`.
 interface isEmailString extends isString;
 function isEmailString(s: isString): isBool {
     /^\S+@\S+\.\S+$/
-    .match($this, s)
+    .test($this, s)
 }
 
-let isUserRecord: isPred = gen_isRecord({ 
+let isUser: isPred = gen_isRecord({ 
     "id": isInt,
     "username": isString,
     "email": isEmailString
 });
 
-interface isUser extends isUserRecord;
-function isUser(m: isMap): isBool {
-    as(isUserRecord, m).isUser
-}
-
-let u: isUser = {
+let u: isUser = as(isUser, {
     "id": 1,
     "username": "johndoe",
     "email": "johndoe@email.com"
-}.as(isUser, $this);
+});
 ```
 
 ## Design goals
