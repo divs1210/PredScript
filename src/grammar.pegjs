@@ -57,6 +57,15 @@
         };
     }
 
+    function regexNode(parsed) {
+        return {
+            type: 'regex', 
+            value: parsed[1].flat(1).join(''),
+            opts: parsed[3].join(''),
+            loc: location()
+        };
+    }
+
     function symbolNode(parsed) {
         return {
             type: 'symbol', 
@@ -488,7 +497,7 @@ loopExprArg  = name:SYMBOL _ '=' _ value:expression                             
 dotNotation = x:(fnCall / getExpr / primary) y:(_ '.' _ (fnCall / grouping / SYMBOL))+         
                                                                                     { return dotNotation(x, y);          }
 
-primary    = REAL / INTEGER / CHAR / STRING / BOOL / NULL / SYMBOL / LIST / MAP / block / grouping
+primary    = REAL / INTEGER / CHAR / STRING / REGEX / BOOL / NULL / SYMBOL / LIST / MAP / block / grouping
 
 grouping   = '(' _ e:expression _ ')'                                                { return groupingNode(e);            }
 block      = '{' _ b:((_ statement _)*) _ '}'                                        { return blockNode(b);               }
@@ -498,15 +507,18 @@ LIST      = '[' _ args:((expression (_ ',' _ expression)*)?) _ ']'              
 MAP       = '{' _ args:((MAPARG (_ ',' _ MAPARG)*)?) _ '}'                           { return mapNode(args);              }
 MAPARG    = k:expression _ ':' _ v:expression                                        { return { k, v };                   }
 
-NULL        = 'null'                                           { return nullNode;      }
-INTEGER     = i:([0-9]+)                                       { return intNode(i);    }
-REAL        = n:([0-9]+ '.' [0-9]+)                            { return realNode(n);   }
-BOOL        = b:('true' / 'false')                             { return boolNode(b);   } 
+NULL        = 'null'                                           { return nullNode;            }
+INTEGER     = i:([0-9]+)                                       { return intNode(i);          }
+REAL        = n:([0-9]+ '.' [0-9]+)                            { return realNode(n);         }
+BOOL        = b:('true' / 'false')                             { return boolNode(b);         } 
 
-CHAR        = c:("'" ([^'\\] / ('\\' .))* "'")                 { return charNode(c);   }
-STRING      = s:('"' ([^"\\] / ('\\' .))* '"')                 { return stringNode(s); }
+CHAR        = c:("'" ([^'\\] / ('\\' .))* "'")                 { return charNode(c);         }
+STRING      = s:('"' ([^"\\] / ('\\' .))* '"')                 { return stringNode(s);       }
 
-SYMBOL      = s:(SYMBOLSTART (SYMBOLSTART / [0-9])*)           { return symbolNode(s); }
+REGEX       = r:('/' ([^/\\] / ('\\' .))* '/' REGEXFLAGS*)     { return regexNode(r);        }
+REGEXFLAGS  = 'd' / 'g' / 'i' / 'm' / 's' / 'u' / 'v' / 'y'
+
+SYMBOL      = s:(SYMBOLSTART (SYMBOLSTART / [0-9])*)           { return symbolNode(s);       }
 SYMBOLSTART = [a-zA-Z] / '$' / '_'
 
 _  = __*
