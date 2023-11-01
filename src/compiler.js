@@ -16,6 +16,8 @@ function compileLiteral(node) {
             return `Char('${val}')`;
         case 'string':
             return `String(\`${val}\`)`;
+        case 'regex':
+            return `newRegExp(${val})`;
         case 'null':
             return `NULL`;
         default: {
@@ -170,6 +172,7 @@ function compileAST(ast) {
         case 'bool':
         case 'char':
         case 'string':
+        case 'regex':
         case 'null':
             return compileLiteral(ast);
         case 'symbol':

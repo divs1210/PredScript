@@ -70,6 +70,30 @@ memoized function gen_isListOf(t: isPred): isPred {
         .AS(isListOf, $this)
     }
 
+    function slice(obj: isListOf, start: isInt): isListOf {
+        AS(isList, obj)
+        .slice($this, start)
+        .AS(isListOf, $this)
+    }
+
+    function slice(obj: isListOf, start: isInt, end: isInt): isListOf {
+        AS(isList, obj)
+        .slice($this, start, end)
+        .AS(isListOf, $this)
+    }
+
+    function unshift(obj: isListOf, x: t): isListOf {
+        AS(isList, obj)
+        .unshift($this, x)
+        .AS(isListOf, $this)
+    }
+
+    function push(obj: isListOf, x: t): isListOf {
+        AS(isList, obj)
+        .push($this, x)
+        .AS(isListOf, $this)
+    }
+
     isListOf
 }
 
@@ -90,15 +114,19 @@ memoized function gen_isVector(elementType: isPred, vSize: isInt): isPred {
     }
 
     function get(obj: isVector, idx: isInt): elementType {
-        // TODO: throw error if idx >= vSize
-        AS(isParentType, obj)[idx]
+        if (idx >= vSize)
+            error("Invalid idx: " + idx + " >= " + vSize)
+        else
+            AS(isParentType, obj)[idx]
     }
 
     function set(obj: isVector, idx: isInt, newVal: elementType): isVector {
-        // TODO: throw error if idx >= vSize
-        AS(isParentType, obj)
-        .set($this, idx, newVal)
-        .AS(isVector, $this)
+        if (idx >= vSize)
+            error("Invalid idx: " + idx + " >= " + vSize)
+        else
+            AS(isParentType, obj)
+            .set($this, idx, newVal)
+            .AS(isVector, $this)
     }
 
     isVector
@@ -115,7 +143,7 @@ memoized function gen_isTuple(preds: isList): isPred {
 }
 
 memoized function gen_isTuple(preds: isListOfPreds): isPred {
-    let isParentType: isPred = gen_isVector(isAny, size(preds));
+    let isParentType: isPred = gen_isVector(isAny, preds.size);
 
     interface isTuple<preds> extends isParentType;
 
@@ -133,13 +161,25 @@ memoized function gen_isTuple(preds: isListOfPreds): isPred {
         }))
     }
 
+    function set(obj: isTuple, idx: isInt, newVal: isAny): isTuple {
+        AS(isParentType, obj)
+        .set($this, idx, as(preds[idx], newVal))
+        .AS(isTuple, $this)
+    }
+
     isTuple
 }
 
 
 // complex numbers (test)
 // ======================
-let isComplexNumber: isPred = gen_isTuple([isReal, isReal]);
+let isTupleOfRealReal: isPred = gen_isTuple([isReal, isReal]);
+
+interface isComplexNumber extends isTupleOfRealReal;
+
+function isComplexNumber(obj: isList): isBool {
+    isComplexNumber(as(isTupleOfRealReal, obj))
+}
 
 function add(x: isComplexNumber, y: isComplexNumber): isComplexNumber {
     [
@@ -160,7 +200,7 @@ let c2: isComplexNumber = as(isComplexNumber, [1, -5]);
 let c3: isComplexNumber = c1 + c2;
 
 assert(c3 == AS(isComplexNumber, [2, -3]));
-assert(toString(c3) == "(2 - 3i)");
+assert(c3.toString == "(2 - 3i)");
 
 
 // refs (test)
@@ -249,7 +289,14 @@ memoized function gen_isRecord(m: isDict): isPred {
 }
 
 // new record type
-let isUser: isPred = gen_isRecord({ "id": isInt, "username": isString });
+let isUserRecord: isPred = { "id": isInt, "username": isString }.gen_isRecord;
+
+interface isUser extends isUserRecord;
+function isUser(m: isMap): isBool {
+    m
+    .as(isUserRecord, $this)
+    .isUser
+}
 
 // user record instance
-let user: isUser = as(isUser, { "id": 1, "username": "johndoe" });
+let user: isUser = { "id": 1, "username": "johndoe" }.as(isUser, $this);

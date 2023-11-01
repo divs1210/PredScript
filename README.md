@@ -30,26 +30,26 @@ PredScript is an attempt to make a flexible dependently-typed functional languag
 with familiar (easy / mainstream / JS-like) syntax that lies
 somewhere on the spectrum of `Dynamically Typed → Statically Typed`.
 
-## Use Case
+## Code Example
 
 ```typescript
-let isUser: isPred = gen_isRecord({
-    "id": isInt,
-    "username": isString
-});
-
-// this can be type checked at compile time
-async function fetchUserById(id: isInt): isUser {
-    (baseURL + "/users/" + id)
-    .fetch
-    .await
-    .get($this, "body")
-    .parseJSON
-    // validate and cast at runtime 
-    .as(isUser, $this)
+interface isEmailString extends isString;
+function isEmailString(s: isString): isBool {
+    /^\S+@\S+\.\S+$/
+    .test($this, s)
 }
 
-fetchUserById(5).then($this, println);
+let isUser: isPred = gen_isRecord({ 
+    "id": isInt,
+    "username": isString,
+    "email": isEmailString
+});
+
+let u: isUser = as(isUser, {
+    "id": 1,
+    "username": "johndoe",
+    "email": "johndoe@email.com"
+});
 ```
 
 ## Design goals

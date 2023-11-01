@@ -10,6 +10,7 @@ const { val, isNull: isJSNull } = require('./util');
 // reify JS
 // ========
 const _String = globalThis.String;
+const _RegExp = globalThis.RegExp;
 
 
 // objects and types
@@ -254,6 +255,12 @@ Implement(
         Implement(
             isParent,
             List(isChild),
+            isBool, 
+            _ => TRUE
+        );
+        Implement(
+            isChild,
+            List(isParent),
             isBool, 
             _ => TRUE
         );
@@ -637,6 +644,48 @@ Implement(
 );
 
 
+// RegExps
+// =======
+const isRegExp = MultiFn("isRegExp", isAny);
+
+const RegExp = MultiFn("RegExp");
+Implement(
+    RegExp,
+    List(isString),
+    isRegExp,
+    src => {
+        let jsSrc = val(src);
+        let jsRegExp = new _RegExp(jsSrc);
+        return Obj(jsRegExp, isRegExp);
+    }
+);
+Implement(
+    RegExp,
+    List(isString, isString),
+    isRegExp,
+    (src, flags) => {
+        let jsSrc = val(src);
+        let jsFlags = val(flags);
+        let jsRegExp = new _RegExp(jsSrc, jsFlags);
+        return Obj(jsRegExp, isRegExp);
+    }
+);
+
+const newRegExp = r => Obj(r, isRegExp);
+
+const test = MultiFn('test');
+Implement(
+    test,
+    List(isRegExp, isString),
+    isBool,
+    (r, s) => {
+        let jsS = val(s);
+        let jsR = val(r);
+        return Bool(jsR.test(jsS));
+    }
+);
+
+
 // toList
 // ======
 const toList = MultiFn("toList");
@@ -964,6 +1013,17 @@ const assertError = _Lambda((checkFn, msg) => {
 });
 
 
+// errors
+const error = _Lambda((msg, obj) => {
+    obj = obj || NULL;
+    
+    let e = new Error(val(msg));
+    e.__psData__ = obj;
+
+    throw e;
+});
+
+
 module.exports = {
     MultiFn,
     isFn,
@@ -1020,6 +1080,10 @@ module.exports = {
     String,
     isString,
     toString,
+    isRegExp,
+    RegExp,
+    newRegExp,
+    test,
     isRef,
     Ref,
     println,
@@ -1035,5 +1099,6 @@ module.exports = {
     assert,
     assertError,
     loop,
-    recur
+    recur,
+    error
 };

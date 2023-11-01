@@ -1,0 +1,4 @@
+let emailRegExp: isRegExp = /^\S+@\S+\.\S+$/;
+
+assert(emailRegExp.test($this, "abc@def.com"));
+assert(emailRegExp.test($this, "abc") == false);
