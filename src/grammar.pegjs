@@ -287,6 +287,35 @@
         );
     }
 
+    function getStringExprNode(from, keys) {
+        if(keys.length === 1)
+            return {
+                type: 'call-exp',
+                f: {
+                    type: "symbol",
+                    value: "get",
+                    loc: location()
+                },
+                args: [
+                    from,
+                    {
+                        type: "string",
+                        value: keys[0][3].value,
+                        loc: location()
+                    }
+                ],
+                loc: location()
+            };
+
+        return getStringExprNode(
+            getStringExprNode(
+                from,
+                [keys[0]]
+            ),
+            keys.slice(1)
+        );
+    }
+
     // intermediate node
     function dotNotation(startNode, rightNodes) {
         rightNodes = (rightNodes || []).map(node => node[3]);
@@ -468,6 +497,7 @@ unary      = op:( '!' / '-' ) _ x:unary                                 { return
              / lambdaExpr
              / ifExpr
              / getExpr
+             / getStringExpr
              / loopExpr
              / recurExpr
              / fnCall
@@ -477,6 +507,9 @@ ifExpr     = 'if' _ '(' _ cond:expression _ ')' _ then:expression _else:((_ 'els
                                                                                      { return ifNode(cond, then, _else); }
 
 lambdaExpr = '(' _ args:((SYMBOL (_ ',' _ SYMBOL)*)?) _ ')' _ '=>' _ body:expression { return lambdaNode(args, body);     }
+
+
+getStringExpr = f:fromExpr ks:((_ ':' _ SYMBOL)+)                                    { return getStringExprNode(f, ks);   }
 
 getExpr    = f:fromExpr _ ks:(keyExpr+)                                              { return getExprNode(f, ks);         }
 fromExpr   = fnCall / LIST / MAP / SYMBOL / STRING

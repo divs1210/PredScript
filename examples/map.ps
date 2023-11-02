@@ -3,7 +3,6 @@ let m: isMap = {
     "a": 2,
     [0]: '_'
 };
-
 assert(toString(m) == "{0: 1, a: 2, [0]: _}");
 assert(size(m) == 3);
 assert(isEmpty(m) == false);
@@ -13,3 +12,7 @@ assert(set(m, 0, 10) == {
   "a": 2,
   [0]: '_'
 });
+
+
+let m2: isMap = {"a": {"b": 1}};
+assert(m2:a:b == 1);
