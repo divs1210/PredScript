@@ -18,6 +18,18 @@ function loop(init, f) {
     return res;
 }
 
+/* example:
+===========
+let fact5 = loop({ n: 5, f: 1}, ({ n, f }) => {
+    if (n < 2)
+        return f;
+    return recur({ 
+        n: n - 1, 
+        f: f * n 
+    });
+});
+*/
+
 module.exports = {
     loop,
     recur
