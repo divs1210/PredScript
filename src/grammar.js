@@ -2182,7 +2182,7 @@ function peg$parse(input, options) {
     var s0, s1, s2, s3, s4, s5, s6, s7;
 
     s0 = peg$currPos;
-    s1 = peg$parsefromExpr();
+    s1 = peg$parsefromMapExpr();
     if (s1 !== peg$FAILED) {
       s2 = [];
       s3 = peg$currPos;
@@ -2269,6 +2269,20 @@ function peg$parse(input, options) {
     } else {
       peg$currPos = s0;
       s0 = peg$FAILED;
+    }
+
+    return s0;
+  }
+
+  function peg$parsefromMapExpr() {
+    var s0;
+
+    s0 = peg$parsefnCall();
+    if (s0 === peg$FAILED) {
+      s0 = peg$parseMAP();
+      if (s0 === peg$FAILED) {
+        s0 = peg$parseSYMBOL();
+      }
     }
 
     return s0;
@@ -2862,7 +2876,10 @@ function peg$parse(input, options) {
     if (s1 === peg$FAILED) {
       s1 = peg$parsegetExpr();
       if (s1 === peg$FAILED) {
-        s1 = peg$parseprimary();
+        s1 = peg$parsegetStringExpr();
+        if (s1 === peg$FAILED) {
+          s1 = peg$parseprimary();
+        }
       }
     }
     if (s1 !== peg$FAILED) {

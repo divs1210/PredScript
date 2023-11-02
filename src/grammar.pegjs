@@ -508,8 +508,8 @@ ifExpr     = 'if' _ '(' _ cond:expression _ ')' _ then:expression _else:((_ 'els
 
 lambdaExpr = '(' _ args:((SYMBOL (_ ',' _ SYMBOL)*)?) _ ')' _ '=>' _ body:expression { return lambdaNode(args, body);     }
 
-
-getStringExpr = f:fromExpr ks:((_ ':' _ SYMBOL)+)                                    { return getStringExprNode(f, ks);   }
+getStringExpr = f:fromMapExpr ks:((_ ':' _ SYMBOL)+)                                 { return getStringExprNode(f, ks);   }
+fromMapExpr   = fnCall / MAP / SYMBOL
 
 getExpr    = f:fromExpr _ ks:(keyExpr+)                                              { return getExprNode(f, ks);         }
 fromExpr   = fnCall / LIST / MAP / SYMBOL / STRING
@@ -526,7 +526,7 @@ loopExprArgs = first:loopExprArg rest:(_ ',' _ loopExprArg)* {
 }
 loopExprArg  = name:SYMBOL _ '=' _ value:expression                                  { return { name, value };            }
 
-dotNotation = x:(fnCall / getExpr / primary) y:(_ '.' _ (fnCall / grouping / SYMBOL))+         
+dotNotation = x:(fnCall / getExpr / getStringExpr / primary) y:(_ '.' _ (fnCall / grouping / SYMBOL))+         
                                                                                     { return dotNotation(x, y);          }
 
 primary    = REAL / INTEGER / CHAR / STRING / REGEX / BOOL / NULL / SYMBOL / LIST / MAP / block / grouping
