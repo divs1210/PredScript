@@ -135,7 +135,6 @@ memoized function gen_isVector(elementType: isPred, vSize: isInt): isPred {
 
 let isListOfPreds: isPred = gen_isListOf(isPred);
 
-
 // tuples are vectors of mixed types
 interface gen_isTuple;
 memoized function gen_isTuple(preds: isList): isPred {
@@ -176,7 +175,6 @@ memoized function gen_isTuple(preds: isListOfPreds): isPred {
 let isTupleOfRealReal: isPred = gen_isTuple([isReal, isReal]);
 
 interface isComplexNumber extends isTupleOfRealReal;
-
 function isComplexNumber(obj: isList): isBool {
     isComplexNumber(as(isTupleOfRealReal, obj))
 }
@@ -206,7 +204,6 @@ assert(c3.toString == "(2 - 3i)");
 // refs (test)
 // ===========
 interface gen_isRefOf;
-
 memoized function gen_isRefOf(t: isPred): isPred {
     interface isRefOf<t> extends isRef;    
 
@@ -289,7 +286,10 @@ memoized function gen_isRecord(m: isDict): isPred {
 }
 
 // new record type
-let isUserRecord: isPred = { "id": isInt, "username": isString }.gen_isRecord;
+let isUserRecord: isPred = { 
+    "id": isInt, 
+    "username": isString 
+}.gen_isRecord;
 
 interface isUser extends isUserRecord;
 function isUser(m: isMap): isBool {
@@ -299,4 +299,8 @@ function isUser(m: isMap): isBool {
 }
 
 // user record instance
-let user: isUser = { "id": 1, "username": "johndoe" }.as(isUser, $this);
+let user: isUser = { 
+    "id": 1, 
+    "username": "johndoe", 
+    "age": 23 
+}.as(isUser, $this);

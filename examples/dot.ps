@@ -1,16 +1,11 @@
-interface inc;
 interface quadratic;
-
-function inc(x: isReal): isReal {
-    x + 1
-}
 
 // x^2 + x + 1
 function quadratic(x: isReal): isReal {
     x
     .pow($this, 2)
-    .($this + x)
-    .inc
+    .add($this, x)
+    .add($this, 1)
 }
 
 assert(quadratic(2) == 7);
