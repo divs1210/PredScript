@@ -68,6 +68,16 @@ let u: isUser = as(isUser, {
 
 ### Install
 
+PredScript is developed against `node 20.6.1`.
+Use [nvm](https://github.com/nvm-sh/nvm) to install it.
+
+```shell
+$ nvm install 20.6.1
+$ nvm use 20.6.1
+```
+
+Download and install PredScript
+
 ```shell
 $ git clone https://github.com/divs1210/PredScript
 $ cd PredScript
@@ -83,6 +93,6 @@ $ node dist/index.js
 
 ## License
 
-MIT License
+[MIT License](/LICENSE)
 
-(C) Divyansh Prakash, 2023
+(C) Divyansh Prakash, 2023-2024
