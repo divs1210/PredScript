@@ -91,6 +91,12 @@ $ node compile.js examples/poly.ps
 $ node dist/index.js
 ```
 
+### Run tests
+
+```shell
+$ npm test
+```
+
 ## License
 
 [MIT License](/LICENSE)
