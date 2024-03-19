@@ -254,6 +254,34 @@ memoized function gen_isMapOf(keyType: isPred, valType: isPred): isPred {
         }))
     }
 
+    function get(m: isMapOf, key: keyType): valType {
+        m
+        .AS(isMap, $this)
+        .get($this, key)
+    }
+
+    function get(_: isMapOf, key: isAny): isNull {
+        error(
+            "Invalid key type: " + key.type 
+            + " for map type: " + isMapOf
+        )
+    }
+
+    function set(m: isMapOf, key: keyType, val: valType): isMapOf {
+        m
+        .AS(isMap, $this)
+        .set($this, key, val)
+        .AS(isMapOf, $this)
+    }
+
+    function set(m: isMapOf, key: isAny, val: isAny): isNull {
+        error(
+            "Invalid key type: " + key.type
+            + " or value type: " + val.type
+            + " for map type: "  + isMapOf
+        )
+    }
+
     isMapOf
 }
 
@@ -286,17 +314,10 @@ memoized function gen_isRecord(m: isDict): isPred {
 }
 
 // new record type
-let isUserRecord: isPred = { 
+let isUser: isPred = gen_isRecord({ 
     "id": isInt, 
     "username": isString 
-}.gen_isRecord;
-
-interface isUser extends isUserRecord;
-function isUser(m: isMap): isBool {
-    m
-    .as(isUserRecord, $this)
-    .isUser
-}
+});
 
 // user record instance
 let user: isUser = { 
