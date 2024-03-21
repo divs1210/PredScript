@@ -13,4 +13,8 @@ function chainedQuadratic(x: isReal): isReal {
     .inc             // chained function call without args
 }
 
-assert(infixQuadratic(2) == chainedQuadratic(2));
+let x: isReal = 3.5
+assert(
+    infixQuadratic(x) 
+    == chainedQuadratic(x)
+);
