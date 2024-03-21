@@ -1,11 +1,16 @@
-interface quadratic;
-
-// x^2 + x + 1
-function quadratic(x: isReal): isReal {
-    x
-    .pow($this, 2)
-    .add($this, x)
-    .add($this, 1)
+interface infixQuadratic;
+function infixQuadratic(x: isReal): isReal {
+    x ** 2 + x + 1
 }
 
-assert(quadratic(2) == 7);
+interface chainedQuadratic;
+function chainedQuadratic(x: isReal): isReal {
+    let inc: isFn = (n) => n + 1;
+
+    x
+    .pow($this, 2)   // chained function call
+    .(x + $this)     // chained expression
+    .inc             // chained function call without args
+}
+
+assert(infixQuadratic(2) == chainedQuadratic(2));
