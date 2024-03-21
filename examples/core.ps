@@ -314,10 +314,10 @@ memoized function gen_isRecord(m: isDict): isPred {
 }
 
 // new record type
-let isUser: isPred = gen_isRecord({ 
+let isUser: isPred = { 
     "id": isInt, 
     "username": isString 
-});
+}.gen_isRecord;
 
 // user record instance
 let user: isUser = { 
